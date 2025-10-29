@@ -1,4 +1,4 @@
-# Channels
+# 채널
 
 ::: langgraph.channels.base
     options:

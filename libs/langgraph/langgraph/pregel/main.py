@@ -210,16 +210,16 @@ class NodeBuilder:
         *channels: str,
         read: bool = True,
     ) -> Self:
-        """Add channels to subscribe to. Node will be invoked when any of these
-        channels are updated, with a dict of the channel values as input.
+        """구독할 채널을 추가합니다. 이러한 채널 중 하나라도 업데이트되면
+        노드가 호출되며, 채널 값의 dict가 입력으로 전달됩니다.
 
         Args:
-            channels: Channel name(s) to subscribe to
-            read: If `True`, the channels will be included in the input to the node.
-                Otherwise, they will trigger the node without being sent in input.
+            channels: 구독할 채널 이름
+            read: `True`이면 채널이 노드의 입력에 포함됩니다.
+                그렇지 않으면 입력으로 전송되지 않고 노드를 트리거합니다.
 
         Returns:
-            Self for chaining
+            체이닝을 위한 Self
         """
         if isinstance(self._channels, str):
             raise ValueError(
@@ -242,7 +242,7 @@ class NodeBuilder:
         self,
         *channels: str,
     ) -> Self:
-        """Adds the specified channels to read from, without subscribing to them."""
+        """구독하지 않고 읽을 지정된 채널을 추가합니다."""
         assert isinstance(self._channels, list), (
             "Cannot read additional channels when subscribed to single channels"
         )
@@ -253,7 +253,7 @@ class NodeBuilder:
         self,
         node: RunnableLike,
     ) -> Self:
-        """Adds the specified node."""
+        """지정된 노드를 추가합니다."""
         if self._bound is not DEFAULT_BOUND:
             self._bound = RunnableSeq(
                 self._bound, coerce_to_runnable(node, name=None, trace=True)
@@ -267,14 +267,14 @@ class NodeBuilder:
         *channels: str | ChannelWriteEntry,
         **kwargs: _WriteValue,
     ) -> Self:
-        """Add channel writes.
+        """채널 쓰기를 추가합니다.
 
         Args:
-            *channels: Channel names to write to
-            **kwargs: Channel name and value mappings
+            *channels: 쓸 채널 이름
+            **kwargs: 채널 이름과 값 매핑
 
         Returns:
-            Self for chaining
+            체이닝을 위한 Self
         """
         self._writes.extend(
             ChannelWriteEntry(c) if isinstance(c, str) else c for c in channels
@@ -289,23 +289,23 @@ class NodeBuilder:
         return self
 
     def meta(self, *tags: str, **metadata: Any) -> Self:
-        """Add tags or metadata to the node."""
+        """노드에 태그 또는 메타데이터를 추가합니다."""
         self._tags.extend(tags)
         self._metadata.update(metadata)
         return self
 
     def add_retry_policies(self, *policies: RetryPolicy) -> Self:
-        """Adds retry policies to the node."""
+        """노드에 재시도 정책을 추가합니다."""
         self._retry_policy.extend(policies)
         return self
 
     def add_cache_policy(self, policy: CachePolicy) -> Self:
-        """Adds cache policies to the node."""
+        """노드에 캐시 정책을 추가합니다."""
         self._cache_policy = policy
         return self
 
     def build(self) -> PregelNode:
-        """Builds the node."""
+        """노드를 빌드합니다."""
         return PregelNode(
             channels=self._channels,
             triggers=self._triggers,
@@ -322,80 +322,79 @@ class Pregel(
     PregelProtocol[StateT, ContextT, InputT, OutputT],
     Generic[StateT, ContextT, InputT, OutputT],
 ):
-    """Pregel manages the runtime behavior for LangGraph applications.
+    """Pregel은 LangGraph 애플리케이션의 런타임 동작을 관리합니다.
 
-    ## Overview
+    ## 개요
 
-    Pregel combines [**actors**](https://en.wikipedia.org/wiki/Actor_model)
-    and **channels** into a single application.
-    **Actors** read data from channels and write data to channels.
-    Pregel organizes the execution of the application into multiple steps,
-    following the **Pregel Algorithm**/**Bulk Synchronous Parallel** model.
+    Pregel은 [**액터**](https://en.wikipedia.org/wiki/Actor_model)와
+    **채널**을 단일 애플리케이션으로 결합합니다.
+    **액터**는 채널에서 데이터를 읽고 채널에 데이터를 씁니다.
+    Pregel은 **Pregel 알고리즘**/**Bulk Synchronous Parallel** 모델을 따라
+    애플리케이션의 실행을 여러 단계로 구성합니다.
 
-    Each step consists of three phases:
+    각 단계는 세 가지 페이즈로 구성됩니다:
 
-    - **Plan**: Determine which **actors** to execute in this step. For example,
-        in the first step, select the **actors** that subscribe to the special
-        **input** channels; in subsequent steps,
-        select the **actors** that subscribe to channels updated in the previous step.
-    - **Execution**: Execute all selected **actors** in parallel,
-        until all complete, or one fails, or a timeout is reached. During this
-        phase, channel updates are invisible to actors until the next step.
-    - **Update**: Update the channels with the values written by the **actors**
-        in this step.
+    - **계획(Plan)**: 이 단계에서 실행할 **액터**를 결정합니다. 예를 들어,
+        첫 번째 단계에서는 특별한 **input** 채널을 구독하는 **액터**를 선택하고,
+        이후 단계에서는 이전 단계에서 업데이트된 채널을 구독하는
+        **액터**를 선택합니다.
+    - **실행(Execution)**: 선택된 모든 **액터**를 병렬로 실행하며,
+        모두 완료되거나, 하나가 실패하거나, 타임아웃에 도달할 때까지 실행합니다.
+        이 페이즈 동안 채널 업데이트는 다음 단계까지 액터에게 보이지 않습니다.
+    - **업데이트(Update)**: 이 단계에서 **액터**가 쓴 값으로
+        채널을 업데이트합니다.
 
-    Repeat until no **actors** are selected for execution, or a maximum number of
-    steps is reached.
+    실행할 **액터**가 선택되지 않거나 최대 단계 수에 도달할 때까지 반복합니다.
 
-    ## Actors
+    ## 액터(Actors)
 
-    An **actor** is a `PregelNode`.
-    It subscribes to channels, reads data from them, and writes data to them.
-    It can be thought of as an **actor** in the Pregel algorithm.
-    `PregelNodes` implement LangChain's
-    Runnable interface.
+    **액터**는 `PregelNode`입니다.
+    채널을 구독하고, 채널에서 데이터를 읽고, 채널에 데이터를 씁니다.
+    Pregel 알고리즘의 **액터**로 생각할 수 있습니다.
+    `PregelNodes`는 LangChain의
+    Runnable 인터페이스를 구현합니다.
 
-    ## Channels
+    ## 채널(Channels)
 
-    Channels are used to communicate between actors (`PregelNodes`).
-    Each channel has a value type, an update type, and an update function – which
-    takes a sequence of updates and
-    modifies the stored value. Channels can be used to send data from one chain to
-    another, or to send data from a chain to itself in a future step. LangGraph
-    provides a number of built-in channels:
+    채널은 액터(`PregelNodes`) 간의 통신에 사용됩니다.
+    각 채널에는 값 타입, 업데이트 타입, 그리고 업데이트 함수가 있습니다 – 이 함수는
+    업데이트 시퀀스를 받아서
+    저장된 값을 수정합니다. 채널은 한 체인에서 다른 체인으로 데이터를 전송하거나,
+    체인에서 미래 단계의 자신에게 데이터를 전송하는 데 사용할 수 있습니다. LangGraph는
+    여러 가지 내장 채널을 제공합니다:
 
-    ### Basic channels: LastValue and Topic
+    ### 기본 채널: LastValue 및 Topic
 
-    - `LastValue`: The default channel, stores the last value sent to the channel,
-       useful for input and output values, or for sending data from one step to the next
-    - `Topic`: A configurable PubSub Topic, useful for sending multiple values
-       between *actors*, or for accumulating output. Can be configured to deduplicate
-       values, and/or to accumulate values over the course of multiple steps.
+    - `LastValue`: 기본 채널로, 채널에 전송된 마지막 값을 저장하며,
+       입력 및 출력 값이나 한 단계에서 다음 단계로 데이터를 전송하는 데 유용합니다
+    - `Topic`: 구성 가능한 PubSub 토픽으로, *액터* 간에 여러 값을 전송하거나
+       출력을 누적하는 데 유용합니다. 값을 중복 제거하거나
+       여러 단계에 걸쳐 값을 누적하도록 구성할 수 있습니다.
 
-    ### Advanced channels: Context and BinaryOperatorAggregate
+    ### 고급 채널: Context 및 BinaryOperatorAggregate
 
-    - `Context`: exposes the value of a context manager, managing its lifecycle.
-      Useful for accessing external resources that require setup and/or teardown. eg.
+    - `Context`: 컨텍스트 관리자의 값을 노출하고 수명 주기를 관리합니다.
+      설정 및/또는 해체가 필요한 외부 리소스에 액세스하는 데 유용합니다. 예:
       `client = Context(httpx.Client)`
-    - `BinaryOperatorAggregate`: stores a persistent value, updated by applying
-       a binary operator to the current value and each update
-       sent to the channel, useful for computing aggregates over multiple steps. eg.
+    - `BinaryOperatorAggregate`: 현재 값과 채널로 전송된
+       각 업데이트에 이진 연산자를 적용하여 업데이트되는
+       영구 값을 저장하며, 여러 단계에 걸쳐 집계를 계산하는 데 유용합니다. 예:
       `total = BinaryOperatorAggregate(int, operator.add)`
 
-    ## Examples
+    ## 예제
 
-    Most users will interact with Pregel via a
-    [StateGraph (Graph API)][langgraph.graph.StateGraph] or via an
-    [entrypoint (Functional API)][langgraph.func.entrypoint].
+    대부분의 사용자는
+    [StateGraph (Graph API)][langgraph.graph.StateGraph] 또는
+    [entrypoint (Functional API)][langgraph.func.entrypoint]를 통해 Pregel과 상호 작용합니다.
 
-    However, for **advanced** use cases, Pregel can be used directly. If you're
-    not sure whether you need to use Pregel directly, then the answer is probably no
-    - you should use the Graph API or Functional API instead. These are higher-level
-    interfaces that will compile down to Pregel under the hood.
+    그러나 **고급** 사용 사례의 경우 Pregel을 직접 사용할 수 있습니다. Pregel을
+    직접 사용해야 하는지 확실하지 않은 경우 답은 아마도 아니오일 것입니다
+    - 대신 Graph API 또는 Functional API를 사용해야 합니다. 이것들은 더 높은 수준의
+    인터페이스로, 내부적으로 Pregel로 컴파일됩니다.
 
-    Here are some examples to give you a sense of how it works:
+    작동 방식을 이해하기 위한 몇 가지 예제입니다:
 
-    Example: Single node application
+    Example: 단일 노드 애플리케이션
         ```python
         from langgraph.channels import EphemeralValue
         from langgraph.pregel import Pregel, NodeBuilder
@@ -423,7 +422,7 @@ class Pregel(
         {'b': 'foofoo'}
         ```
 
-    Example: Using multiple nodes and multiple output channels
+    Example: 여러 노드 및 여러 출력 채널 사용하기
         ```python
         from langgraph.channels import LastValue, EphemeralValue
         from langgraph.pregel import Pregel, NodeBuilder
@@ -459,7 +458,7 @@ class Pregel(
         {'b': 'foofoo', 'c': 'foofoofoofoo'}
         ```
 
-    Example: Using a Topic channel
+    Example: Topic 채널 사용하기
         ```python
         from langgraph.channels import LastValue, EphemeralValue, Topic
         from langgraph.pregel import Pregel, NodeBuilder
@@ -495,7 +494,7 @@ class Pregel(
         {"c": ["foofoo", "foofoofoofoo"]}
         ```
 
-    Example: Using a BinaryOperatorAggregate channel
+    Example: BinaryOperatorAggregate 채널 사용하기
         ```python
         from langgraph.channels import EphemeralValue, BinaryOperatorAggregate
         from langgraph.pregel import Pregel, NodeBuilder
@@ -539,10 +538,10 @@ class Pregel(
         {'c': 'foofoo | foofoofoofoo'}
         ```
 
-    Example: Introducing a cycle
-        This example demonstrates how to introduce a cycle in the graph, by having
-        a chain write to a channel it subscribes to. Execution will continue
-        until a None value is written to the channel.
+    Example: 사이클 도입하기
+        이 예제는 체인이 구독하는 채널에 쓰기를 하도록 하여
+        그래프에 사이클을 도입하는 방법을 보여줍니다. 실행은
+        None 값이 채널에 기록될 때까지 계속됩니다.
 
         ```python
         from langgraph.channels import EphemeralValue
@@ -577,16 +576,16 @@ class Pregel(
     channels: dict[str, BaseChannel | ManagedValueSpec]
 
     stream_mode: StreamMode = "values"
-    """Mode to stream output, defaults to 'values'."""
+    """출력을 스트림하는 모드, 기본값은 'values'입니다."""
 
     stream_eager: bool = False
-    """Whether to force emitting stream events eagerly, automatically turned on
-    for stream_mode "messages" and "custom"."""
+    """스트림 이벤트를 즉시 방출하도록 강제할지 여부, stream_mode가 "messages" 및
+    "custom"인 경우 자동으로 켜집니다."""
 
     output_channels: str | Sequence[str]
 
     stream_channels: str | Sequence[str] | None = None
-    """Channels to stream, defaults to all channels not in reserved channels"""
+    """스트림할 채널, 기본값은 예약된 채널을 제외한 모든 채널입니다"""
 
     interrupt_after_nodes: All | Sequence[str]
 
@@ -595,28 +594,28 @@ class Pregel(
     input_channels: str | Sequence[str]
 
     step_timeout: float | None = None
-    """Maximum time to wait for a step to complete, in seconds."""
+    """단계가 완료되기를 기다리는 최대 시간(초)입니다."""
 
     debug: bool
-    """Whether to print debug information during execution."""
+    """실행 중에 디버그 정보를 출력할지 여부입니다."""
 
     checkpointer: Checkpointer = None
-    """`Checkpointer` used to save and load graph state."""
+    """그래프 상태를 저장하고 로드하는 데 사용되는 `Checkpointer`입니다."""
 
     store: BaseStore | None = None
-    """Memory store to use for SharedValues."""
+    """SharedValues에 사용할 메모리 저장소입니다."""
 
     cache: BaseCache | None = None
-    """Cache to use for storing node results."""
+    """노드 결과를 저장하는 데 사용할 캐시입니다."""
 
     retry_policy: Sequence[RetryPolicy] = ()
-    """Retry policies to use when running tasks. Empty set disables retries."""
+    """작업 실행 시 사용할 재시도 정책입니다. 빈 세트는 재시도를 비활성화합니다."""
 
     cache_policy: CachePolicy | None = None
-    """Cache policy to use for all nodes. Can be overridden by individual nodes."""
+    """모든 노드에 사용할 캐시 정책입니다. 개별 노드에서 재정의할 수 있습니다."""
 
     context_schema: type[ContextT] | None = None
-    """Specifies the schema for the context object that will be passed to the workflow."""
+    """워크플로에 전달될 컨텍스트 객체의 스키마를 지정합니다."""
 
     config: RunnableConfig | None = None
 
@@ -698,8 +697,8 @@ class Pregel(
     def get_graph(
         self, config: RunnableConfig | None = None, *, xray: int | bool = False
     ) -> Graph:
-        """Return a drawable representation of the computation graph."""
-        # gather subgraphs
+        """계산 그래프의 그릴 수 있는 표현을 반환합니다."""
+        # 서브그래프 수집
         if xray:
             subgraphs = {
                 k: v.get_graph(
@@ -726,9 +725,9 @@ class Pregel(
     async def aget_graph(
         self, config: RunnableConfig | None = None, *, xray: int | bool = False
     ) -> Graph:
-        """Return a drawable representation of the computation graph."""
+        """계산 그래프의 그릴 수 있는 표현을 반환합니다."""
 
-        # gather subgraphs
+        # 서브그래프 수집
         if xray:
             subpregels: dict[str, PregelProtocol] = {
                 k: v async for k, v in self.aget_subgraphs()
@@ -766,7 +765,7 @@ class Pregel(
         )
 
     def _repr_mimebundle_(self, **kwargs: Any) -> dict[str, Any]:
-        """Mime bundle used by Jupyter to display the graph"""
+        """Jupyter가 그래프를 표시하는 데 사용하는 Mime 번들"""
         return {
             "text/plain": repr(self),
             "image/png": self.get_graph().draw_mermaid_png(),
@@ -778,7 +777,7 @@ class Pregel(
         return self.__class__(**attrs)
 
     def with_config(self, config: RunnableConfig | None = None, **kwargs: Any) -> Self:
-        """Create a copy of the Pregel object with an updated config."""
+        """업데이트된 구성으로 Pregel 객체의 복사본을 생성합니다."""
         return self.copy(
             {"config": merge_configs(self.config, config, cast(RunnableConfig, kwargs))}
         )
@@ -926,30 +925,30 @@ class Pregel(
     def get_subgraphs(
         self, *, namespace: str | None = None, recurse: bool = False
     ) -> Iterator[tuple[str, PregelProtocol]]:
-        """Get the subgraphs of the graph.
+        """그래프의 서브그래프를 가져옵니다.
 
         Args:
-            namespace: The namespace to filter the subgraphs by.
-            recurse: Whether to recurse into the subgraphs.
-                If `False`, only the immediate subgraphs will be returned.
+            namespace: 서브그래프를 필터링할 네임스페이스입니다.
+            recurse: 서브그래프로 재귀할지 여부입니다.
+                `False`인 경우 직접적인 서브그래프만 반환됩니다.
 
         Returns:
-            An iterator of the `(namespace, subgraph)` pairs.
+            `(namespace, subgraph)` 쌍의 이터레이터입니다.
         """
         for name, node in self.nodes.items():
-            # filter by prefix
+            # 접두사로 필터링
             if namespace is not None:
                 if not namespace.startswith(name):
                     continue
 
-            # find the subgraph, if any
+            # 서브그래프 찾기(있는 경우)
             graph = node.subgraphs[0] if node.subgraphs else None
 
-            # if found, yield recursively
+            # 찾았으면 재귀적으로 yield
             if graph:
                 if name == namespace:
                     yield name, graph
-                    return  # we found it, stop searching
+                    return  # 찾았으므로 검색 중지
                 if namespace is None:
                     yield name, graph
                 if recurse and isinstance(graph, Pregel):
@@ -965,21 +964,21 @@ class Pregel(
     async def aget_subgraphs(
         self, *, namespace: str | None = None, recurse: bool = False
     ) -> AsyncIterator[tuple[str, PregelProtocol]]:
-        """Get the subgraphs of the graph.
+        """그래프의 서브그래프를 가져옵니다.
 
         Args:
-            namespace: The namespace to filter the subgraphs by.
-            recurse: Whether to recurse into the subgraphs.
-                If `False`, only the immediate subgraphs will be returned.
+            namespace: 서브그래프를 필터링할 네임스페이스입니다.
+            recurse: 서브그래프로 재귀할지 여부입니다.
+                `False`인 경우 직접적인 서브그래프만 반환됩니다.
 
         Returns:
-            An iterator of the `(namespace, subgraph)` pairs.
+            `(namespace, subgraph)` 쌍의 이터레이터입니다.
         """
         for name, node in self.get_subgraphs(namespace=namespace, recurse=recurse):
             yield name, node
 
     def _migrate_checkpoint(self, checkpoint: Checkpoint) -> None:
-        """Migrate a saved checkpoint to new channel layout."""
+        """저장된 체크포인트를 새 채널 레이아웃으로 마이그레이션합니다."""
         if checkpoint["v"] < 4 and checkpoint.get("pending_sends"):
             pending_sends: list[Send] = checkpoint.pop("pending_sends")
             checkpoint["channel_values"][TASKS] = pending_sends
@@ -1006,7 +1005,7 @@ class Pregel(
                 interrupts=(),
             )
 
-        # migrate checkpoint if needed
+        # 필요한 경우 체크포인트 마이그레이션
         self._migrate_checkpoint(saved.checkpoint)
 
         step = saved.metadata.get("step", -1) + 1
@@ -1015,7 +1014,7 @@ class Pregel(
             self.channels,
             saved.checkpoint,
         )
-        # tasks for this checkpoint
+        # 이 체크포인트에 대한 작업들
         next_tasks = prepare_next_tasks(
             saved.checkpoint,
             saved.pending_writes or [],
@@ -1034,19 +1033,19 @@ class Pregel(
             ),
             manager=None,
         )
-        # get the subgraphs
+        # 서브그래프 가져오기
         subgraphs = dict(self.get_subgraphs())
         parent_ns = saved.config[CONF].get(CONFIG_KEY_CHECKPOINT_NS, "")
         task_states: dict[str, RunnableConfig | StateSnapshot] = {}
         for task in next_tasks.values():
             if task.name not in subgraphs:
                 continue
-            # assemble checkpoint_ns for this task
+            # 이 작업에 대한 checkpoint_ns 조립
             task_ns = f"{task.name}{NS_END}{task.id}"
             if parent_ns:
                 task_ns = f"{parent_ns}{NS_SEP}{task_ns}"
             if not recurse:
-                # set config as signal that subgraph checkpoints exist
+                # 서브그래프 체크포인트가 존재한다는 신호로 config 설정
                 config = {
                     CONF: {
                         "thread_id": saved.config[CONF]["thread_id"],
@@ -1055,7 +1054,7 @@ class Pregel(
                 }
                 task_states[task.id] = config
             else:
-                # get the state of the subgraph
+                # 서브그래프의 상태 가져오기
                 config = {
                     CONF: {
                         CONFIG_KEY_CHECKPOINTER: recurse,
@@ -1066,7 +1065,7 @@ class Pregel(
                 task_states[task.id] = subgraphs[task.name].get_state(
                     config, subgraphs=True
                 )
-        # apply pending writes
+        # 대기 중인 쓰기 적용
         if null_writes := [
             w[1:] for w in saved.pending_writes or [] if w[0] == NULL_TASK_ID
         ]:
@@ -1094,7 +1093,7 @@ class Pregel(
             task_states,
             self.stream_channels_asis,
         )
-        # assemble the state snapshot
+        # 상태 스냅샷 조립
         return StateSnapshot(
             read_channels(channels, self.stream_channels_asis),
             tuple(t.name for t in next_tasks.values() if not t.writes),
@@ -1125,7 +1124,7 @@ class Pregel(
                 interrupts=(),
             )
 
-        # migrate checkpoint if needed
+        # 필요한 경우 체크포인트 마이그레이션
         self._migrate_checkpoint(saved.checkpoint)
 
         step = saved.metadata.get("step", -1) + 1
@@ -1134,7 +1133,7 @@ class Pregel(
             self.channels,
             saved.checkpoint,
         )
-        # tasks for this checkpoint
+        # 이 체크포인트에 대한 작업들
         next_tasks = prepare_next_tasks(
             saved.checkpoint,
             saved.pending_writes or [],
@@ -1153,19 +1152,19 @@ class Pregel(
             ),
             manager=None,
         )
-        # get the subgraphs
+        # 서브그래프 가져오기
         subgraphs = {n: g async for n, g in self.aget_subgraphs()}
         parent_ns = saved.config[CONF].get(CONFIG_KEY_CHECKPOINT_NS, "")
         task_states: dict[str, RunnableConfig | StateSnapshot] = {}
         for task in next_tasks.values():
             if task.name not in subgraphs:
                 continue
-            # assemble checkpoint_ns for this task
+            # 이 작업에 대한 checkpoint_ns 조립
             task_ns = f"{task.name}{NS_END}{task.id}"
             if parent_ns:
                 task_ns = f"{parent_ns}{NS_SEP}{task_ns}"
             if not recurse:
-                # set config as signal that subgraph checkpoints exist
+                # 서브그래프 체크포인트가 존재한다는 신호로 config 설정
                 config = {
                     CONF: {
                         "thread_id": saved.config[CONF]["thread_id"],
@@ -1174,7 +1173,7 @@ class Pregel(
                 }
                 task_states[task.id] = config
             else:
-                # get the state of the subgraph
+                # 서브그래프의 상태 가져오기
                 config = {
                     CONF: {
                         CONFIG_KEY_CHECKPOINTER: recurse,
@@ -1185,7 +1184,7 @@ class Pregel(
                 task_states[task.id] = await subgraphs[task.name].aget_state(
                     config, subgraphs=True
                 )
-        # apply pending writes
+        # 대기 중인 쓰기 적용
         if null_writes := [
             w[1:] for w in saved.pending_writes or [] if w[0] == NULL_TASK_ID
         ]:
@@ -1214,7 +1213,7 @@ class Pregel(
             task_states,
             self.stream_channels_asis,
         )
-        # assemble the state snapshot
+        # 상태 스냅샷 조립
         return StateSnapshot(
             read_channels(channels, self.stream_channels_asis),
             tuple(t.name for t in next_tasks.values() if not t.writes),
@@ -1229,7 +1228,7 @@ class Pregel(
     def get_state(
         self, config: RunnableConfig, *, subgraphs: bool = False
     ) -> StateSnapshot:
-        """Get the current state of the graph."""
+        """그래프의 현재 상태를 가져옵니다."""
         checkpointer: BaseCheckpointSaver | None = ensure_config(config)[CONF].get(
             CONFIG_KEY_CHECKPOINTER, self.checkpointer
         )
@@ -1239,9 +1238,9 @@ class Pregel(
         if (
             checkpoint_ns := config[CONF].get(CONFIG_KEY_CHECKPOINT_NS, "")
         ) and CONFIG_KEY_CHECKPOINTER not in config[CONF]:
-            # remove task_ids from checkpoint_ns
+            # checkpoint_ns에서 task_ids 제거
             recast = recast_checkpoint_ns(checkpoint_ns)
-            # find the subgraph with the matching name
+            # 일치하는 이름을 가진 서브그래프 찾기
             for _, pregel in self.get_subgraphs(namespace=recast, recurse=True):
                 return pregel.get_state(
                     patch_configurable(config, {CONFIG_KEY_CHECKPOINTER: checkpointer}),
@@ -1271,7 +1270,7 @@ class Pregel(
     async def aget_state(
         self, config: RunnableConfig, *, subgraphs: bool = False
     ) -> StateSnapshot:
-        """Get the current state of the graph."""
+        """그래프의 현재 상태를 가져옵니다."""
         checkpointer: BaseCheckpointSaver | None = ensure_config(config)[CONF].get(
             CONFIG_KEY_CHECKPOINTER, self.checkpointer
         )
@@ -1281,9 +1280,9 @@ class Pregel(
         if (
             checkpoint_ns := config[CONF].get(CONFIG_KEY_CHECKPOINT_NS, "")
         ) and CONFIG_KEY_CHECKPOINTER not in config[CONF]:
-            # remove task_ids from checkpoint_ns
+            # checkpoint_ns에서 task_ids 제거
             recast = recast_checkpoint_ns(checkpoint_ns)
-            # find the subgraph with the matching name
+            # 일치하는 이름을 가진 서브그래프 찾기
             async for _, pregel in self.aget_subgraphs(namespace=recast, recurse=True):
                 return await pregel.aget_state(
                     patch_configurable(config, {CONFIG_KEY_CHECKPOINTER: checkpointer}),
@@ -1318,7 +1317,7 @@ class Pregel(
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> Iterator[StateSnapshot]:
-        """Get the history of the state of the graph."""
+        """그래프 상태의 히스토리를 가져옵니다."""
         config = ensure_config(config)
         checkpointer: BaseCheckpointSaver | None = config[CONF].get(
             CONFIG_KEY_CHECKPOINTER, self.checkpointer
@@ -1329,9 +1328,9 @@ class Pregel(
         if (
             checkpoint_ns := config[CONF].get(CONFIG_KEY_CHECKPOINT_NS, "")
         ) and CONFIG_KEY_CHECKPOINTER not in config[CONF]:
-            # remove task_ids from checkpoint_ns
+            # checkpoint_ns에서 task_ids 제거
             recast = recast_checkpoint_ns(checkpoint_ns)
-            # find the subgraph with the matching name
+            # 일치하는 이름을 가진 서브그래프 찾기
             for _, pregel in self.get_subgraphs(namespace=recast, recurse=True):
                 yield from pregel.get_state_history(
                     patch_configurable(config, {CONFIG_KEY_CHECKPOINTER: checkpointer}),
@@ -1353,7 +1352,7 @@ class Pregel(
                 }
             },
         )
-        # eagerly consume list() to avoid holding up the db cursor
+        # db 커서를 잡고 있지 않도록 list()를 즉시 소비
         for checkpoint_tuple in list(
             checkpointer.list(config, before=before, limit=limit, filter=filter)
         ):
@@ -1369,7 +1368,7 @@ class Pregel(
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> AsyncIterator[StateSnapshot]:
-        """Asynchronously get the history of the state of the graph."""
+        """비동기적으로 그래프 상태의 히스토리를 가져옵니다."""
         config = ensure_config(config)
         checkpointer: BaseCheckpointSaver | None = ensure_config(config)[CONF].get(
             CONFIG_KEY_CHECKPOINTER, self.checkpointer
@@ -1380,9 +1379,9 @@ class Pregel(
         if (
             checkpoint_ns := config[CONF].get(CONFIG_KEY_CHECKPOINT_NS, "")
         ) and CONFIG_KEY_CHECKPOINTER not in config[CONF]:
-            # remove task_ids from checkpoint_ns
+            # checkpoint_ns에서 task_ids 제거
             recast = recast_checkpoint_ns(checkpoint_ns)
-            # find the subgraph with the matching name
+            # 일치하는 이름을 가진 서브그래프 찾기
             async for _, pregel in self.aget_subgraphs(namespace=recast, recurse=True):
                 async for state in pregel.aget_state_history(
                     patch_configurable(config, {CONFIG_KEY_CHECKPOINTER: checkpointer}),
@@ -1405,7 +1404,7 @@ class Pregel(
                 }
             },
         )
-        # eagerly consume list() to avoid holding up the db cursor
+        # db 커서를 잡고 있지 않도록 list()를 즉시 소비
         for checkpoint_tuple in [
             c
             async for c in checkpointer.alist(
@@ -1421,19 +1420,19 @@ class Pregel(
         config: RunnableConfig,
         supersteps: Sequence[Sequence[StateUpdate]],
     ) -> RunnableConfig:
-        """Apply updates to the graph state in bulk. Requires a checkpointer to be set.
+        """그래프 상태에 대한 업데이트를 대량으로 적용합니다. 체크포인터가 설정되어 있어야 합니다.
 
         Args:
-            config: The config to apply the updates to.
-            supersteps: A list of supersteps, each including a list of updates to apply sequentially to a graph state.
-                        Each update is a tuple of the form `(values, as_node, task_id)` where `task_id` is optional.
+            config: 업데이트를 적용할 config입니다.
+            supersteps: 각각 그래프 상태에 순차적으로 적용할 업데이트 목록을 포함하는 슈퍼스텝 목록입니다.
+                        각 업데이트는 `(values, as_node, task_id)` 형식의 튜플이며, `task_id`는 선택적입니다.
 
         Raises:
-            ValueError: If no checkpointer is set or no updates are provided.
-            InvalidUpdateError: If an invalid update is provided.
+            ValueError: 체크포인터가 설정되지 않았거나 업데이트가 제공되지 않은 경우.
+            InvalidUpdateError: 유효하지 않은 업데이트가 제공된 경우.
 
         Returns:
-            RunnableConfig: The updated config.
+            RunnableConfig: 업데이트된 config입니다.
         """
 
         checkpointer: BaseCheckpointSaver | None = ensure_config(config)[CONF].get(
@@ -1448,13 +1447,13 @@ class Pregel(
         if any(len(u) == 0 for u in supersteps):
             raise ValueError("No updates provided")
 
-        # delegate to subgraph
+        # 서브그래프에 위임
         if (
             checkpoint_ns := config[CONF].get(CONFIG_KEY_CHECKPOINT_NS, "")
         ) and CONFIG_KEY_CHECKPOINTER not in config[CONF]:
-            # remove task_ids from checkpoint_ns
+            # checkpoint_ns에서 task_ids 제거
             recast = recast_checkpoint_ns(checkpoint_ns)
-            # find the subgraph with the matching name
+            # 일치하는 이름을 가진 서브그래프 찾기
             for _, pregel in self.get_subgraphs(namespace=recast, recurse=True):
                 return pregel.bulk_update_state(
                     patch_configurable(config, {CONFIG_KEY_CHECKPOINTER: checkpointer}),
@@ -1466,7 +1465,7 @@ class Pregel(
         def perform_superstep(
             input_config: RunnableConfig, updates: Sequence[StateUpdate]
         ) -> RunnableConfig:
-            # get last checkpoint
+            # 마지막 체크포인트 가져오기
             config = ensure_config(self.config, input_config)
             saved = checkpointer.get_tuple(config)
             if saved is not None:
@@ -1478,7 +1477,7 @@ class Pregel(
                 saved.checkpoint["channel_versions"].copy() if saved else {}
             )
             step = saved.metadata.get("step", -1) if saved else -1
-            # merge configurable fields with previous checkpoint config
+            # 이전 체크포인트 config와 구성 가능한 필드 병합
             checkpoint_config = patch_configurable(
                 config,
                 {
@@ -1495,7 +1494,7 @@ class Pregel(
             )
             values, as_node = updates[0][:2]
 
-            # no values as END, just clear all tasks
+            # END로서 값이 없으면 모든 작업을 지웁니다
             if values is None and as_node == END:
                 if len(updates) > 1:
                     raise InvalidUpdateError(
@@ -1503,7 +1502,7 @@ class Pregel(
                     )
 
                 if saved is not None:
-                    # tasks for this checkpoint
+                    # 이 체크포인트에 대한 작업들
                     next_tasks = prepare_next_tasks(
                         checkpoint,
                         saved.pending_writes or [],
@@ -1518,7 +1517,7 @@ class Pregel(
                         checkpointer=checkpointer,
                         manager=None,
                     )
-                    # apply null writes
+                    # null 쓰기 적용
                     if null_writes := [
                         w[1:]
                         for w in saved.pending_writes or []
@@ -1531,14 +1530,14 @@ class Pregel(
                             checkpointer.get_next_version,
                             self.trigger_to_nodes,
                         )
-                    # apply writes from tasks that already ran
+                    # 이미 실행된 작업의 쓰기 적용
                     for tid, k, v in saved.pending_writes or []:
                         if k in (ERROR, INTERRUPT):
                             continue
                         if tid not in next_tasks:
                             continue
                         next_tasks[tid].writes.append((k, v))
-                    # clear all current tasks
+                    # 모든 현재 작업 지우기
                     apply_writes(
                         checkpoint,
                         channels,
@@ -1546,7 +1545,7 @@ class Pregel(
                         checkpointer.get_next_version,
                         self.trigger_to_nodes,
                     )
-                # save checkpoint
+                # 체크포인트 저장
                 next_config = checkpointer.put(
                     checkpoint_config,
                     create_checkpoint(checkpoint, channels, step),
@@ -1564,7 +1563,7 @@ class Pregel(
                     next_config, saved.metadata if saved else None
                 )
 
-            # act as an input
+            # 입력으로 동작
             if as_node == INPUT:
                 if len(updates) > 1:
                     raise InvalidUpdateError(
@@ -1580,7 +1579,7 @@ class Pregel(
                         self.trigger_to_nodes,
                     )
 
-                    # apply input write to channels
+                    # 입력 쓰기를 채널에 적용
                     next_step = (
                         step + 1
                         if saved and saved.metadata.get("step") is not None
@@ -1602,7 +1601,7 @@ class Pregel(
                         ),
                     )
 
-                    # store the writes
+                    # 쓰기를 저장
                     checkpointer.put_writes(
                         next_config,
                         input_writes,
@@ -1629,7 +1628,7 @@ class Pregel(
 
                 next_checkpoint = create_checkpoint(checkpoint, None, step)
 
-                # copy checkpoint
+                # 체크포인트 복사
                 next_config = checkpointer.put(
                     saved.parent_config
                     or patch_configurable(
@@ -1644,10 +1643,10 @@ class Pregel(
                     {},
                 )
 
-                # we want to both clone a checkpoint and update state in one go.
-                # reuse the same task ID if possible.
+                # 한 번에 체크포인트를 복제하고 상태를 업데이트하려고 합니다.
+                # 가능한 경우 동일한 task ID를 재사용합니다.
                 if isinstance(values, list) and len(values) > 0:
-                    # figure out the task IDs for the next update checkpoint
+                    # 다음 업데이트 체크포인트를 위한 task ID를 파악합니다
                     next_tasks = prepare_next_tasks(
                         next_checkpoint,
                         saved.pending_writes or [],
@@ -1698,11 +1697,11 @@ class Pregel(
 
                 return patch_checkpoint_map(next_config, saved.metadata)
 
-            # task ids can be provided in the StateUpdate, but if not,
-            # we use the task id generated by prepare_next_tasks
+            # task id는 StateUpdate에 제공될 수 있지만, 제공되지 않으면
+            # prepare_next_tasks에서 생성된 task id를 사용합니다
             node_to_task_ids: dict[str, deque[str]] = defaultdict(deque)
             if saved is not None and saved.pending_writes is not None:
-                # tasks for this checkpoint
+                # 이 체크포인트에 대한 작업들
                 next_tasks = prepare_next_tasks(
                     checkpoint,
                     saved.pending_writes,
@@ -1717,11 +1716,11 @@ class Pregel(
                     checkpointer=checkpointer,
                     manager=None,
                 )
-                # collect task ids to reuse so we can properly attach task results
+                # 작업 결과를 올바르게 연결할 수 있도록 재사용할 task id를 수집합니다
                 for t in next_tasks.values():
                     node_to_task_ids[t.name].append(t.id)
 
-                # apply null writes
+                # null 쓰기 적용
                 if null_writes := [
                     w[1:] for w in saved.pending_writes or [] if w[0] == NULL_TASK_ID
                 ]:
@@ -1732,7 +1731,7 @@ class Pregel(
                         checkpointer.get_next_version,
                         self.trigger_to_nodes,
                     )
-                # apply writes
+                # 쓰기 적용
                 for tid, k, v in saved.pending_writes:
                     if k in (ERROR, INTERRUPT):
                         continue
@@ -1750,7 +1749,7 @@ class Pregel(
             valid_updates: list[tuple[str, dict[str, Any] | None, str | None]] = []
             if len(updates) == 1:
                 values, as_node, task_id = updates[0]
-                # find last node that updated the state, if not provided
+                # 제공되지 않은 경우 상태를 업데이트한 마지막 노드를 찾습니다
                 if as_node is None and len(self.nodes) == 1:
                     as_node = tuple(self.nodes)[0]
                 elif as_node is None and not any(
@@ -1770,7 +1769,7 @@ class Pregel(
                         if n in self.nodes
                         for v in seen.values()
                     )
-                    # if two nodes updated the state at the same time, it's ambiguous
+                    # 두 노드가 동시에 상태를 업데이트한 경우, 모호합니다
                     if last_seen_by_node:
                         if len(last_seen_by_node) == 1:
                             as_node = last_seen_by_node[0][1]
@@ -1796,15 +1795,15 @@ class Pregel(
             run_task_ids: list[str] = []
 
             for as_node, values, provided_task_id in valid_updates:
-                # create task to run all writers of the chosen node
+                # 선택된 노드의 모든 writer를 실행할 작업을 생성합니다
                 writers = self.nodes[as_node].flat_writers
                 if not writers:
                     raise InvalidUpdateError(f"Node {as_node} has no writers")
                 writes: deque[tuple[str, Any]] = deque()
                 task = PregelTaskWrites((), as_node, writes, [INTERRUPT])
-                # get the task ids that were prepared for this node
-                # if a task id was provided in the StateUpdate, we use it
-                # otherwise, we use the next available task id
+                # 이 노드를 위해 준비된 task id를 가져옵니다
+                # StateUpdate에 task id가 제공된 경우 이를 사용합니다
+                # 그렇지 않으면 다음으로 사용 가능한 task id를 사용합니다
                 prepared_task_ids = node_to_task_ids.get(as_node, deque())
                 task_id = provided_task_id or (
                     prepared_task_ids.popleft()
@@ -1814,14 +1813,14 @@ class Pregel(
                 run_tasks.append(task)
                 run_task_ids.append(task_id)
                 run = RunnableSequence(*writers) if len(writers) > 1 else writers[0]
-                # execute task
+                # 작업 실행
                 run.invoke(
                     values,
                     patch_config(
                         config,
                         run_name=self.name + "UpdateState",
                         configurable={
-                            # deque.extend is thread-safe
+                            # deque.extend는 스레드 세이프합니다
                             CONFIG_KEY_SEND: writes.extend,
                             CONFIG_KEY_TASK_ID: task_id,
                             CONFIG_KEY_READ: partial(
@@ -1842,13 +1841,13 @@ class Pregel(
                         },
                     ),
                 )
-            # save task writes
+            # 작업 쓰기 저장
             for task_id, task in zip(run_task_ids, run_tasks):
-                # channel writes are saved to current checkpoint
+                # 채널 쓰기는 현재 체크포인트에 저장됩니다
                 channel_writes = [w for w in task.writes if w[0] != PUSH]
                 if saved and channel_writes:
                     checkpointer.put_writes(checkpoint_config, channel_writes, task_id)
-            # apply to checkpoint and save
+            # 체크포인트에 적용하고 저장
             apply_writes(
                 checkpoint,
                 channels,
@@ -1870,7 +1869,7 @@ class Pregel(
                 ),
             )
             for task_id, task in zip(run_task_ids, run_tasks):
-                # save push writes
+                # push 쓰기 저장
                 if push_writes := [w for w in task.writes if w[0] == PUSH]:
                     checkpointer.put_writes(next_config, push_writes, task_id)
 
@@ -1888,19 +1887,19 @@ class Pregel(
         config: RunnableConfig,
         supersteps: Sequence[Sequence[StateUpdate]],
     ) -> RunnableConfig:
-        """Asynchronously apply updates to the graph state in bulk. Requires a checkpointer to be set.
+        """그래프 상태에 대한 업데이트를 대량으로 비동기적으로 적용합니다. 체크포인터가 설정되어 있어야 합니다.
 
         Args:
-            config: The config to apply the updates to.
-            supersteps: A list of supersteps, each including a list of updates to apply sequentially to a graph state.
-                        Each update is a tuple of the form `(values, as_node, task_id)` where `task_id` is optional.
+            config: 업데이트를 적용할 config입니다.
+            supersteps: 각 superstep에는 그래프 상태에 순차적으로 적용할 업데이트 목록이 포함됩니다.
+                        각 업데이트는 `(values, as_node, task_id)` 형식의 튜플이며, 여기서 `task_id`는 선택 사항입니다.
 
         Raises:
-            ValueError: If no checkpointer is set or no updates are provided.
-            InvalidUpdateError: If an invalid update is provided.
+            ValueError: 체크포인터가 설정되지 않았거나 업데이트가 제공되지 않은 경우.
+            InvalidUpdateError: 잘못된 업데이트가 제공된 경우.
 
         Returns:
-            RunnableConfig: The updated config.
+            RunnableConfig: 업데이트된 config입니다.
         """
 
         checkpointer: BaseCheckpointSaver | None = ensure_config(config)[CONF].get(
@@ -1915,13 +1914,13 @@ class Pregel(
         if any(len(u) == 0 for u in supersteps):
             raise ValueError("No updates provided")
 
-        # delegate to subgraph
+        # 서브그래프에 위임
         if (
             checkpoint_ns := config[CONF].get(CONFIG_KEY_CHECKPOINT_NS, "")
         ) and CONFIG_KEY_CHECKPOINTER not in config[CONF]:
-            # remove task_ids from checkpoint_ns
+            # checkpoint_ns에서 task_ids 제거
             recast = recast_checkpoint_ns(checkpoint_ns)
-            # find the subgraph with the matching name
+            # 일치하는 이름을 가진 서브그래프 찾기
             async for _, pregel in self.aget_subgraphs(namespace=recast, recurse=True):
                 return await pregel.abulk_update_state(
                     patch_configurable(config, {CONFIG_KEY_CHECKPOINTER: checkpointer}),
@@ -1933,7 +1932,7 @@ class Pregel(
         async def aperform_superstep(
             input_config: RunnableConfig, updates: Sequence[StateUpdate]
         ) -> RunnableConfig:
-            # get last checkpoint
+            # 마지막 체크포인트 가져오기
             config = ensure_config(self.config, input_config)
             saved = await checkpointer.aget_tuple(config)
             if saved is not None:
@@ -1945,7 +1944,7 @@ class Pregel(
                 saved.checkpoint["channel_versions"].copy() if saved else {}
             )
             step = saved.metadata.get("step", -1) if saved else -1
-            # merge configurable fields with previous checkpoint config
+            # 이전 체크포인트 config와 구성 가능한 필드 병합
             checkpoint_config = patch_configurable(
                 config,
                 {
@@ -1961,14 +1960,14 @@ class Pregel(
                 checkpoint,
             )
             values, as_node = updates[0][:2]
-            # no values, just clear all tasks
+            # 값이 없으면 모든 작업을 지웁니다
             if values is None and as_node == END:
                 if len(updates) > 1:
                     raise InvalidUpdateError(
                         "Cannot apply multiple updates when clearing state"
                     )
                 if saved is not None:
-                    # tasks for this checkpoint
+                    # 이 체크포인트에 대한 작업들
                     next_tasks = prepare_next_tasks(
                         checkpoint,
                         saved.pending_writes or [],
@@ -1983,7 +1982,7 @@ class Pregel(
                         checkpointer=checkpointer,
                         manager=None,
                     )
-                    # apply null writes
+                    # null 쓰기 적용
                     if null_writes := [
                         w[1:]
                         for w in saved.pending_writes or []
@@ -1996,14 +1995,14 @@ class Pregel(
                             checkpointer.get_next_version,
                             self.trigger_to_nodes,
                         )
-                    # apply writes from tasks that already ran
+                    # 이미 실행된 작업의 쓰기 적용
                     for tid, k, v in saved.pending_writes or []:
                         if k in (ERROR, INTERRUPT):
                             continue
                         if tid not in next_tasks:
                             continue
                         next_tasks[tid].writes.append((k, v))
-                    # clear all current tasks
+                    # 모든 현재 작업 지우기
                     apply_writes(
                         checkpoint,
                         channels,
@@ -2011,7 +2010,7 @@ class Pregel(
                         checkpointer.get_next_version,
                         self.trigger_to_nodes,
                     )
-                # save checkpoint
+                # 체크포인트 저장
                 next_config = await checkpointer.aput(
                     checkpoint_config,
                     create_checkpoint(checkpoint, channels, step),
@@ -2028,7 +2027,7 @@ class Pregel(
                     next_config, saved.metadata if saved else None
                 )
 
-            # act as an input
+            # 입력으로 동작
             if as_node == INPUT:
                 if len(updates) > 1:
                     raise InvalidUpdateError(
@@ -2044,7 +2043,7 @@ class Pregel(
                         self.trigger_to_nodes,
                     )
 
-                    # apply input write to channels
+                    # 입력 쓰기를 채널에 적용
                     next_step = (
                         step + 1
                         if saved and saved.metadata.get("step") is not None
@@ -2066,7 +2065,7 @@ class Pregel(
                         ),
                     )
 
-                    # store the writes
+                    # 쓰기를 저장
                     await checkpointer.aput_writes(
                         next_config,
                         input_writes,
@@ -2081,7 +2080,7 @@ class Pregel(
                         f"Received no input writes for {self.input_channels}"
                     )
 
-            # no values, copy checkpoint
+            # 값이 없으면 체크포인트를 복사
             if as_node == "__copy__":
                 if len(updates) > 1:
                     raise InvalidUpdateError(
@@ -2093,7 +2092,7 @@ class Pregel(
 
                 next_checkpoint = create_checkpoint(checkpoint, None, step)
 
-                # copy checkpoint
+                # 체크포인트 복사
                 next_config = await checkpointer.aput(
                     saved.parent_config
                     or patch_configurable(
@@ -2108,10 +2107,10 @@ class Pregel(
                     {},
                 )
 
-                # we want to both clone a checkpoint and update state in one go.
-                # reuse the same task ID if possible.
+                # 한 번에 체크포인트를 복제하고 상태를 업데이트하려고 합니다.
+                # 가능한 경우 동일한 task ID를 재사용합니다.
                 if isinstance(values, list) and len(values) > 0:
-                    # figure out the task IDs for the next update checkpoint
+                    # 다음 업데이트 체크포인트를 위한 task ID를 파악합니다
                     next_tasks = prepare_next_tasks(
                         next_checkpoint,
                         saved.pending_writes or [],
@@ -2163,11 +2162,11 @@ class Pregel(
                     next_config, saved.metadata if saved else None
                 )
 
-            # task ids can be provided in the StateUpdate, but if not,
-            # we use the task id generated by prepare_next_tasks
+            # task id는 StateUpdate에 제공될 수 있지만, 제공되지 않으면
+            # prepare_next_tasks에서 생성된 task id를 사용합니다
             node_to_task_ids: dict[str, deque[str]] = defaultdict(deque)
             if saved is not None and saved.pending_writes is not None:
-                # tasks for this checkpoint
+                # 이 체크포인트에 대한 작업들
                 next_tasks = prepare_next_tasks(
                     checkpoint,
                     saved.pending_writes,
@@ -2182,11 +2181,11 @@ class Pregel(
                     checkpointer=checkpointer,
                     manager=None,
                 )
-                # collect task ids to reuse so we can properly attach task results
+                # 작업 결과를 올바르게 연결할 수 있도록 재사용할 task id를 수집합니다
                 for t in next_tasks.values():
                     node_to_task_ids[t.name].append(t.id)
 
-                # apply null writes
+                # null 쓰기 적용
                 if null_writes := [
                     w[1:] for w in saved.pending_writes or [] if w[0] == NULL_TASK_ID
                 ]:
@@ -2214,7 +2213,7 @@ class Pregel(
             valid_updates: list[tuple[str, dict[str, Any] | None, str | None]] = []
             if len(updates) == 1:
                 values, as_node, task_id = updates[0]
-                # find last node that updated the state, if not provided
+                # 제공되지 않은 경우 상태를 업데이트한 마지막 노드를 찾습니다
                 if as_node is None and len(self.nodes) == 1:
                     as_node = tuple(self.nodes)[0]
                 elif as_node is None and not saved:
@@ -2230,7 +2229,7 @@ class Pregel(
                         if n in self.nodes
                         for v in seen.values()
                     )
-                    # if two nodes updated the state at the same time, it's ambiguous
+                    # 두 노드가 동시에 상태를 업데이트한 경우, 모호합니다
                     if last_seen_by_node:
                         if len(last_seen_by_node) == 1:
                             as_node = last_seen_by_node[0][1]
@@ -2256,15 +2255,15 @@ class Pregel(
             run_task_ids: list[str] = []
 
             for as_node, values, provided_task_id in valid_updates:
-                # create task to run all writers of the chosen node
+                # 선택된 노드의 모든 writer를 실행할 작업을 생성합니다
                 writers = self.nodes[as_node].flat_writers
                 if not writers:
                     raise InvalidUpdateError(f"Node {as_node} has no writers")
                 writes: deque[tuple[str, Any]] = deque()
                 task = PregelTaskWrites((), as_node, writes, [INTERRUPT])
-                # get the task ids that were prepared for this node
-                # if a task id was provided in the StateUpdate, we use it
-                # otherwise, we use the next available task id
+                # 이 노드를 위해 준비된 task id를 가져옵니다
+                # StateUpdate에 task id가 제공된 경우 이를 사용합니다
+                # 그렇지 않으면 다음으로 사용 가능한 task id를 사용합니다
                 prepared_task_ids = node_to_task_ids.get(as_node, deque())
                 task_id = provided_task_id or (
                     prepared_task_ids.popleft()
@@ -2274,14 +2273,14 @@ class Pregel(
                 run_tasks.append(task)
                 run_task_ids.append(task_id)
                 run = RunnableSequence(*writers) if len(writers) > 1 else writers[0]
-                # execute task
+                # 작업 실행
                 await run.ainvoke(
                     values,
                     patch_config(
                         config,
                         run_name=self.name + "UpdateState",
                         configurable={
-                            # deque.extend is thread-safe
+                            # deque.extend는 스레드 세이프합니다
                             CONFIG_KEY_SEND: writes.extend,
                             CONFIG_KEY_TASK_ID: task_id,
                             CONFIG_KEY_READ: partial(
@@ -2302,15 +2301,15 @@ class Pregel(
                         },
                     ),
                 )
-            # save task writes
+            # 작업 쓰기 저장
             for task_id, task in zip(run_task_ids, run_tasks):
-                # channel writes are saved to current checkpoint
+                # 채널 쓰기는 현재 체크포인트에 저장됩니다
                 channel_writes = [w for w in task.writes if w[0] != PUSH]
                 if saved and channel_writes:
                     await checkpointer.aput_writes(
                         checkpoint_config, channel_writes, task_id
                     )
-            # apply to checkpoint and save
+            # 체크포인트에 적용하고 저장
             apply_writes(
                 checkpoint,
                 channels,
@@ -2319,7 +2318,7 @@ class Pregel(
                 self.trigger_to_nodes,
             )
             checkpoint = create_checkpoint(checkpoint, channels, step + 1)
-            # save checkpoint, after applying writes
+            # 쓰기 적용 후 체크포인트 저장
             next_config = await checkpointer.aput(
                 checkpoint_config,
                 checkpoint,
@@ -2333,7 +2332,7 @@ class Pregel(
                 ),
             )
             for task_id, task in zip(run_task_ids, run_tasks):
-                # save push writes
+                # push 쓰기 저장
                 if push_writes := [w for w in task.writes if w[0] == PUSH]:
                     await checkpointer.aput_writes(next_config, push_writes, task_id)
             return patch_checkpoint_map(next_config, saved.metadata if saved else None)
@@ -2352,9 +2351,8 @@ class Pregel(
         as_node: str | None = None,
         task_id: str | None = None,
     ) -> RunnableConfig:
-        """Update the state of the graph with the given values, as if they came from
-        node `as_node`. If `as_node` is not provided, it will be set to the last node
-        that updated the state, if not ambiguous.
+        """주어진 값으로 그래프 상태를 업데이트합니다. 마치 `as_node` 노드에서 온 것처럼 동작합니다.
+        `as_node`가 제공되지 않으면 모호하지 않은 경우 상태를 업데이트한 마지막 노드로 설정됩니다.
         """
         return self.bulk_update_state(config, [[StateUpdate(values, as_node, task_id)]])
 
@@ -2365,9 +2363,8 @@ class Pregel(
         as_node: str | None = None,
         task_id: str | None = None,
     ) -> RunnableConfig:
-        """Asynchronously update the state of the graph with the given values, as if they came from
-        node `as_node`. If `as_node` is not provided, it will be set to the last node
-        that updated the state, if not ambiguous.
+        """주어진 값으로 그래프 상태를 비동기적으로 업데이트합니다. 마치 `as_node` 노드에서 온 것처럼 동작합니다.
+        `as_node`가 제공되지 않으면 모호하지 않은 경우 상태를 업데이트한 마지막 노드로 설정됩니다.
         """
         return await self.abulk_update_state(
             config, [[StateUpdate(values, as_node, task_id)]]
@@ -2459,50 +2456,48 @@ class Pregel(
         debug: bool | None = None,
         **kwargs: Unpack[DeprecatedKwargs],
     ) -> Iterator[dict[str, Any] | Any]:
-        """Stream graph steps for a single input.
+        """단일 입력에 대한 그래프 단계를 스트리밍합니다.
 
         Args:
-            input: The input to the graph.
-            config: The configuration to use for the run.
-            context: The static context to use for the run.
-                !!! version-added "Added in version 0.6.0"
-            stream_mode: The mode to stream output, defaults to `self.stream_mode`.
-                Options are:
+            input: 그래프에 대한 입력입니다.
+            config: 실행에 사용할 구성입니다.
+            context: 실행에 사용할 정적 컨텍스트입니다.
+                !!! version-added "버전 0.6.0에서 추가됨"
+            stream_mode: 출력을 스트리밍하는 모드, 기본값은 `self.stream_mode`입니다.
+                옵션은 다음과 같습니다:
 
-                - `"values"`: Emit all values in the state after each step, including interrupts.
-                    When used with functional API, values are emitted once at the end of the workflow.
-                - `"updates"`: Emit only the node or task names and updates returned by the nodes or tasks after each step.
-                    If multiple updates are made in the same step (e.g. multiple nodes are run) then those updates are emitted separately.
-                - `"custom"`: Emit custom data from inside nodes or tasks using `StreamWriter`.
-                - `"messages"`: Emit LLM messages token-by-token together with metadata for any LLM invocations inside nodes or tasks.
-                    Will be emitted as 2-tuples `(LLM token, metadata)`.
-                - `"checkpoints"`: Emit an event when a checkpoint is created, in the same format as returned by `get_state()`.
-                - `"tasks"`: Emit events when tasks start and finish, including their results and errors.
+                - `"values"`: 인터럽트를 포함하여 각 단계 후 상태의 모든 값을 방출합니다.
+                    함수형 API와 함께 사용하면 워크플로우 끝에서 한 번 값이 방출됩니다.
+                - `"updates"`: 각 단계 후 노드 또는 작업 이름과 노드 또는 작업에서 반환된 업데이트만 방출합니다.
+                    동일한 단계에서 여러 업데이트가 수행되는 경우(예: 여러 노드가 실행됨) 해당 업데이트는 별도로 방출됩니다.
+                - `"custom"`: `StreamWriter`를 사용하여 노드 또는 작업 내부에서 커스텀 데이터를 방출합니다.
+                - `"messages"`: 노드 또는 작업 내부의 모든 LLM 호출에 대한 메타데이터와 함께 LLM 메시지를 토큰 단위로 방출합니다.
+                    2-튜플 `(LLM token, metadata)` 형식으로 방출됩니다.
+                - `"checkpoints"`: 체크포인트가 생성될 때 이벤트를 방출하며, `get_state()`에서 반환하는 것과 동일한 형식입니다.
+                - `"tasks"`: 작업이 시작되고 완료될 때 결과와 오류를 포함하여 이벤트를 방출합니다.
 
-                You can pass a list as the `stream_mode` parameter to stream multiple modes at once.
-                The streamed outputs will be tuples of `(mode, data)`.
+                `stream_mode` 매개변수에 리스트를 전달하여 여러 모드를 한 번에 스트리밍할 수 있습니다.
+                스트리밍된 출력은 `(mode, data)` 튜플이 됩니다.
 
-                See [LangGraph streaming guide](https://langchain-ai.github.io/langgraph/how-tos/streaming/) for more details.
-            print_mode: Accepts the same values as `stream_mode`, but only prints the output to the console, for debugging purposes. Does not affect the output of the graph in any way.
-            output_keys: The keys to stream, defaults to all non-context channels.
-            interrupt_before: Nodes to interrupt before, defaults to all nodes in the graph.
-            interrupt_after: Nodes to interrupt after, defaults to all nodes in the graph.
-            durability: The durability mode for the graph execution, defaults to `"async"`.
-                Options are:
+                자세한 내용은 [LangGraph 스트리밍 가이드](https://langchain-ai.github.io/langgraph/how-tos/streaming/)를 참조하세요.
+            print_mode: `stream_mode`와 동일한 값을 허용하지만, 디버깅 목적으로 콘솔에 출력만 인쇄합니다. 그래프의 출력에는 어떤 식으로도 영향을 주지 않습니다.
+            output_keys: 스트리밍할 키, 기본값은 모든 비컨텍스트 채널입니다.
+            interrupt_before: 인터럽트할 노드(이전), 기본값은 그래프의 모든 노드입니다.
+            interrupt_after: 인터럽트할 노드(이후), 기본값은 그래프의 모든 노드입니다.
+            durability: 그래프 실행에 대한 내구성 모드, 기본값은 `"async"`입니다.
+                옵션은 다음과 같습니다:
 
-                - `"sync"`: Changes are persisted synchronously before the next step starts.
-                - `"async"`: Changes are persisted asynchronously while the next step executes.
-                - `"exit"`: Changes are persisted only when the graph exits.
-            subgraphs: Whether to stream events from inside subgraphs, defaults to False.
-                If `True`, the events will be emitted as tuples `(namespace, data)`,
-                or `(namespace, mode, data)` if `stream_mode` is a list,
-                where `namespace` is a tuple with the path to the node where a subgraph is invoked,
-                e.g. `("parent_node:<task_id>", "child_node:<task_id>")`.
-
-                See [LangGraph streaming guide](https://langchain-ai.github.io/langgraph/how-tos/streaming/) for more details.
+                - `"sync"`: 다음 단계가 시작되기 전에 변경 사항이 동기적으로 유지됩니다.
+                - `"async"`: 다음 단계가 실행되는 동안 변경 사항이 비동기적으로 유지됩니다.
+                - `"exit"`: 그래프가 종료될 때만 변경 사항이 유지됩니다.
+            subgraphs: 서브그래프 내부에서 이벤트를 스트리밍할지 여부, 기본값은 False입니다.
+                `True`이면 이벤트는 `(namespace, data)` 튜플로 방출되며,
+                `stream_mode`가 리스트인 경우 `(namespace, mode, data)`로 방출됩니다.
+                여기서 `namespace`는 서브그래프가 호출되는 노드의 경로를 가진 튜플입니다.
+                예: `("parent_node:<task_id>", "child_node:<task_id>")`.
 
         Yields:
-            The output of each step in the graph. The output shape depends on the `stream_mode`.
+            그래프의 각 단계 출력입니다. 출력 형태는 `stream_mode`에 따라 달라집니다.
         """
         if (checkpoint_during := kwargs.get("checkpoint_during")) is not None:
             warnings.warn(
@@ -2517,8 +2512,8 @@ class Pregel(
             durability = "async" if checkpoint_during else "exit"
 
         if stream_mode is None:
-            # if being called as a node in another graph, default to values mode
-            # but don't overwrite stream_mode arg if provided
+            # 다른 그래프의 노드로 호출되는 경우 values 모드를 기본값으로 사용합니다
+            # 하지만 stream_mode 인수가 제공된 경우 덮어쓰지 않습니다
             stream_mode = (
                 "values"
                 if config is not None and CONFIG_KEY_TASK_ID in config.get(CONF, {})
@@ -2538,7 +2533,7 @@ class Pregel(
             run_id=config.get("run_id"),
         )
         try:
-            # assign defaults
+            # 기본값 할당
             (
                 stream_modes,
                 output_keys,
@@ -2561,11 +2556,11 @@ class Pregel(
                 warnings.warn(
                     "`durability` has no effect when no checkpointer is present.",
                 )
-            # set up subgraph checkpointing
+            # 서브그래프 체크포인팅 설정
             if self.checkpointer is True:
                 ns = cast(str, config[CONF][CONFIG_KEY_CHECKPOINT_NS])
                 config[CONF][CONFIG_KEY_CHECKPOINT_NS] = recast_checkpoint_ns(ns)
-            # set up messages stream mode
+            # messages 스트림 모드 설정
             if "messages" in stream_modes:
                 ns_ = cast(str | None, config[CONF].get(CONFIG_KEY_CHECKPOINT_NS))
                 run_manager.inheritable_handlers.append(
@@ -2576,7 +2571,7 @@ class Pregel(
                     )
                 )
 
-            # set up custom stream mode
+            # custom 스트림 모드 설정
             if "custom" in stream_modes:
 
                 def stream_writer(c: Any) -> None:
@@ -2598,7 +2593,7 @@ class Pregel(
                 def stream_writer(c: Any) -> None:
                     pass
 
-            # set durability mode for subgraphs
+            # 서브그래프에 대한 내구성 모드 설정
             if durability is not None:
                 config[CONF][CONFIG_KEY_DURABILITY] = durability_
 
@@ -2633,7 +2628,7 @@ class Pregel(
                 retry_policy=self.retry_policy,
                 cache_policy=self.cache_policy,
             ) as loop:
-                # create runner
+                # runner 생성
                 runner = PregelRunner(
                     submit=config[CONF].get(
                         CONFIG_KEY_RUNNER_SUBMIT, weakref.WeakMethod(loop.submit)
@@ -2641,10 +2636,10 @@ class Pregel(
                     put_writes=weakref.WeakMethod(loop.put_writes),
                     node_finished=config[CONF].get(CONFIG_KEY_NODE_FINISHED),
                 )
-                # enable subgraph streaming
+                # 서브그래프 스트리밍 활성화
                 if subgraphs:
                     loop.config[CONF][CONFIG_KEY_STREAM] = loop.stream
-                # enable concurrent streaming
+                # 동시 스트리밍 활성화
                 get_waiter: Callable[[], concurrent.futures.Future[None]] | None = None
                 if (
                     self.stream_eager
@@ -2652,12 +2647,12 @@ class Pregel(
                     or "messages" in stream_modes
                     or "custom" in stream_modes
                 ):
-                    # we are careful to have a single waiter live at any one time
-                    # because on exit we increment semaphore count by exactly 1
+                    # 한 번에 하나의 waiter만 유지하도록 주의합니다
+                    # 종료 시 세마포어 카운트를 정확히 1만큼 증가시키기 때문입니다
                     waiter: concurrent.futures.Future | None = None
-                    # because sync futures cannot be cancelled, we instead
-                    # release the stream semaphore on exit, which will cause
-                    # a pending waiter to return immediately
+                    # 동기 futures는 취소할 수 없으므로 대신
+                    # 종료 시 스트림 세마포어를 해제하여
+                    # 대기 중인 waiter가 즉시 반환되도록 합니다
                     loop.stack.callback(stream._count.release)
 
                     def get_waiter() -> concurrent.futures.Future[None]:
@@ -2668,11 +2663,11 @@ class Pregel(
                         else:
                             return waiter
 
-                # Similarly to Bulk Synchronous Parallel / Pregel model
-                # computation proceeds in steps, while there are channel updates.
-                # Channel updates from step N are only visible in step N+1
-                # channels are guaranteed to be immutable for the duration of the step,
-                # with channel updates applied only at the transition between steps.
+                # Bulk Synchronous Parallel / Pregel 모델과 유사하게
+                # 채널 업데이트가 있는 동안 계산이 단계별로 진행됩니다.
+                # 단계 N의 채널 업데이트는 단계 N+1에서만 볼 수 있습니다
+                # 채널은 단계 동안 불변임이 보장되며,
+                # 채널 업데이트는 단계 간 전환 시에만 적용됩니다.
                 while loop.tick():
                     for task in loop.match_cached_writes():
                         loop.output_writes(task.id, task.writes, cached=True)
@@ -2682,19 +2677,19 @@ class Pregel(
                         get_waiter=get_waiter,
                         schedule_task=loop.accept_push,
                     ):
-                        # emit output
+                        # 출력 방출
                         yield from _output(
                             stream_mode, print_mode, subgraphs, stream.get, queue.Empty
                         )
                     loop.after_tick()
-                    # wait for checkpoint
+                    # 체크포인트 대기
                     if durability_ == "sync":
                         loop._put_checkpoint_fut.result()
-            # emit output
+            # 출력 방출
             yield from _output(
                 stream_mode, print_mode, subgraphs, stream.get, queue.Empty
             )
-            # handle exit
+            # 종료 처리
             if loop.status == "out_of_steps":
                 msg = create_error_message(
                     message=(
@@ -2705,7 +2700,7 @@ class Pregel(
                     error_code=ErrorCode.GRAPH_RECURSION_LIMIT,
                 )
                 raise GraphRecursionError(msg)
-            # set final channel values as run output
+            # 최종 채널 값을 실행 출력으로 설정
             run_manager.on_chain_end(loop.output)
         except BaseException as e:
             run_manager.on_chain_error(e)
@@ -2727,49 +2722,47 @@ class Pregel(
         debug: bool | None = None,
         **kwargs: Unpack[DeprecatedKwargs],
     ) -> AsyncIterator[dict[str, Any] | Any]:
-        """Asynchronously stream graph steps for a single input.
+        """단일 입력에 대한 그래프 단계를 비동기적으로 스트리밍합니다.
 
         Args:
-            input: The input to the graph.
-            config: The configuration to use for the run.
-            context: The static context to use for the run.
-                !!! version-added "Added in version 0.6.0"
-            stream_mode: The mode to stream output, defaults to `self.stream_mode`.
-                Options are:
+            input: 그래프에 대한 입력입니다.
+            config: 실행에 사용할 구성입니다.
+            context: 실행에 사용할 정적 컨텍스트입니다.
+                !!! version-added "버전 0.6.0에서 추가됨"
+            stream_mode: 출력을 스트리밍하는 모드, 기본값은 `self.stream_mode`입니다.
+                옵션은 다음과 같습니다:
 
-                - `"values"`: Emit all values in the state after each step, including interrupts.
-                    When used with functional API, values are emitted once at the end of the workflow.
-                - `"updates"`: Emit only the node or task names and updates returned by the nodes or tasks after each step.
-                    If multiple updates are made in the same step (e.g. multiple nodes are run) then those updates are emitted separately.
-                - `"custom"`: Emit custom data from inside nodes or tasks using `StreamWriter`.
-                - `"messages"`: Emit LLM messages token-by-token together with metadata for any LLM invocations inside nodes or tasks.
-                    Will be emitted as 2-tuples `(LLM token, metadata)`.
-                - `"debug"`: Emit debug events with as much information as possible for each step.
+                - `"values"`: 인터럽트를 포함하여 각 단계 후 상태의 모든 값을 방출합니다.
+                    함수형 API와 함께 사용하면 워크플로우 끝에서 한 번 값이 방출됩니다.
+                - `"updates"`: 각 단계 후 노드 또는 작업 이름과 노드 또는 작업에서 반환된 업데이트만 방출합니다.
+                    동일한 단계에서 여러 업데이트가 수행되는 경우(예: 여러 노드가 실행됨) 해당 업데이트는 별도로 방출됩니다.
+                - `"custom"`: `StreamWriter`를 사용하여 노드 또는 작업 내부에서 커스텀 데이터를 방출합니다.
+                - `"messages"`: 노드 또는 작업 내부의 모든 LLM 호출에 대한 메타데이터와 함께 LLM 메시지를 토큰 단위로 방출합니다.
+                    2-튜플 `(LLM token, metadata)` 형식으로 방출됩니다.
+                - `"debug"`: 각 단계에 대해 가능한 한 많은 정보를 포함하는 디버그 이벤트를 방출합니다.
 
-                You can pass a list as the `stream_mode` parameter to stream multiple modes at once.
-                The streamed outputs will be tuples of `(mode, data)`.
+                `stream_mode` 매개변수에 리스트를 전달하여 여러 모드를 한 번에 스트리밍할 수 있습니다.
+                스트리밍된 출력은 `(mode, data)` 튜플이 됩니다.
 
-                See [LangGraph streaming guide](https://langchain-ai.github.io/langgraph/how-tos/streaming/) for more details.
-            print_mode: Accepts the same values as `stream_mode`, but only prints the output to the console, for debugging purposes. Does not affect the output of the graph in any way.
-            output_keys: The keys to stream, defaults to all non-context channels.
-            interrupt_before: Nodes to interrupt before, defaults to all nodes in the graph.
-            interrupt_after: Nodes to interrupt after, defaults to all nodes in the graph.
-            durability: The durability mode for the graph execution, defaults to `"async"`.
-                Options are:
+                자세한 내용은 [LangGraph 스트리밍 가이드](https://langchain-ai.github.io/langgraph/how-tos/streaming/)를 참조하세요.
+            print_mode: `stream_mode`와 동일한 값을 허용하지만, 디버깅 목적으로 콘솔에 출력만 인쇄합니다. 그래프의 출력에는 어떤 식으로도 영향을 주지 않습니다.
+            output_keys: 스트리밍할 키, 기본값은 모든 비컨텍스트 채널입니다.
+            interrupt_before: 인터럽트할 노드(이전), 기본값은 그래프의 모든 노드입니다.
+            interrupt_after: 인터럽트할 노드(이후), 기본값은 그래프의 모든 노드입니다.
+            durability: 그래프 실행에 대한 내구성 모드, 기본값은 `"async"`입니다.
+                옵션은 다음과 같습니다:
 
-                - `"sync"`: Changes are persisted synchronously before the next step starts.
-                - `"async"`: Changes are persisted asynchronously while the next step executes.
-                - `"exit"`: Changes are persisted only when the graph exits.
-            subgraphs: Whether to stream events from inside subgraphs, defaults to False.
-                If `True`, the events will be emitted as tuples `(namespace, data)`,
-                or `(namespace, mode, data)` if `stream_mode` is a list,
-                where `namespace` is a tuple with the path to the node where a subgraph is invoked,
-                e.g. `("parent_node:<task_id>", "child_node:<task_id>")`.
-
-                See [LangGraph streaming guide](https://langchain-ai.github.io/langgraph/how-tos/streaming/) for more details.
+                - `"sync"`: 다음 단계가 시작되기 전에 변경 사항이 동기적으로 유지됩니다.
+                - `"async"`: 다음 단계가 실행되는 동안 변경 사항이 비동기적으로 유지됩니다.
+                - `"exit"`: 그래프가 종료될 때만 변경 사항이 유지됩니다.
+            subgraphs: 서브그래프 내부에서 이벤트를 스트리밍할지 여부, 기본값은 False입니다.
+                `True`이면 이벤트는 `(namespace, data)` 튜플로 방출되며,
+                `stream_mode`가 리스트인 경우 `(namespace, mode, data)`로 방출됩니다.
+                여기서 `namespace`는 서브그래프가 호출되는 노드의 경로를 가진 튜플입니다.
+                예: `("parent_node:<task_id>", "child_node:<task_id>")`.
 
         Yields:
-            The output of each step in the graph. The output shape depends on the `stream_mode`.
+            그래프의 각 단계 출력입니다. 출력 형태는 `stream_mode`에 따라 달라집니다.
         """
         if (checkpoint_during := kwargs.get("checkpoint_during")) is not None:
             warnings.warn(
@@ -2784,8 +2777,8 @@ class Pregel(
             durability = "async" if checkpoint_during else "exit"
 
         if stream_mode is None:
-            # if being called as a node in another graph, default to values mode
-            # but don't overwrite stream_mode arg if provided
+            # 다른 그래프의 노드로 호출되는 경우 values 모드를 기본값으로 사용합니다
+            # 하지만 stream_mode 인수가 제공된 경우 덮어쓰지 않습니다
             stream_mode = (
                 "values"
                 if config is not None and CONFIG_KEY_TASK_ID in config.get(CONF, {})
@@ -2809,7 +2802,7 @@ class Pregel(
             name=config.get("run_name", self.get_name()),
             run_id=config.get("run_id"),
         )
-        # if running from astream_log() run each proc with streaming
+        # astream_log()에서 실행 중인 경우 각 프로세스를 스트리밍과 함께 실행합니다
         do_stream = (
             next(
                 (
@@ -2824,7 +2817,7 @@ class Pregel(
             else False
         )
         try:
-            # assign defaults
+            # 기본값 할당
             (
                 stream_modes,
                 output_keys,
@@ -2847,13 +2840,13 @@ class Pregel(
                 warnings.warn(
                     "`durability` has no effect when no checkpointer is present.",
                 )
-            # set up subgraph checkpointing
+            # 서브그래프 체크포인팅 설정
             if self.checkpointer is True:
                 ns = cast(str, config[CONF][CONFIG_KEY_CHECKPOINT_NS])
                 config[CONF][CONFIG_KEY_CHECKPOINT_NS] = recast_checkpoint_ns(ns)
-            # set up messages stream mode
+            # messages 스트림 모드 설정
             if "messages" in stream_modes:
-                # namespace can be None in a root level graph?
+                # 루트 레벨 그래프에서 namespace는 None일 수 있습니다
                 ns_ = cast(str | None, config[CONF].get(CONFIG_KEY_CHECKPOINT_NS))
                 run_manager.inheritable_handlers.append(
                     StreamMessagesHandler(
@@ -2863,7 +2856,7 @@ class Pregel(
                     )
                 )
 
-            # set up custom stream mode
+            # custom 스트림 모드 설정
             def stream_writer(c: Any) -> None:
                 aioloop.call_soon_threadsafe(
                     stream.put_nowait,
@@ -2900,7 +2893,7 @@ class Pregel(
                 def stream_writer(c: Any) -> None:
                     pass
 
-            # set durability mode for subgraphs
+            # 서브그래프에 대한 내구성 모드 설정
             if durability is not None:
                 config[CONF][CONFIG_KEY_DURABILITY] = durability_
 
@@ -2935,7 +2928,7 @@ class Pregel(
                 retry_policy=self.retry_policy,
                 cache_policy=self.cache_policy,
             ) as loop:
-                # create runner
+                # runner 생성
                 runner = PregelRunner(
                     submit=config[CONF].get(
                         CONFIG_KEY_RUNNER_SUBMIT, weakref.WeakMethod(loop.submit)
@@ -2944,12 +2937,12 @@ class Pregel(
                     use_astream=do_stream,
                     node_finished=config[CONF].get(CONFIG_KEY_NODE_FINISHED),
                 )
-                # enable subgraph streaming
+                # 서브그래프 스트리밍 활성화
                 if subgraphs:
                     loop.config[CONF][CONFIG_KEY_STREAM] = StreamProtocol(
                         stream_put, stream_modes
                     )
-                # enable concurrent streaming
+                # 동시 스트리밍 활성화
                 get_waiter: Callable[[], asyncio.Task[None]] | None = None
                 _cleanup_waiter: Callable[[], Awaitable[None]] | None = None
                 if (
@@ -2958,7 +2951,7 @@ class Pregel(
                     or "messages" in stream_modes
                     or "custom" in stream_modes
                 ):
-                    # Keep a single waiter task alive; ensure cleanup on exit.
+                    # 단일 waiter 작업을 유지하고 종료 시 정리를 보장합니다.
                     waiter: asyncio.Task[None] | None = None
 
                     def get_waiter() -> asyncio.Task[None]:
@@ -2975,9 +2968,9 @@ class Pregel(
                         return waiter
 
                     async def _cleanup_waiter() -> None:
-                        """Wake pending waiter and/or cancel+await to avoid pending tasks."""
+                        """대기 중인 waiter를 깨우거나 취소 및 대기하여 대기 중인 작업을 방지합니다."""
                         nonlocal waiter
-                        # Try to wake via semaphore like SyncPregelLoop
+                        # SyncPregelLoop처럼 세마포어를 통해 깨우기를 시도합니다
                         with contextlib.suppress(Exception):
                             if hasattr(stream, "_count"):
                                 stream._count.release()
@@ -2988,11 +2981,11 @@ class Pregel(
                             with contextlib.suppress(asyncio.CancelledError):
                                 await t
 
-                # Similarly to Bulk Synchronous Parallel / Pregel model
-                # computation proceeds in steps, while there are channel updates
-                # channel updates from step N are only visible in step N+1
-                # channels are guaranteed to be immutable for the duration of the step,
-                # with channel updates applied only at the transition between steps
+                # Bulk Synchronous Parallel / Pregel 모델과 유사하게
+                # 채널 업데이트가 있는 동안 계산이 단계별로 진행됩니다
+                # 단계 N의 채널 업데이트는 단계 N+1에서만 볼 수 있습니다
+                # 채널은 단계 동안 불변임이 보장되며,
+                # 채널 업데이트는 단계 간 전환 시에만 적용됩니다
                 try:
                     while loop.tick():
                         for task in await loop.amatch_cached_writes():
@@ -3003,7 +2996,7 @@ class Pregel(
                             get_waiter=get_waiter,
                             schedule_task=loop.aaccept_push,
                         ):
-                            # emit output
+                            # 출력 방출
                             for o in _output(
                                 stream_mode,
                                 print_mode,
@@ -3013,15 +3006,15 @@ class Pregel(
                             ):
                                 yield o
                         loop.after_tick()
-                        # wait for checkpoint
+                        # 체크포인트 대기
                         if durability_ == "sync":
                             await cast(asyncio.Future, loop._put_checkpoint_fut)
                 finally:
-                    # ensure waiter doesn't remain pending on cancel/shutdown
+                    # 취소/종료 시 waiter가 대기 중으로 남지 않도록 보장합니다
                     if _cleanup_waiter is not None:
                         await _cleanup_waiter()
 
-            # emit output
+            # 출력 방출
             for o in _output(
                 stream_mode,
                 print_mode,
@@ -3030,7 +3023,7 @@ class Pregel(
                 asyncio.QueueEmpty,
             ):
                 yield o
-            # handle exit
+            # 종료 처리
             if loop.status == "out_of_steps":
                 msg = create_error_message(
                     message=(
@@ -3041,7 +3034,7 @@ class Pregel(
                     error_code=ErrorCode.GRAPH_RECURSION_LIMIT,
                 )
                 raise GraphRecursionError(msg)
-            # set final channel values as run output
+            # 최종 채널 값을 실행 출력으로 설정
             await run_manager.on_chain_end(loop.output)
         except BaseException as e:
             await asyncio.shield(run_manager.on_chain_error(e))
@@ -3061,29 +3054,29 @@ class Pregel(
         durability: Durability | None = None,
         **kwargs: Any,
     ) -> dict[str, Any] | Any:
-        """Run the graph with a single input and config.
+        """단일 입력과 config로 그래프를 실행합니다.
 
         Args:
-            input: The input data for the graph. It can be a dictionary or any other type.
-            config: The configuration for the graph run.
-            context: The static context to use for the run.
-                !!! version-added "Added in version 0.6.0"
-            stream_mode: The stream mode for the graph run.
-            print_mode: Accepts the same values as `stream_mode`, but only prints the output to the console, for debugging purposes. Does not affect the output of the graph in any way.
-            output_keys: The output keys to retrieve from the graph run.
-            interrupt_before: The nodes to interrupt the graph run before.
-            interrupt_after: The nodes to interrupt the graph run after.
-            durability: The durability mode for the graph execution, defaults to `"async"`.
-                Options are:
+            input: 그래프의 입력 데이터입니다. 딕셔너리 또는 다른 타입일 수 있습니다.
+            config: 그래프 실행을 위한 구성입니다.
+            context: 실행에 사용할 정적 컨텍스트입니다.
+                !!! version-added "버전 0.6.0에서 추가됨"
+            stream_mode: 그래프 실행을 위한 스트림 모드입니다.
+            print_mode: `stream_mode`와 동일한 값을 허용하지만, 디버깅 목적으로 콘솔에 출력만 인쇄합니다. 그래프의 출력에는 어떤 식으로도 영향을 주지 않습니다.
+            output_keys: 그래프 실행에서 검색할 출력 키입니다.
+            interrupt_before: 그래프 실행을 중단할 노드(이전)입니다.
+            interrupt_after: 그래프 실행을 중단할 노드(이후)입니다.
+            durability: 그래프 실행에 대한 내구성 모드, 기본값은 `"async"`입니다.
+                옵션은 다음과 같습니다:
 
-                - `"sync"`: Changes are persisted synchronously before the next step starts.
-                - `"async"`: Changes are persisted asynchronously while the next step executes.
-                - `"exit"`: Changes are persisted only when the graph exits.
-            **kwargs: Additional keyword arguments to pass to the graph run.
+                - `"sync"`: 다음 단계가 시작되기 전에 변경 사항이 동기적으로 유지됩니다.
+                - `"async"`: 다음 단계가 실행되는 동안 변경 사항이 비동기적으로 유지됩니다.
+                - `"exit"`: 그래프가 종료될 때만 변경 사항이 유지됩니다.
+            **kwargs: 그래프 실행에 전달할 추가 키워드 인수입니다.
 
         Returns:
-            The output of the graph run. If `stream_mode` is `"values"`, it returns the latest output.
-            If `stream_mode` is not `"values"`, it returns a list of output chunks.
+            그래프 실행의 출력입니다. `stream_mode`가 `"values"`인 경우 최신 출력을 반환합니다.
+            `stream_mode`가 `"values"`가 아닌 경우 출력 청크 목록을 반환합니다.
         """
         output_keys = output_keys if output_keys is not None else self.output_channels
 
@@ -3148,29 +3141,29 @@ class Pregel(
         durability: Durability | None = None,
         **kwargs: Any,
     ) -> dict[str, Any] | Any:
-        """Asynchronously invoke the graph on a single input.
+        """단일 입력에 대해 그래프를 비동기적으로 호출합니다.
 
         Args:
-            input: The input data for the computation. It can be a dictionary or any other type.
-            config: The configuration for the computation.
-            context: The static context to use for the run.
-                !!! version-added "Added in version 0.6.0"
-            stream_mode: The stream mode for the computation.
-            print_mode: Accepts the same values as `stream_mode`, but only prints the output to the console, for debugging purposes. Does not affect the output of the graph in any way.
-            output_keys: The output keys to include in the result.
-            interrupt_before: The nodes to interrupt before.
-            interrupt_after: The nodes to interrupt after.
-            durability: The durability mode for the graph execution, defaults to `"async"`.
-                Options are:
+            input: 계산을 위한 입력 데이터입니다. 딕셔너리 또는 다른 타입일 수 있습니다.
+            config: 계산을 위한 구성입니다.
+            context: 실행에 사용할 정적 컨텍스트입니다.
+                !!! version-added "버전 0.6.0에서 추가됨"
+            stream_mode: 계산을 위한 스트림 모드입니다.
+            print_mode: `stream_mode`와 동일한 값을 허용하지만, 디버깅 목적으로 콘솔에 출력만 인쇄합니다. 그래프의 출력에는 어떤 식으로도 영향을 주지 않습니다.
+            output_keys: 결과에 포함할 출력 키입니다.
+            interrupt_before: 인터럽트할 노드(이전)입니다.
+            interrupt_after: 인터럽트할 노드(이후)입니다.
+            durability: 그래프 실행에 대한 내구성 모드, 기본값은 `"async"`입니다.
+                옵션은 다음과 같습니다:
 
-                - `"sync"`: Changes are persisted synchronously before the next step starts.
-                - `"async"`: Changes are persisted asynchronously while the next step executes.
-                - `"exit"`: Changes are persisted only when the graph exits.
-            **kwargs: Additional keyword arguments.
+                - `"sync"`: 다음 단계가 시작되기 전에 변경 사항이 동기적으로 유지됩니다.
+                - `"async"`: 다음 단계가 실행되는 동안 변경 사항이 비동기적으로 유지됩니다.
+                - `"exit"`: 그래프가 종료될 때만 변경 사항이 유지됩니다.
+            **kwargs: 추가 키워드 인수입니다.
 
         Returns:
-            The result of the computation. If `stream_mode` is `"values"`, it returns the latest value.
-            If `stream_mode` is `"chunks"`, it returns a list of chunks.
+            계산 결과입니다. `stream_mode`가 `"values"`인 경우 최신 값을 반환합니다.
+            `stream_mode`가 `"chunks"`인 경우 청크 목록을 반환합니다.
         """
 
         output_keys = output_keys if output_keys is not None else self.output_channels
@@ -3223,11 +3216,11 @@ class Pregel(
             return chunks
 
     def clear_cache(self, nodes: Sequence[str] | None = None) -> None:
-        """Clear the cache for the given nodes."""
+        """주어진 노드에 대한 캐시를 지웁니다."""
         if not self.cache:
             raise ValueError("No cache is set for this graph. Cannot clear cache.")
         nodes = nodes or self.nodes.keys()
-        # collect namespaces to clear
+        # 지울 네임스페이스 수집
         namespaces: list[tuple[str, ...]] = []
         for node in nodes:
             if node in self.nodes:
@@ -3238,15 +3231,15 @@ class Pregel(
                         node,
                     ),
                 )
-        # clear cache
+        # 캐시 지우기
         self.cache.clear(namespaces)
 
     async def aclear_cache(self, nodes: Sequence[str] | None = None) -> None:
-        """Asynchronously clear the cache for the given nodes."""
+        """주어진 노드에 대한 캐시를 비동기적으로 지웁니다."""
         if not self.cache:
             raise ValueError("No cache is set for this graph. Cannot clear cache.")
         nodes = nodes or self.nodes.keys()
-        # collect namespaces to clear
+        # 지울 네임스페이스 수집
         namespaces: list[tuple[str, ...]] = []
         for node in nodes:
             if node in self.nodes:
@@ -3257,12 +3250,12 @@ class Pregel(
                         node,
                     ),
                 )
-        # clear cache
+        # 캐시 지우기
         await self.cache.aclear(namespaces)
 
 
 def _trigger_to_nodes(nodes: dict[str, PregelNode]) -> Mapping[str, Sequence[str]]:
-    """Index from a trigger to nodes that depend on it."""
+    """트리거에서 해당 트리거에 의존하는 노드로의 인덱스입니다."""
     trigger_to_nodes: defaultdict[str, list[str]] = defaultdict(list)
     for name, node in nodes.items():
         for trigger in node.triggers:
@@ -3316,17 +3309,17 @@ def _output(
 def _coerce_context(
     context_schema: type[ContextT] | None, context: Any
 ) -> ContextT | None:
-    """Coerce context input to the appropriate schema type.
+    """컨텍스트 입력을 적절한 스키마 타입으로 강제 변환합니다.
 
-    If context is a dict and context_schema is a dataclass or pydantic model, we coerce.
-    Else, we return the context as-is.
+    context가 딕셔너리이고 context_schema가 dataclass 또는 pydantic 모델인 경우 강제 변환합니다.
+    그렇지 않으면 context를 그대로 반환합니다.
 
     Args:
-        context_schema: The schema type to coerce to (BaseModel, dataclass, or TypedDict)
-        context: The context value to coerce
+        context_schema: 강제 변환할 스키마 타입입니다 (BaseModel, dataclass, 또는 TypedDict).
+        context: 강제 변환할 컨텍스트 값입니다.
 
     Returns:
-        The coerced context value or None if context is None
+        강제 변환된 컨텍스트 값 또는 context가 None인 경우 None입니다.
     """
     if context is None:
         return None

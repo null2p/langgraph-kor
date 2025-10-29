@@ -66,9 +66,9 @@ async def store(request) -> AsyncIterator[AsyncPostgresStore]:
             ]
             await store.setup()
             async with store._cursor() as cur:
-                # drop the migration index
+                # 마이그레이션 인덱스 삭제
                 await cur.execute("DROP TABLE IF EXISTS store_migrations")
-            await store.setup()  # Will fail if migrations aren't idempotent
+            await store.setup()  # 마이그레이션이 멱등성이 아니면 실패함
 
         if request.param == "pipe":
             async with AsyncPostgresStore.from_conn_string(
@@ -124,7 +124,7 @@ async def test_no_running_loop(store: AsyncPostgresStore) -> None:
 
 
 async def test_large_batches(request: Any, store: AsyncPostgresStore) -> None:
-    N = 100  # less important that we are performant here
+    N = 100  # 여기서는 성능이 덜 중요함
     M = 10
 
     with ThreadPoolExecutor(max_workers=10) as executor:
@@ -221,7 +221,7 @@ async def test_large_batches_async(store: AsyncPostgresStore) -> None:
 
 
 async def test_abatch_order(store: AsyncPostgresStore) -> None:
-    # Setup test data
+    # 테스트 데이터 설정
     await store.aput(("test", "foo"), "key1", {"data": "value1"})
     await store.aput(("test", "bar"), "key2", {"data": "value2"})
 
@@ -275,7 +275,7 @@ async def test_abatch_order(store: AsyncPostgresStore) -> None:
 
 
 async def test_batch_get_ops(store: AsyncPostgresStore) -> None:
-    # Setup test data
+    # 테스트 데이터 설정
     await store.aput(("test",), "key1", {"data": "value1"})
     await store.aput(("test",), "key2", {"data": "value2"})
 
@@ -307,13 +307,13 @@ async def test_batch_put_ops(store: AsyncPostgresStore) -> None:
     assert len(results) == 3
     assert all(result is None for result in results)
 
-    # Verify the puts worked
+    # put이 제대로 작동했는지 확인
     items = await store.asearch(["test"], limit=10)
-    assert len(items) == 2  # key3 had None value so wasn't stored
+    assert len(items) == 2  # key3은 None 값을 가지므로 저장되지 않음
 
 
 async def test_batch_search_ops(store: AsyncPostgresStore) -> None:
-    # Setup test data
+    # 테스트 데이터 설정
     await store.aput(("test", "foo"), "key1", {"data": "value1"})
     await store.aput(("test", "bar"), "key2", {"data": "value2"})
 
@@ -327,12 +327,12 @@ async def test_batch_search_ops(store: AsyncPostgresStore) -> None:
     results = await store.abatch(ops)
 
     assert len(results) == 2
-    assert len(results[0]) == 1  # Filtered results
-    assert len(results[1]) == 2  # All results
+    assert len(results[0]) == 1  # 필터링된 결과
+    assert len(results[1]) == 2  # 모든 결과
 
 
 async def test_batch_list_namespaces_ops(store: AsyncPostgresStore) -> None:
-    # Setup test data
+    # 테스트 데이터 설정
     await store.aput(("test", "namespace1"), "key1", {"data": "value1"})
     await store.aput(("test", "namespace2"), "key2", {"data": "value2"})
 
@@ -353,7 +353,7 @@ async def _create_vector_store(
     fake_embeddings: CharacterEmbeddings,
     text_fields: list[str] | None = None,
 ) -> AsyncIterator[AsyncPostgresStore]:
-    """Create a store with vector search enabled."""
+    """벡터 검색이 활성화된 저장소를 생성합니다."""
 
     database = f"test_{uuid.uuid4().hex[:16]}"
     uri_parts = DEFAULT_URI.split("/")
@@ -409,7 +409,7 @@ async def vector_store(
     request,
     fake_embeddings: CharacterEmbeddings,
 ) -> AsyncIterator[AsyncPostgresStore]:
-    """Create a store with vector search enabled."""
+    """벡터 검색이 활성화된 저장소를 생성합니다."""
     vector_type, distance_type = request.param
     async with _create_vector_store(
         vector_type, distance_type, fake_embeddings
@@ -420,7 +420,7 @@ async def vector_store(
 async def test_vector_store_initialization(
     vector_store: AsyncPostgresStore, fake_embeddings: CharacterEmbeddings
 ) -> None:
-    """Test store initialization with embedding config."""
+    """임베딩 설정으로 저장소 초기화를 테스트합니다."""
     assert vector_store.index_config is not None
     assert vector_store.index_config["dims"] == fake_embeddings.dims
     if isinstance(vector_store.index_config["embed"], Embeddings):
@@ -430,7 +430,7 @@ async def test_vector_store_initialization(
 async def test_vector_insert_with_auto_embedding(
     vector_store: AsyncPostgresStore,
 ) -> None:
-    """Test inserting items that get auto-embedded."""
+    """자동으로 임베딩되는 항목 삽입을 테스트합니다."""
     docs = [
         ("doc1", {"text": "short text"}),
         ("doc2", {"text": "longer text document"}),
@@ -452,7 +452,7 @@ async def test_vector_insert_with_auto_embedding(
 
 
 async def test_vector_update_with_embedding(vector_store: AsyncPostgresStore) -> None:
-    """Test that updating items properly updates their embeddings."""
+    """항목 업데이트 시 임베딩이 올바르게 업데이트되는지 테스트합니다."""
     await vector_store.aput(("test",), "doc1", {"text": "zany zebra Xerxes"})
     await vector_store.aput(("test",), "doc2", {"text": "something about dogs"})
     await vector_store.aput(("test",), "doc3", {"text": "text about birds"})
@@ -473,7 +473,7 @@ async def test_vector_update_with_embedding(vector_store: AsyncPostgresStore) ->
         if r.key == "doc1":
             assert r.score > after_score
 
-    # Don't index this one
+    # 이것은 인덱싱하지 않음
     await vector_store.aput(
         ("test",), "doc4", {"text": "new text about dogs"}, index=False
     )
@@ -484,7 +484,7 @@ async def test_vector_update_with_embedding(vector_store: AsyncPostgresStore) ->
 
 
 async def test_vector_search_with_filters(vector_store: AsyncPostgresStore) -> None:
-    """Test combining vector search with filters."""
+    """벡터 검색과 필터를 결합하여 테스트합니다."""
     docs = [
         ("doc1", {"text": "red apple", "color": "red", "score": 4.5}),
         ("doc2", {"text": "red car", "color": "red", "score": 3.0}),
@@ -521,7 +521,7 @@ async def test_vector_search_with_filters(vector_store: AsyncPostgresStore) -> N
 
 
 async def test_vector_search_pagination(vector_store: AsyncPostgresStore) -> None:
-    """Test pagination with vector search."""
+    """벡터 검색의 페이지네이션을 테스트합니다."""
     for i in range(5):
         await vector_store.aput(
             ("test",), f"doc{i}", {"text": f"test document number {i}"}
@@ -541,7 +541,7 @@ async def test_vector_search_pagination(vector_store: AsyncPostgresStore) -> Non
 
 
 async def test_vector_search_edge_cases(vector_store: AsyncPostgresStore) -> None:
-    """Test edge cases in vector search."""
+    """벡터 검색의 엣지 케이스를 테스트합니다."""
     await vector_store.aput(("test",), "doc1", {"text": "test document"})
 
     perfect_match = await vector_store.asearch(("test",), query="text test document")
@@ -578,21 +578,21 @@ async def test_embed_with_path(
     vector_type: str,
     distance_type: str,
 ) -> None:
-    """Test vector search with specific text fields in Postgres store."""
+    """Postgres 저장소에서 특정 텍스트 필드를 사용한 벡터 검색을 테스트합니다."""
     async with _create_vector_store(
         vector_type,
         distance_type,
         fake_embeddings,
         text_fields=["key0", "key1", "key3"],
     ) as store:
-        # This will have 2 vectors representing it
+        # 이것은 2개의 벡터로 표현됩니다
         doc1 = {
-            # Omit key0 - check it doesn't raise an error
+            # key0 생략 - 오류가 발생하지 않는지 확인
             "key1": "xxx",
             "key2": "yyy",
             "key3": "zzz",
         }
-        # This will have 3 vectors representing it
+        # 이것은 3개의 벡터로 표현됩니다
         doc2 = {
             "key0": "uuu",
             "key1": "vvv",
@@ -602,7 +602,7 @@ async def test_embed_with_path(
         await store.aput(("test",), "doc1", doc1)
         await store.aput(("test",), "doc2", doc2)
 
-        # doc2.key3 and doc1.key1 both would have the highest score
+        # doc2.key3과 doc1.key1이 모두 가장 높은 점수를 가짐
         results = await store.asearch(("test",), query="xxx")
         assert len(results) == 2
         assert results[0].key != results[1].key
@@ -617,8 +617,8 @@ async def test_embed_with_path(
         assert results[0].score > results[1].score
         assert ascore == pytest.approx(results[0].score, abs=1e-3)
 
-        # Un-indexed - will have low results for both. Not zero (because we're projecting)
-        # but less than the above.
+        # 인덱싱되지 않음 - 둘 다 낮은 결과를 가짐. Not zero (because we're projecting)
+        # 하지만 위보다는 낮음.
         results = await store.asearch(("test",), query="www")
         assert len(results) == 2
         assert results[0].score < ascore
@@ -637,12 +637,12 @@ async def test_search_sorting(
     vector_type: str,
     distance_type: str,
 ) -> None:
-    """Test operation-level field configuration for vector search."""
+    """벡터 검색을 위한 작업 수준의 필드 설정을 테스트합니다."""
     async with _create_vector_store(
         vector_type,
         distance_type,
         fake_embeddings,
-        text_fields=["key1"],  # Default fields that won't match our test data
+        text_fields=["key1"],  # 테스트 데이터와 일치하지 않는 기본 필드
     ) as store:
         amatch = {
             "key1": "mmm",
@@ -663,7 +663,7 @@ async def test_search_sorting(
 
 
 async def test_store_ttl(store):
-    # Assumes a TTL of 1 minute = 60 seconds
+    # TTL이 1분 = 60초라고 가정
     ns = ("foo",)
     await store.start_ttl_sweeper()
     await store.aput(
@@ -682,6 +682,6 @@ async def test_store_ttl(store):
     res = await store.aget(ns, key="item1", refresh_ttl=False)
     assert res is not None
     await asyncio.sleep(TTL_SECONDS - 1)
-    # Now has been (TTL_SECONDS-2)*2 > TTL_SECONDS + TTL_SECONDS/2
+    # 이제 경과 시간이 (TTL_SECONDS-2)*2 > TTL_SECONDS + TTL_SECONDS/2
     results = await store.asearch(ns, query="bar", refresh_ttl=False)
     assert len(results) == 0

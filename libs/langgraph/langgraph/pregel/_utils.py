@@ -18,7 +18,7 @@ from langgraph.pregel.protocol import PregelProtocol
 def get_new_channel_versions(
     previous_versions: ChannelVersions, current_versions: ChannelVersions
 ) -> ChannelVersions:
-    """Get subset of current_versions that are newer than previous_versions."""
+    """previous_versions보다 최신인 current_versions의 부분 집합을 가져옵니다."""
     if previous_versions:
         version_type = type(next(iter(current_versions.values()), None))
         null_version = version_type()  # type: ignore[misc]
@@ -65,13 +65,13 @@ def find_subgraph_pregel(candidate: Runnable) -> PregelProtocol | None:
 
 
 def get_function_nonlocals(func: Callable) -> list[Any]:
-    """Get the nonlocal variables accessed by a function.
+    """함수가 접근하는 비로컬 변수를 가져옵니다.
 
     Args:
-        func: The function to check.
+        func: 확인할 함수입니다.
 
     Returns:
-        List[Any]: The nonlocal variables accessed by the function.
+        List[Any]: 함수가 접근하는 비로컬 변수 목록입니다.
     """
     try:
         code = inspect.getsource(func)

@@ -35,34 +35,34 @@ class MockAsyncBatchedStore(AsyncBatchedBaseStore):
 
 
 async def test_async_batch_store_resilience() -> None:
-    """Test that AsyncBatchedBaseStore recovers gracefully from task cancellation."""
+    """AsyncBatchedBaseStore가 태스크 취소로부터 우아하게 복구되는지 테스트합니다."""
     doc = {"foo": "bar"}
     async_store = MockAsyncBatchedStore()
 
     await async_store.aput(("foo", "langgraph", "foo"), "bar", doc)
 
-    # Store the original task reference
+    # 원래 태스크 참조 저장
     original_task = async_store._task
     assert original_task is not None
     assert not original_task.done()
 
-    # Cancel the background task
+    # 백그라운드 태스크 취소
     original_task.cancel()
     await asyncio.sleep(0.01)
     assert original_task.cancelled()
 
-    # Perform a new operation - this should trigger _ensure_task() to create a new task
+    # 새 작업 수행 - _ensure_task()가 새 태스크를 생성해야 함
     result = await async_store.asearch(("foo", "langgraph", "foo"))
     assert len(result) > 0
     assert result[0].value == doc
 
-    # Verify a new task was created
+    # 새 태스크가 생성되었는지 확인
     new_task = async_store._task
     assert new_task is not None
     assert new_task is not original_task
     assert not new_task.done()
 
-    # Test that operations continue to work with the new task
+    # 새 태스크로 작업이 계속 잘 작동하는지 테스트
     doc2 = {"baz": "qux"}
     await async_store.aput(("test", "namespace"), "key", doc2)
     result2 = await async_store.aget(("test", "namespace"), "key")
@@ -161,7 +161,7 @@ async def test_async_batch_store(mocker: MockerFixture) -> None:
 
     store = MockStore()
 
-    # concurrent calls are batched
+    # 동시 호출은 배치 처리됨
     results = await asyncio.gather(
         store.aget(namespace=("a",), key="b"),
         store.aget(namespace=("c",), key="d"),
@@ -211,13 +211,13 @@ async def test_async_batch_store_handles_cancellation() -> None:
 
     store = MockStore()
 
-    # Simulate cancellation
+    # 취소 시뮬레이션
     task = asyncio.create_task(store.aget(namespace=("a",), key="b"))
     await asyncio.sleep(0)
     task.cancel()
     await asyncio.sleep(0)
 
-    # Cancelling individual queries against the store should not break the store
+    # 스토어에 대한 개별 쿼리를 취소해도 스토어가 손상되지 않아야 함
     result = await store.aget(namespace=("c",), key="d")
     assert result == Item(
         value={},
@@ -270,7 +270,7 @@ def test_list_namespaces_basic() -> None:
     ]
     assert sorted(result) == sorted(expected)
 
-    # Test max_depth
+    # max_depth 테스트
     result = store.list_namespaces(prefix=("a", "b"), max_depth=3)
     expected = [
         ("a", "b", "c"),
@@ -279,7 +279,7 @@ def test_list_namespaces_basic() -> None:
     ]
     assert sorted(result) == sorted(expected)
 
-    # Test limit and offset
+    # limit과 offset 테스트
     result = store.list_namespaces(prefix=("a", "b"), limit=2)
     expected = [
         ("a", "b", "c"),
@@ -468,7 +468,7 @@ async def test_cannot_put_empty_namespace() -> None:
     store.delete(("foo", "langgraph", "foo"), "bar")
     assert store.get(("foo", "langgraph", "foo"), "bar") is None
 
-    # Do the same but go past the public put api
+    # 같은 작업을 공개 put API를 우회하여 수행
     await store.abatch([PutOp(("langgraph", "foo"), "bar", doc)])
     assert (await store.aget(("langgraph", "foo"), "bar")).value == doc  # type: ignore[union-attr]
     assert (await store.asearch(("langgraph", "foo")))[0].value == doc
@@ -586,7 +586,7 @@ def fake_embeddings() -> CharacterEmbeddings:
 
 
 def test_vector_store_initialization(fake_embeddings: CharacterEmbeddings) -> None:
-    """Test store initialization with embedding config."""
+    """임베딩 설정으로 스토어 초기화를 테스트합니다."""
     store = InMemoryStore(
         index={"dims": fake_embeddings.dims, "embed": fake_embeddings}
     )
@@ -598,7 +598,7 @@ def test_vector_store_initialization(fake_embeddings: CharacterEmbeddings) -> No
 def test_vector_insert_with_auto_embedding(
     fake_embeddings: CharacterEmbeddings,
 ) -> None:
-    """Test inserting items that get auto-embedded."""
+    """자동으로 임베딩되는 항목을 삽입하는 것을 테스트합니다."""
     store = InMemoryStore(
         index={"dims": fake_embeddings.dims, "embed": fake_embeddings}
     )
@@ -625,7 +625,7 @@ def test_vector_insert_with_auto_embedding(
 async def test_async_vector_insert_with_auto_embedding(
     fake_embeddings: CharacterEmbeddings,
 ) -> None:
-    """Test inserting items that get auto-embedded using async methods."""
+    """비동기 메서드를 사용하여 자동으로 임베딩되는 항목을 삽입하는 것을 테스트합니다."""
     store = InMemoryStore(
         index={"dims": fake_embeddings.dims, "embed": fake_embeddings}
     )
@@ -650,7 +650,7 @@ async def test_async_vector_insert_with_auto_embedding(
 
 
 def test_vector_update_with_embedding(fake_embeddings: CharacterEmbeddings) -> None:
-    """Test that updating items properly updates their embeddings."""
+    """항목을 업데이트하면 임베딩도 올바르게 업데이트되는지 테스트합니다."""
     store = InMemoryStore(
         index={"dims": fake_embeddings.dims, "embed": fake_embeddings}
     )
@@ -676,7 +676,7 @@ def test_vector_update_with_embedding(fake_embeddings: CharacterEmbeddings) -> N
         if r.key == "doc1":
             assert r.score > after_score
 
-    # Don't index this one
+    # 이것은 인덱싱하지 않음
     store.put(("test",), "doc4", {"text": "new text about dogs"}, index=False)
     results_new = store.search(("test",), query="new text about dogs", limit=3)
     assert not any(r.key == "doc4" for r in results_new)
@@ -685,7 +685,7 @@ def test_vector_update_with_embedding(fake_embeddings: CharacterEmbeddings) -> N
 async def test_async_vector_update_with_embedding(
     fake_embeddings: CharacterEmbeddings,
 ) -> None:
-    """Test that updating items properly updates their embeddings using async methods."""
+    """비동기 메서드를 사용하여 항목을 업데이트하면 임베딩도 올바르게 업데이트되는지 테스트합니다."""
     store = InMemoryStore(
         index={"dims": fake_embeddings.dims, "embed": fake_embeddings}
     )
@@ -711,18 +711,18 @@ async def test_async_vector_update_with_embedding(
             assert r.score is not None
             assert r.score > after_score
 
-    # Don't index this one
+    # 이것은 인덱싱하지 않음
     await store.aput(("test",), "doc4", {"text": "new text about dogs"}, index=False)
     results_new = await store.asearch(("test",), query="new text about dogs", limit=3)
     assert not any(r.key == "doc4" for r in results_new)
 
 
 def test_vector_search_with_filters(fake_embeddings: CharacterEmbeddings) -> None:
-    """Test combining vector search with filters."""
+    """벡터 검색과 필터를 결합하는 것을 테스트합니다."""
     inmem_store = InMemoryStore(
         index={"dims": fake_embeddings.dims, "embed": fake_embeddings}
     )
-    # Insert test documents
+    # 테스트 문서 삽입
     docs = [
         ("doc1", {"text": "red apple", "color": "red", "score": 4.5}),
         ("doc2", {"text": "red car", "color": "red", "score": 3.0}),
@@ -747,7 +747,7 @@ def test_vector_search_with_filters(fake_embeddings: CharacterEmbeddings) -> Non
     assert len(results) == 3
     assert results[0].key == "doc4"
 
-    # Multiple filters
+    # 여러 필터
     results = inmem_store.search(
         ("test",), query="apple", filter={"score": {"$gte": 4.0}, "color": "green"}
     )
@@ -758,11 +758,11 @@ def test_vector_search_with_filters(fake_embeddings: CharacterEmbeddings) -> Non
 async def test_async_vector_search_with_filters(
     fake_embeddings: CharacterEmbeddings,
 ) -> None:
-    """Test combining vector search with filters using async methods."""
+    """비동기 메서드를 사용하여 벡터 검색과 필터를 결합하는 것을 테스트합니다."""
     store = InMemoryStore(
         index={"dims": fake_embeddings.dims, "embed": fake_embeddings}
     )
-    # Insert test documents
+    # 테스트 문서 삽입
     docs = [
         ("doc1", {"text": "red apple", "color": "red", "score": 4.5}),
         ("doc2", {"text": "red car", "color": "red", "score": 3.0}),
@@ -787,7 +787,7 @@ async def test_async_vector_search_with_filters(
     assert len(results) == 3
     assert results[0].key == "doc4"
 
-    # Multiple filters
+    # 여러 필터
     results = await store.asearch(
         ("test",), query="apple", filter={"score": {"$gte": 4.0}, "color": "green"}
     )
@@ -798,7 +798,7 @@ async def test_async_vector_search_with_filters(
 async def test_async_batched_vector_search_concurrent(
     fake_embeddings: CharacterEmbeddings,
 ) -> None:
-    """Test concurrent vector search operations using async batched store."""
+    """비동기 배치 스토어를 사용하여 동시 벡터 검색 작업을 테스트합니다."""
     store = MockAsyncBatchedStore(
         index={"dims": fake_embeddings.dims, "embed": fake_embeddings}
     )
@@ -825,7 +825,7 @@ async def test_async_batched_vector_search_concurrent(
     ]
     await asyncio.gather(*coros)
 
-    # Prepare multiple search queries with different filters
+    # 다양한 필터로 여러 검색 쿼리 준비
     search_queries: list[tuple[str, dict[str, Any]]] = [
         ("apple", {"color": "red"}),
         ("car", {"color": "blue"}),
@@ -878,7 +878,7 @@ async def test_async_batched_vector_search_concurrent(
 
 
 def test_vector_search_pagination(fake_embeddings: CharacterEmbeddings) -> None:
-    """Test pagination with vector search."""
+    """벡터 검색에서 페이지네이션을 테스트합니다."""
     store = InMemoryStore(
         index={"dims": fake_embeddings.dims, "embed": fake_embeddings}
     )
@@ -899,7 +899,7 @@ def test_vector_search_pagination(fake_embeddings: CharacterEmbeddings) -> None:
 async def test_async_vector_search_pagination(
     fake_embeddings: CharacterEmbeddings,
 ) -> None:
-    """Test pagination with vector search using async methods."""
+    """비동기 메서드를 사용하여 벡터 검색에서 페이지네이션을 테스트합니다."""
     store = InMemoryStore(
         index={"dims": fake_embeddings.dims, "embed": fake_embeddings}
     )
@@ -918,23 +918,23 @@ async def test_async_vector_search_pagination(
 
 
 async def test_embed_with_path(fake_embeddings: CharacterEmbeddings) -> None:
-    # Test store-level field configuration
+    # 스토어 레벨 필드 설정 테스트
     store = InMemoryStore(
         index={
             "dims": fake_embeddings.dims,
             "embed": fake_embeddings,
-            # Key 2 isn't included. Don't index it.
+            # Key 2는 포함되지 않음. 인덱싱하지 않음.
             "fields": ["key0", "key1", "key3"],
         }
     )
-    # This will have 2 vectors representing it
+    # 이것은 2개의 벡터로 표현됨
     doc1 = {
-        # Omit key0 - check it doesn't raise an error
+        # key0 생략 - 오류를 발생시키지 않는지 확인
         "key1": "xxx",
         "key2": "yyy",
         "key3": "zzz",
     }
-    # This will have 3 vectors representing it
+    # 이것은 3개의 벡터로 표현됨
     doc2 = {
         "key0": "uuu",
         "key1": "vvv",
@@ -944,7 +944,7 @@ async def test_embed_with_path(fake_embeddings: CharacterEmbeddings) -> None:
     await store.aput(("test",), "doc1", doc1)
     await store.aput(("test",), "doc2", doc2)
 
-    # doc2.key3 and doc1.key1 both would have the highest score
+    # doc2.key3과 doc1.key1 모두 가장 높은 점수를 가짐
     results = await store.asearch(("test",), query="xxx")
     assert len(results) == 2
     assert results[0].key != results[1].key
@@ -960,14 +960,14 @@ async def test_embed_with_path(fake_embeddings: CharacterEmbeddings) -> None:
     assert results[0].score is not None and results[0].score > results[1].score
     assert ascore == pytest.approx(results[0].score, abs=1e-5)
 
-    # Un-indexed - will have low results for both. Not zero (because we're projecting)
-    # but less than the above.
+    # 인덱싱되지 않음 - 둘 다 낮은 결과를 가짐. 0은 아님 (프로젝션하기 때문)
+    # 하지만 위의 것보다는 낮음.
     results = await store.asearch(("test",), query="www")
     assert len(results) == 2
     assert results[0].score < ascore
     assert results[1].score < ascore
 
-    # Test operation-level field configuration
+    # 작업 레벨 필드 설정 테스트
     store_no_defaults = InMemoryStore(
         index={
             "dims": fake_embeddings.dims,
@@ -984,7 +984,7 @@ async def test_embed_with_path(fake_embeddings: CharacterEmbeddings) -> None:
     }
     doc4 = {
         "key0": "eee",
-        "key1": "bbb",  # Same as doc3.key1
+        "key1": "bbb",  # doc3.key1과 동일
         "key2": "fff",
         "key3": "ggg",
     }
@@ -1024,7 +1024,7 @@ async def test_embed_with_path(fake_embeddings: CharacterEmbeddings) -> None:
 
 
 def test_non_ascii(fake_embeddings: CharacterEmbeddings) -> None:
-    """Test support for non-ascii characters"""
+    """비ASCII 문자 지원을 테스트합니다"""
     store = InMemoryStore(
         index={"dims": fake_embeddings.dims, "embed": fake_embeddings}
     )

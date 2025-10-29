@@ -51,11 +51,11 @@ StructuredResponseSchema = dict | type[BaseModel]
 
 
 @deprecated(
-    "AgentState has been moved to `langchain.agents`. Please update your import to `from langchain.agents import AgentState`.",
+    "AgentState가 `langchain.agents`로 이동되었습니다. import를 `from langchain.agents import AgentState`로 업데이트하세요.",
     category=LangGraphDeprecatedSinceV10,
 )
 class AgentState(TypedDict):
-    """The state of the agent."""
+    """에이전트의 상태입니다."""
 
     messages: Annotated[Sequence[BaseMessage], add_messages]
 
@@ -63,11 +63,11 @@ class AgentState(TypedDict):
 
 
 @deprecated(
-    "AgentStatePydantic has been moved to `langchain.agents`. Please update your import to `from langchain.agents import AgentStatePydantic`.",
+    "AgentStatePydantic가 `langchain.agents`로 이동되었습니다. import를 `from langchain.agents import AgentStatePydantic`로 업데이트하세요.",
     category=LangGraphDeprecatedSinceV10,
 )
 class AgentStatePydantic(BaseModel):
-    """The state of the agent."""
+    """에이전트의 상태입니다."""
 
     messages: Annotated[Sequence[BaseMessage], add_messages]
 
@@ -82,11 +82,11 @@ with warnings.catch_warnings():
     )
 
     @deprecated(
-        "AgentStateWithStructuredResponse has been moved to `langchain.agents`. Please update your import to `from langchain.agents import AgentStateWithStructuredResponse`.",
+        "AgentStateWithStructuredResponse가 `langchain.agents`로 이동되었습니다. import를 `from langchain.agents import AgentStateWithStructuredResponse`로 업데이트하세요.",
         category=LangGraphDeprecatedSinceV10,
     )
     class AgentStateWithStructuredResponse(AgentState):
-        """The state of the agent with a structured response."""
+        """구조화된 응답을 포함하는 에이전트의 상태입니다."""
 
         structured_response: StructuredResponse
 
@@ -99,11 +99,11 @@ with warnings.catch_warnings():
     )
 
     @deprecated(
-        "AgentStateWithStructuredResponsePydantic has been moved to `langchain.agents`. Please update your import to `from langchain.agents import AgentStateWithStructuredResponsePydantic`.",
+        "AgentStateWithStructuredResponsePydantic가 `langchain.agents`로 이동되었습니다. import를 `from langchain.agents import AgentStateWithStructuredResponsePydantic`로 업데이트하세요.",
         category=LangGraphDeprecatedSinceV10,
     )
     class AgentStateWithStructuredResponsePydantic(AgentStatePydantic):
-        """The state of the agent with a structured response."""
+        """구조화된 응답을 포함하는 에이전트의 상태입니다."""
 
         structured_response: StructuredResponse
 
@@ -194,14 +194,14 @@ def _should_bind_tools(
     tool_names = set(tool.name for tool in tools)
     bound_tool_names = set()
     for bound_tool in bound_tools:
-        # OpenAI-style tool
+        # OpenAI 스타일 도구
         if bound_tool.get("type") == "function":
             bound_tool_name = bound_tool["function"]["name"]
-        # Anthropic-style tool
+        # Anthropic 스타일 도구
         elif bound_tool.get("name"):
             bound_tool_name = bound_tool["name"]
         else:
-            # unknown tool type so we'll ignore it
+            # 알 수 없는 도구 타입이므로 무시합니다
             continue
 
         bound_tool_names.add(bound_tool_name)
@@ -213,7 +213,7 @@ def _should_bind_tools(
 
 
 def _get_model(model: LanguageModelLike) -> BaseChatModel:
-    """Get the underlying model from a RunnableBinding or return the model itself."""
+    """RunnableBinding에서 기본 모델을 가져오거나 모델 자체를 반환합니다."""
     if isinstance(model, RunnableSequence):
         model = next(
             (
@@ -238,7 +238,7 @@ def _get_model(model: LanguageModelLike) -> BaseChatModel:
 def _validate_chat_history(
     messages: Sequence[BaseMessage],
 ) -> None:
-    """Validate that all tool calls in AIMessages have a corresponding ToolMessage."""
+    """AIMessage의 모든 도구 호출에 해당하는 ToolMessage가 있는지 검증합니다."""
     all_tool_calls = [
         tool_call
         for message in messages
@@ -257,17 +257,17 @@ def _validate_chat_history(
         return
 
     error_message = create_error_message(
-        message="Found AIMessages with tool_calls that do not have a corresponding ToolMessage. "
-        f"Here are the first few of those tool calls: {tool_calls_without_results[:3]}.\n\n"
-        "Every tool call (LLM requesting to call a tool) in the message history MUST have a corresponding ToolMessage "
-        "(result of a tool invocation to return to the LLM) - this is required by most LLM providers.",
+        message="해당하는 ToolMessage가 없는 tool_calls를 가진 AIMessage를 발견했습니다. "
+        f"해당 도구 호출의 처음 몇 개는 다음과 같습니다: {tool_calls_without_results[:3]}.\n\n"
+        "메시지 기록의 모든 도구 호출(LLM이 도구를 호출하도록 요청)은 해당하는 ToolMessage "
+        "(LLM에 반환할 도구 실행 결과)를 가져야 합니다 - 이는 대부분의 LLM 공급자에서 요구됩니다.",
         error_code=ErrorCode.INVALID_CHAT_HISTORY,
     )
     raise ValueError(error_message)
 
 
 @deprecated(
-    "create_react_agent has been moved to `langchain.agents`. Please update your import to `from langchain.agents import create_agent`.",
+    "create_react_agent가 `langchain.agents`로 이동되었습니다. import를 `from langchain.agents import create_agent`로 업데이트하세요.",
     category=LangGraphDeprecatedSinceV10,
 )
 def create_react_agent(
@@ -301,29 +301,28 @@ def create_react_agent(
     name: str | None = None,
     **deprecated_kwargs: Any,
 ) -> CompiledStateGraph:
-    """Creates an agent graph that calls tools in a loop until a stopping condition is met.
+    """중지 조건이 충족될 때까지 루프에서 도구를 호출하는 에이전트 그래프를 생성합니다.
 
-    For more details on using `create_react_agent`, visit [Agents](https://langchain-ai.github.io/langgraph/agents/overview/) documentation.
+    `create_react_agent` 사용에 대한 자세한 내용은 [Agents](https://langchain-ai.github.io/langgraph/agents/overview/) 문서를 참조하세요.
 
     Args:
-        model: The language model for the agent. Supports static and dynamic
-            model selection.
+        model: 에이전트를 위한 언어 모델입니다. 정적 및 동적
+            모델 선택을 지원합니다.
 
-            - **Static model**: A chat model instance (e.g., `ChatOpenAI()`) or
-              string identifier (e.g., `"openai:gpt-4"`)
-            - **Dynamic model**: A callable with signature
-              `(state, runtime) -> BaseChatModel` that returns different models
-              based on runtime context
-              If the model has tools bound via `.bind_tools()` or other configurations,
-              the return type should be a Runnable[LanguageModelInput, BaseMessage]
-              Coroutines are also supported, allowing for asynchronous model selection.
+            - **정적 모델**: 채팅 모델 인스턴스 (예: `ChatOpenAI()`) 또는
+              문자열 식별자 (예: `"openai:gpt-4"`)
+            - **동적 모델**: 런타임 컨텍스트에 따라 다른 모델을 반환하는
+              `(state, runtime) -> BaseChatModel` 시그니처를 가진 callable입니다.
+              모델에 `.bind_tools()` 또는 기타 설정을 통해 도구가 바인딩된 경우,
+              반환 타입은 Runnable[LanguageModelInput, BaseMessage]이어야 합니다.
+              코루틴도 지원되어 비동기 모델 선택이 가능합니다.
 
-            Dynamic functions receive graph state and runtime, enabling
-            context-dependent model selection. Must return a `BaseChatModel`
-            instance. For tool calling, bind tools using `.bind_tools()`.
-            Bound tools must be a subset of the `tools` parameter.
+            동적 함수는 그래프 상태와 런타임을 받아, 컨텍스트에 따른
+            모델 선택을 가능하게 합니다. `BaseChatModel` 인스턴스를 반환해야 합니다.
+            도구 호출의 경우 `.bind_tools()`를 사용하여 도구를 바인딩합니다.
+            바인딩된 도구는 `tools` 매개변수의 하위 집합이어야 합니다.
 
-            Dynamic model example:
+            동적 모델 예제:
             ```python
             from dataclasses import dataclass
 
@@ -331,7 +330,7 @@ def create_react_agent(
             class ModelContext:
                 model_name: str = "gpt-3.5-turbo"
 
-            # Instantiate models globally
+            # 모델을 전역적으로 인스턴스화
             gpt4_model = ChatOpenAI(model="gpt-4")
             gpt35_model = ChatOpenAI(model="gpt-3.5-turbo")
 
@@ -341,63 +340,63 @@ def create_react_agent(
                 return model.bind_tools(tools)
             ```
 
-            !!! note "Dynamic Model Requirements"
+            !!! note "동적 모델 요구사항"
 
-                Ensure returned models have appropriate tools bound via
-                `.bind_tools()` and support required functionality. Bound tools
-                must be a subset of those specified in the `tools` parameter.
+                반환된 모델이 `.bind_tools()`를 통해 적절한 도구가 바인딩되어 있고
+                필요한 기능을 지원하는지 확인하세요. 바인딩된 도구는
+                `tools` 매개변수에 지정된 도구의 하위 집합이어야 합니다.
 
-        tools: A list of tools or a `ToolNode` instance.
-            If an empty list is provided, the agent will consist of a single LLM node without tool calling.
-        prompt: An optional prompt for the LLM. Can take a few different forms:
+        tools: 도구 목록 또는 `ToolNode` 인스턴스입니다.
+            빈 목록이 제공되면, 에이전트는 도구 호출 없이 단일 LLM 노드로 구성됩니다.
+        prompt: LLM을 위한 선택적 프롬프트입니다. 여러 형태로 제공될 수 있습니다:
 
-            - str: This is converted to a SystemMessage and added to the beginning of the list of messages in state["messages"].
-            - SystemMessage: this is added to the beginning of the list of messages in state["messages"].
-            - Callable: This function should take in full graph state and the output is then passed to the language model.
-            - Runnable: This runnable should take in full graph state and the output is then passed to the language model.
+            - str: SystemMessage로 변환되어 state["messages"]의 메시지 목록 시작 부분에 추가됩니다.
+            - SystemMessage: state["messages"]의 메시지 목록 시작 부분에 추가됩니다.
+            - Callable: 이 함수는 전체 그래프 상태를 받아 출력이 언어 모델로 전달됩니다.
+            - Runnable: 이 runnable은 전체 그래프 상태를 받아 출력이 언어 모델로 전달됩니다.
 
-        response_format: An optional schema for the final agent output.
+        response_format: 최종 에이전트 출력을 위한 선택적 스키마입니다.
 
-            If provided, output will be formatted to match the given schema and returned in the 'structured_response' state key.
-            If not provided, `structured_response` will not be present in the output state.
-            Can be passed in as:
+            제공되면, 출력이 주어진 스키마에 맞게 포맷되어 'structured_response' 상태 키에 반환됩니다.
+            제공되지 않으면, `structured_response`는 출력 상태에 존재하지 않습니다.
+            다음과 같이 전달될 수 있습니다:
 
-                - an OpenAI function/tool schema,
-                - a JSON Schema,
-                - a TypedDict class,
-                - or a Pydantic class.
-                - a tuple (prompt, schema), where schema is one of the above.
-                    The prompt will be used together with the model that is being used to generate the structured response.
+                - OpenAI function/tool 스키마,
+                - JSON 스키마,
+                - TypedDict 클래스,
+                - 또는 Pydantic 클래스.
+                - 튜플 (prompt, schema), 여기서 schema는 위의 것 중 하나입니다.
+                    프롬프트는 구조화된 응답을 생성하는 데 사용되는 모델과 함께 사용됩니다.
 
             !!! Important
-                `response_format` requires the model to support `.with_structured_output`
+                `response_format`은 모델이 `.with_structured_output`을 지원해야 합니다
 
             !!! Note
-                The graph will make a separate call to the LLM to generate the structured response after the agent loop is finished.
-                This is not the only strategy to get structured responses, see more options in [this guide](https://langchain-ai.github.io/langgraph/how-tos/react-agent-structured-output/).
+                그래프는 에이전트 루프가 완료된 후 구조화된 응답을 생성하기 위해 LLM에 별도의 호출을 수행합니다.
+                이것이 구조화된 응답을 얻는 유일한 전략은 아닙니다. [이 가이드](https://langchain-ai.github.io/langgraph/how-tos/react-agent-structured-output/)에서 더 많은 옵션을 확인하세요.
 
-        pre_model_hook: An optional node to add before the `agent` node (i.e., the node that calls the LLM).
-            Useful for managing long message histories (e.g., message trimming, summarization, etc.).
-            Pre-model hook must be a callable or a runnable that takes in current graph state and returns a state update in the form of
+        pre_model_hook: `agent` 노드(즉, LLM을 호출하는 노드) 앞에 추가할 선택적 노드입니다.
+            긴 메시지 기록 관리(예: 메시지 트리밍, 요약 등)에 유용합니다.
+            Pre-model hook은 현재 그래프 상태를 받아 다음 형태의 상태 업데이트를 반환하는 callable 또는 runnable이어야 합니다
                 ```python
-                # At least one of `messages` or `llm_input_messages` MUST be provided
+                # `messages` 또는 `llm_input_messages` 중 적어도 하나는 반드시 제공되어야 합니다
                 {
-                    # If provided, will UPDATE the `messages` in the state
+                    # 제공되면, 상태의 `messages`를 업데이트합니다
                     "messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES), ...],
-                    # If provided, will be used as the input to the LLM,
-                    # and will NOT UPDATE `messages` in the state
+                    # 제공되면, LLM의 입력으로 사용되며,
+                    # 상태의 `messages`를 업데이트하지 않습니다
                     "llm_input_messages": [...],
-                    # Any other state keys that need to be propagated
+                    # 전파되어야 하는 기타 상태 키
                     ...
                 }
                 ```
 
             !!! Important
-                At least one of `messages` or `llm_input_messages` MUST be provided and will be used as an input to the `agent` node.
-                The rest of the keys will be added to the graph state.
+                `messages` 또는 `llm_input_messages` 중 적어도 하나는 반드시 제공되어야 하며 `agent` 노드의 입력으로 사용됩니다.
+                나머지 키는 그래프 상태에 추가됩니다.
 
             !!! Warning
-                If you are returning `messages` in the pre-model hook, you should OVERWRITE the `messages` key by doing the following:
+                pre-model hook에서 `messages`를 반환하는 경우, 다음과 같이 `messages` 키를 덮어써야 합니다:
 
                 ```python
                 {
@@ -405,62 +404,61 @@ def create_react_agent(
                     ...
                 }
                 ```
-        post_model_hook: An optional node to add after the `agent` node (i.e., the node that calls the LLM).
-            Useful for implementing human-in-the-loop, guardrails, validation, or other post-processing.
-            Post-model hook must be a callable or a runnable that takes in current graph state and returns a state update.
+        post_model_hook: `agent` 노드(즉, LLM을 호출하는 노드) 뒤에 추가할 선택적 노드입니다.
+            human-in-the-loop, 가드레일, 검증 또는 기타 후처리를 구현하는 데 유용합니다.
+            Post-model hook은 현재 그래프 상태를 받아 상태 업데이트를 반환하는 callable 또는 runnable이어야 합니다.
 
             !!! Note
-                Only available with `version="v2"`.
-        state_schema: An optional state schema that defines graph state.
-            Must have `messages` and `remaining_steps` keys.
-            Defaults to `AgentState` that defines those two keys.
+                `version="v2"`에서만 사용 가능합니다.
+        state_schema: 그래프 상태를 정의하는 선택적 상태 스키마입니다.
+            `messages`와 `remaining_steps` 키를 가져야 합니다.
+            기본값은 이 두 키를 정의하는 `AgentState`입니다.
             !!! Note
-                `remaining_steps` is used to limit the number of steps the react agent can take.
-                Calculated roughly as `recursion_limit` - `total_steps_taken`.
-                If `remaining_steps` is less than 2 and tool calls are present in the response,
-                the react agent will return a final AI Message with
-                the content "Sorry, need more steps to process this request.".
-                No `GraphRecusionError` will be raised in this case.
+                `remaining_steps`는 react 에이전트가 수행할 수 있는 단계 수를 제한하는 데 사용됩니다.
+                대략 `recursion_limit` - `total_steps_taken`으로 계산됩니다.
+                `remaining_steps`가 2보다 작고 응답에 도구 호출이 있는 경우,
+                react 에이전트는 "Sorry, need more steps to process this request."
+                내용의 최종 AI Message를 반환합니다.
+                이 경우 `GraphRecusionError`는 발생하지 않습니다.
 
-        context_schema: An optional schema for runtime context.
-        checkpointer: An optional checkpoint saver object. This is used for persisting
-            the state of the graph (e.g., as chat memory) for a single thread (e.g., a single conversation).
-        store: An optional store object. This is used for persisting data
-            across multiple threads (e.g., multiple conversations / users).
-        interrupt_before: An optional list of node names to interrupt before.
-            Should be one of the following: "agent", "tools".
-            This is useful if you want to add a user confirmation or other interrupt before taking an action.
-        interrupt_after: An optional list of node names to interrupt after.
-            Should be one of the following: "agent", "tools".
-            This is useful if you want to return directly or run additional processing on an output.
-        debug: A flag indicating whether to enable debug mode.
-        version: Determines the version of the graph to create.
-            Can be one of:
+        context_schema: 런타임 컨텍스트를 위한 선택적 스키마입니다.
+        checkpointer: 선택적 체크포인트 저장 객체입니다. 단일 스레드(예: 단일 대화)에 대해
+            그래프의 상태를 유지하는 데(예: 채팅 메모리로) 사용됩니다.
+        store: 선택적 저장소 객체입니다. 여러 스레드(예: 여러 대화/사용자)에 걸쳐
+            데이터를 유지하는 데 사용됩니다.
+        interrupt_before: 중단할 노드 이름의 선택적 목록입니다.
+            다음 중 하나여야 합니다: "agent", "tools".
+            작업을 수행하기 전에 사용자 확인 또는 기타 중단을 추가하려는 경우 유용합니다.
+        interrupt_after: 다음에 중단할 노드 이름의 선택적 목록입니다.
+            다음 중 하나여야 합니다: "agent", "tools".
+            직접 반환하거나 출력에 대한 추가 처리를 실행하려는 경우 유용합니다.
+        debug: 디버그 모드를 활성화할지 여부를 나타내는 플래그입니다.
+        version: 생성할 그래프의 버전을 결정합니다.
+            다음 중 하나일 수 있습니다:
 
-            - `"v1"`: The tool node processes a single message. All tool
-                calls in the message are executed in parallel within the tool node.
-            - `"v2"`: The tool node processes a tool call.
-                Tool calls are distributed across multiple instances of the tool
-                node using the [Send](https://langchain-ai.github.io/langgraph/concepts/low_level/#send)
-                API.
-        name: An optional name for the CompiledStateGraph.
-            This name will be automatically used when adding ReAct agent graph to another graph as a subgraph node -
-            particularly useful for building multi-agent systems.
+            - `"v1"`: 도구 노드가 단일 메시지를 처리합니다. 메시지의 모든 도구
+                호출은 도구 노드 내에서 병렬로 실행됩니다.
+            - `"v2"`: 도구 노드가 도구 호출을 처리합니다.
+                도구 호출은 [Send](https://langchain-ai.github.io/langgraph/concepts/low_level/#send)
+                API를 사용하여 도구 노드의 여러 인스턴스에 분산됩니다.
+        name: CompiledStateGraph의 선택적 이름입니다.
+            이 이름은 ReAct 에이전트 그래프를 서브그래프 노드로 다른 그래프에 추가할 때 자동으로 사용됩니다 -
+            다중 에이전트 시스템 구축에 특히 유용합니다.
 
-    !!! warning "`config_schema` Deprecated"
-        The `config_schema` parameter is deprecated in v0.6.0 and support will be removed in v2.0.0.
-        Please use `context_schema` instead to specify the schema for run-scoped context.
+    !!! warning "`config_schema` 더 이상 사용되지 않음"
+        `config_schema` 매개변수는 v0.6.0에서 더 이상 사용되지 않으며 v2.0.0에서 지원이 제거될 예정입니다.
+        런 범위 컨텍스트의 스키마를 지정하려면 대신 `context_schema`를 사용하세요.
 
 
     Returns:
-        A compiled LangChain runnable that can be used for chat interactions.
+        채팅 상호 작용에 사용할 수 있는 컴파일된 LangChain runnable입니다.
 
-    The "agent" node calls the language model with the messages list (after applying the prompt).
-    If the resulting AIMessage contains `tool_calls`, the graph will then call the ["tools"][langgraph.prebuilt.tool_node.ToolNode].
-    The "tools" node executes the tools (1 tool per `tool_call`) and adds the responses to the messages list
-    as `ToolMessage` objects. The agent node then calls the language model again.
-    The process repeats until no more `tool_calls` are present in the response.
-    The agent then returns the full list of messages as a dictionary containing the key "messages".
+    "agent" 노드는 메시지 목록(프롬프트 적용 후)으로 언어 모델을 호출합니다.
+    결과 AIMessage에 `tool_calls`가 포함되어 있으면, 그래프는 ["tools"][langgraph.prebuilt.tool_node.ToolNode]를 호출합니다.
+    "tools" 노드는 도구를 실행하고(`tool_call`당 1개의 도구) 응답을 `ToolMessage` 객체로
+    메시지 목록에 추가합니다. 그런 다음 agent 노드가 언어 모델을 다시 호출합니다.
+    응답에 더 이상 `tool_calls`가 없을 때까지 프로세스가 반복됩니다.
+    그런 다음 에이전트는 "messages" 키를 포함하는 딕셔너리로 전체 메시지 목록을 반환합니다.
 
     ``` mermaid
         sequenceDiagram
@@ -481,7 +479,7 @@ def create_react_agent(
         from langgraph.prebuilt import create_react_agent
 
         def check_weather(location: str) -> str:
-            '''Return the weather forecast for the specified location.'''
+            '''지정된 위치의 날씨 예보를 반환합니다.'''
             return f"It's always sunny in {location}"
 
         graph = create_react_agent(
@@ -569,17 +567,17 @@ def create_react_agent(
 
         static_model: Runnable | None = _get_prompt_runnable(prompt) | model  # type: ignore[operator]
     else:
-        # For dynamic models, we'll create the runnable at runtime
+        # 동적 모델의 경우 런타임에 runnable을 생성합니다
         static_model = None
 
-    # If any of the tools are configured to return_directly after running,
-    # our graph needs to check if these were called
+    # 실행 후 return_directly로 구성된 도구가 있는 경우,
+    # 그래프는 이러한 도구가 호출되었는지 확인해야 합니다
     should_return_direct = {t.name for t in tool_classes if t.return_direct}
 
     def _resolve_model(
         state: StateSchema, runtime: Runtime[ContextT]
     ) -> LanguageModelLike:
-        """Resolve the model to use, handling both static and dynamic models."""
+        """정적 및 동적 모델을 모두 처리하여 사용할 모델을 확인합니다."""
         if is_dynamic_model:
             return _get_prompt_runnable(prompt) | model(state, runtime)  # type: ignore[operator]
         else:
@@ -588,7 +586,7 @@ def create_react_agent(
     async def _aresolve_model(
         state: StateSchema, runtime: Runtime[ContextT]
     ) -> LanguageModelLike:
-        """Async resolve the model to use, handling both static and dynamic models."""
+        """정적 및 동적 모델을 모두 처리하여 사용할 모델을 비동기적으로 확인합니다."""
         if is_async_dynamic_model:
             resolved_model = await model(state, runtime)  # type: ignore[misc,operator]
             return _get_prompt_runnable(prompt) | resolved_model
@@ -629,7 +627,7 @@ def create_react_agent(
             raise ValueError(error_msg)
 
         _validate_chat_history(messages)
-        # we're passing messages under `messages` key, as this is expected by the prompt
+        # 프롬프트가 예상하는 대로 `messages` 키 아래에 메시지를 전달합니다
         if isinstance(state_schema, type) and issubclass(state_schema, BaseModel):
             state.messages = messages  # type: ignore
         else:
@@ -637,28 +635,28 @@ def create_react_agent(
 
         return state
 
-    # Define the function that calls the model
+    # 모델을 호출하는 함수를 정의합니다
     def call_model(
         state: StateSchema, runtime: Runtime[ContextT], config: RunnableConfig
     ) -> StateSchema:
         if is_async_dynamic_model:
             msg = (
-                "Async model callable provided but agent invoked synchronously. "
-                "Use agent.ainvoke() or agent.astream(), or "
-                "provide a sync model callable."
+                "비동기 모델 callable이 제공되었지만 에이전트가 동기적으로 호출되었습니다. "
+                "agent.ainvoke() 또는 agent.astream()을 사용하거나, "
+                "동기 모델 callable을 제공하세요."
             )
             raise RuntimeError(msg)
 
         model_input = _get_model_input_state(state)
 
         if is_dynamic_model:
-            # Resolve dynamic model at runtime and apply prompt
+            # 런타임에 동적 모델을 확인하고 프롬프트를 적용합니다
             dynamic_model = _resolve_model(state, runtime)
             response = cast(AIMessage, dynamic_model.invoke(model_input, config))  # type: ignore[arg-type]
         else:
             response = cast(AIMessage, static_model.invoke(model_input, config))  # type: ignore[union-attr]
 
-        # add agent name to the AIMessage
+        # AIMessage에 에이전트 이름을 추가합니다
         response.name = name
 
         if _are_more_steps_needed(state, response):
@@ -670,7 +668,7 @@ def create_react_agent(
                     )
                 ]
             }
-        # We return a list, because this will get added to the existing list
+        # 리스트를 반환합니다. 이는 기존 리스트에 추가될 것이기 때문입니다
         return {"messages": [response]}
 
     async def acall_model(
@@ -679,14 +677,14 @@ def create_react_agent(
         model_input = _get_model_input_state(state)
 
         if is_dynamic_model:
-            # Resolve dynamic model at runtime and apply prompt
-            # (supports both sync and async)
+            # 런타임에 동적 모델을 확인하고 프롬프트를 적용합니다
+            # (동기 및 비동기 모두 지원)
             dynamic_model = await _aresolve_model(state, runtime)
             response = cast(AIMessage, await dynamic_model.ainvoke(model_input, config))  # type: ignore[arg-type]
         else:
             response = cast(AIMessage, await static_model.ainvoke(model_input, config))  # type: ignore[union-attr]
 
-        # add agent name to the AIMessage
+        # AIMessage에 에이전트 이름을 추가합니다
         response.name = name
         if _are_more_steps_needed(state, response):
             return {
@@ -697,14 +695,14 @@ def create_react_agent(
                     )
                 ]
             }
-        # We return a list, because this will get added to the existing list
+        # 리스트를 반환합니다. 이는 기존 리스트에 추가될 것이기 때문입니다
         return {"messages": [response]}
 
     input_schema: StateSchemaType
     if pre_model_hook is not None:
-        # Dynamically create a schema that inherits from state_schema and adds 'llm_input_messages'
+        # state_schema를 상속하고 'llm_input_messages'를 추가하는 스키마를 동적으로 생성합니다
         if isinstance(state_schema, type) and issubclass(state_schema, BaseModel):
-            # For Pydantic schemas
+            # Pydantic 스키마의 경우
             from pydantic import create_model
 
             input_schema = create_model(
@@ -713,7 +711,7 @@ def create_react_agent(
                 __base__=state_schema,
             )
         else:
-            # For TypedDict schemas
+            # TypedDict 스키마의 경우
             class CallModelInputSchema(state_schema):  # type: ignore
                 llm_input_messages: list[AnyMessage]
 
@@ -726,8 +724,8 @@ def create_react_agent(
     ) -> StateSchema:
         if is_async_dynamic_model:
             msg = (
-                "Async model callable provided but agent invoked synchronously. "
-                "Use agent.ainvoke() or agent.astream(), or provide a sync model callable."
+                "비동기 모델 callable이 제공되었지만 에이전트가 동기적으로 호출되었습니다. "
+                "agent.ainvoke() 또는 agent.astream()을 사용하거나, 동기 모델 callable을 제공하세요."
             )
             raise RuntimeError(msg)
 
@@ -765,7 +763,7 @@ def create_react_agent(
         return {"structured_response": response}
 
     if not tool_calling_enabled:
-        # Define a new graph
+        # 새 그래프를 정의합니다
         workflow = StateGraph(state_schema=state_schema, context_schema=context_schema)
         workflow.add_node(
             "agent",
@@ -807,11 +805,11 @@ def create_react_agent(
             name=name,
         )
 
-    # Define the function that determines whether to continue or not
+    # 계속할지 여부를 결정하는 함수를 정의합니다
     def should_continue(state: StateSchema) -> str | list[Send]:
         messages = _get_state_value(state, "messages")
         last_message = messages[-1]
-        # If there is no function call, then we finish
+        # 함수 호출이 없으면 완료합니다
         if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
             if post_model_hook is not None:
                 return "post_model_hook"
@@ -819,7 +817,7 @@ def create_react_agent(
                 return "generate_structured_response"
             else:
                 return END
-        # Otherwise if there is, we continue
+        # 그렇지 않고 함수 호출이 있으면 계속합니다
         else:
             if version == "v1":
                 return "tools"
@@ -832,12 +830,12 @@ def create_react_agent(
                 ]
                 return [Send("tools", [tool_call]) for tool_call in tool_calls]
 
-    # Define a new graph
+    # 새 그래프를 정의합니다
     workflow = StateGraph(
         state_schema=state_schema or AgentState, context_schema=context_schema
     )
 
-    # Define the two nodes we will cycle between
+    # 순환할 두 개의 노드를 정의합니다
     workflow.add_node(
         "agent",
         RunnableCallable(call_model, acall_model),
@@ -845,8 +843,8 @@ def create_react_agent(
     )
     workflow.add_node("tools", tool_node)
 
-    # Optionally add a pre-model hook node that will be called
-    # every time before the "agent" (LLM-calling node)
+    # "agent"(LLM 호출 노드) 전에 매번 호출될
+    # pre-model hook 노드를 선택적으로 추가합니다
     if pre_model_hook is not None:
         workflow.add_node("pre_model_hook", pre_model_hook)  # type: ignore[arg-type]
         workflow.add_edge("pre_model_hook", "agent")
@@ -854,14 +852,14 @@ def create_react_agent(
     else:
         entrypoint = "agent"
 
-    # Set the entrypoint as `agent`
-    # This means that this node is the first one called
+    # 엔트리포인트를 `agent`로 설정합니다
+    # 이는 이 노드가 첫 번째로 호출되는 노드임을 의미합니다
     workflow.set_entry_point(entrypoint)
 
     agent_paths = []
     post_model_hook_paths = [entrypoint, "tools"]
 
-    # Add a post model hook node if post_model_hook is provided
+    # post_model_hook이 제공되면 post model hook 노드를 추가합니다
     if post_model_hook is not None:
         workflow.add_node("post_model_hook", post_model_hook)  # type: ignore[arg-type]
         agent_paths.append("post_model_hook")
@@ -869,7 +867,7 @@ def create_react_agent(
     else:
         agent_paths.append("tools")
 
-    # Add a structured output node if response_format is provided
+    # response_format이 제공되면 구조화된 출력 노드를 추가합니다
     if response_format is not None:
         workflow.add_node(
             "generate_structured_response",
@@ -891,12 +889,12 @@ def create_react_agent(
     if post_model_hook is not None:
 
         def post_model_hook_router(state: StateSchema) -> str | list[Send]:
-            """Route to the next node after post_model_hook.
+            """post_model_hook 이후 다음 노드로 라우팅합니다.
 
-            Routes to one of:
-            * "tools": if there are pending tool calls without a corresponding message.
-            * "generate_structured_response": if no pending tool calls exist and response_format is specified.
-            * END: if no pending tool calls exist and no response_format is specified.
+            다음 중 하나로 라우팅합니다:
+            * "tools": 해당하는 메시지 없이 대기 중인 도구 호출이 있는 경우.
+            * "generate_structured_response": 대기 중인 도구 호출이 없고 response_format이 지정된 경우.
+            * END: 대기 중인 도구 호출이 없고 response_format이 지정되지 않은 경우.
             """
 
             messages = _get_state_value(state, "messages")
@@ -942,8 +940,8 @@ def create_react_agent(
             if m.name in should_return_direct:
                 return END
 
-        # handle a case of parallel tool calls where
-        # the tool w/ `return_direct` was executed in a different `Send`
+        # `return_direct`를 가진 도구가 다른 `Send`에서 실행된
+        # 병렬 도구 호출의 경우를 처리합니다
         if isinstance(m, AIMessage) and m.tool_calls:
             if any(call["name"] in should_return_direct for call in m.tool_calls):
                 return END
@@ -957,9 +955,9 @@ def create_react_agent(
     else:
         workflow.add_edge("tools", entrypoint)
 
-    # Finally, we compile it!
-    # This compiles it into a LangChain Runnable,
-    # meaning you can use it as you would any other runnable
+    # 마지막으로 컴파일합니다!
+    # 이것은 LangChain Runnable로 컴파일되며,
+    # 다른 runnable과 동일하게 사용할 수 있습니다
     return workflow.compile(
         checkpointer=checkpointer,
         store=store,
@@ -970,7 +968,7 @@ def create_react_agent(
     )
 
 
-# Keep for backwards compatibility
+# 이전 버전과의 호환성을 유지합니다
 create_tool_calling_executor = create_react_agent
 
 __all__ = [

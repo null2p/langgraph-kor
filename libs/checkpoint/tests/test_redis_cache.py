@@ -1,4 +1,4 @@
-"""Unit tests for Redis cache implementation."""
+"""Redis 캐시 구현을 위한 단위 테스트입니다."""
 
 import time
 
@@ -12,7 +12,7 @@ from langgraph.cache.redis import RedisCache
 class TestRedisCache:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
-        """Set up test Redis client and cache."""
+        """테스트용 Redis 클라이언트와 캐시를 설정합니다."""
         self.client = redis.Redis(
             host="localhost", port=6379, db=0, decode_responses=False
         )
@@ -23,31 +23,31 @@ class TestRedisCache:
 
         self.cache: RedisCache = RedisCache(self.client, prefix="test:cache:")
 
-        # Clean up before each test
+        # 각 테스트 전에 정리
         self.client.flushdb()
 
     def teardown_method(self) -> None:
-        """Clean up after each test."""
+        """각 테스트 후에 정리합니다."""
         try:
             self.client.flushdb()
         except Exception:
             pass
 
     def test_basic_set_and_get(self) -> None:
-        """Test basic set and get operations."""
+        """기본적인 set과 get 작업을 테스트합니다."""
         keys: list[FullKey] = [(("graph", "node"), "key1")]
         values = {keys[0]: ({"result": 42}, None)}
 
-        # Set value
+        # 값 설정
         self.cache.set(values)
 
-        # Get value
+        # 값 가져오기
         result = self.cache.get(keys)
         assert len(result) == 1
         assert result[keys[0]] == {"result": 42}
 
     def test_batch_operations(self) -> None:
-        """Test batch set and get operations."""
+        """배치 set과 get 작업을 테스트합니다."""
         keys: list[FullKey] = [
             (("graph", "node1"), "key1"),
             (("graph", "node2"), "key2"),
@@ -55,14 +55,14 @@ class TestRedisCache:
         ]
         values = {
             keys[0]: ({"result": 1}, None),
-            keys[1]: ({"result": 2}, 60),  # With TTL
+            keys[1]: ({"result": 2}, 60),  # TTL 포함
             keys[2]: ({"result": 3}, None),
         }
 
-        # Set values
+        # 값들 설정
         self.cache.set(values)
 
-        # Get all values
+        # 모든 값 가져오기
         result = self.cache.get(keys)
         assert len(result) == 3
         assert result[keys[0]] == {"result": 1}
@@ -70,27 +70,27 @@ class TestRedisCache:
         assert result[keys[2]] == {"result": 3}
 
     def test_ttl_behavior(self) -> None:
-        """Test TTL (time-to-live) functionality."""
+        """TTL(time-to-live) 기능을 테스트합니다."""
         key: FullKey = (("graph", "node"), "ttl_key")
-        values = {key: ({"data": "expires_soon"}, 1)}  # 1 second TTL
+        values = {key: ({"data": "expires_soon"}, 1)}  # 1초 TTL
 
-        # Set with TTL
+        # TTL과 함께 설정
         self.cache.set(values)
 
-        # Should be available immediately
+        # 즉시 사용 가능해야 함
         result = self.cache.get([key])
         assert len(result) == 1
         assert result[key] == {"data": "expires_soon"}
 
-        # Wait for expiration
+        # 만료 대기
         time.sleep(1.1)
 
-        # Should be expired
+        # 만료되어야 함
         result = self.cache.get([key])
         assert len(result) == 0
 
     def test_namespace_isolation(self) -> None:
-        """Test that different namespaces are isolated."""
+        """서로 다른 네임스페이스가 격리되는지 테스트합니다."""
         key1: FullKey = (("graph1", "node"), "same_key")
         key2: FullKey = (("graph2", "node"), "same_key")
 
@@ -103,7 +103,7 @@ class TestRedisCache:
         assert result[key2] == {"graph": 2}
 
     def test_clear_all(self) -> None:
-        """Test clearing all cached values."""
+        """모든 캐시된 값을 지우는 것을 테스트합니다."""
         keys: list[FullKey] = [
             (("graph", "node1"), "key1"),
             (("graph", "node2"), "key2"),
@@ -112,19 +112,19 @@ class TestRedisCache:
 
         self.cache.set(values)
 
-        # Verify data exists
+        # 데이터 존재 확인
         result = self.cache.get(keys)
         assert len(result) == 2
 
-        # Clear all
+        # 모두 지우기
         self.cache.clear()
 
-        # Verify data is gone
+        # 데이터가 사라졌는지 확인
         result = self.cache.get(keys)
         assert len(result) == 0
 
     def test_clear_by_namespace(self) -> None:
-        """Test clearing cached values by namespace."""
+        """네임스페이스별로 캐시된 값을 지우는 것을 테스트합니다."""
         keys: list[FullKey] = [
             (("graph1", "node"), "key1"),
             (("graph2", "node"), "key2"),
@@ -138,33 +138,33 @@ class TestRedisCache:
 
         self.cache.set(values)
 
-        # Clear only graph1 namespace
+        # graph1 네임스페이스만 지우기
         self.cache.clear([("graph1", "node"), ("graph1", "other")])
 
-        # graph1 should be cleared, graph2 should remain
+        # graph1은 지워지고 graph2는 유지되어야 함
         result = self.cache.get(keys)
         assert len(result) == 1
         assert result[keys[1]] == {"result": 2}
 
     def test_empty_operations(self) -> None:
-        """Test behavior with empty keys/values."""
-        # Empty get
+        """빈 키/값에 대한 동작을 테스트합니다."""
+        # 빈 get
         result = self.cache.get([])
         assert result == {}
 
-        # Empty set
-        self.cache.set({})  # Should not raise error
+        # 빈 set
+        self.cache.set({})  # 오류를 발생시키지 않아야 함
 
     def test_nonexistent_keys(self) -> None:
-        """Test getting keys that don't exist."""
+        """존재하지 않는 키를 가져오는 것을 테스트합니다."""
         keys: list[FullKey] = [(("graph", "node"), "nonexistent")]
         result = self.cache.get(keys)
         assert len(result) == 0
 
     @pytest.mark.asyncio
     async def test_async_operations(self) -> None:
-        """Test async set and get operations with sync Redis client."""
-        # Create sync Redis client and cache (like main integration tests)
+        """동기 Redis 클라이언트로 비동기 set과 get 작업을 테스트합니다."""
+        # 동기 Redis 클라이언트와 캐시 생성 (메인 통합 테스트와 유사)
         client = redis.Redis(host="localhost", port=6379, db=1, decode_responses=False)
         try:
             client.ping()
@@ -176,21 +176,21 @@ class TestRedisCache:
         keys: list[FullKey] = [(("graph", "node"), "async_key")]
         values = {keys[0]: ({"async": True}, None)}
 
-        # Async set (delegates to sync)
+        # 비동기 set (동기로 위임)
         await cache.aset(values)
 
-        # Async get (delegates to sync)
+        # 비동기 get (동기로 위임)
         result = await cache.aget(keys)
         assert len(result) == 1
         assert result[keys[0]] == {"async": True}
 
-        # Cleanup
+        # 정리
         client.flushdb()
 
     @pytest.mark.asyncio
     async def test_async_clear(self) -> None:
-        """Test async clear operations with sync Redis client."""
-        # Create sync Redis client and cache (like main integration tests)
+        """동기 Redis 클라이언트로 비동기 clear 작업을 테스트합니다."""
+        # 동기 Redis 클라이언트와 캐시 생성 (메인 통합 테스트와 유사)
         client = redis.Redis(host="localhost", port=6379, db=1, decode_responses=False)
         try:
             client.ping()
@@ -204,23 +204,23 @@ class TestRedisCache:
 
         await cache.aset(values)
 
-        # Verify data exists
+        # 데이터 존재 확인
         result = await cache.aget(keys)
         assert len(result) == 1
 
-        # Clear all (delegates to sync)
+        # 모두 지우기 (동기로 위임)
         await cache.aclear()
 
-        # Verify data is gone
+        # 데이터가 사라졌는지 확인
         result = await cache.aget(keys)
         assert len(result) == 0
 
-        # Cleanup
+        # 정리
         client.flushdb()
 
     def test_redis_unavailable_get(self) -> None:
-        """Test behavior when Redis is unavailable during get operations."""
-        # Create cache with non-existent Redis server
+        """get 작업 중 Redis를 사용할 수 없을 때의 동작을 테스트합니다."""
+        # 존재하지 않는 Redis 서버로 캐시 생성
         bad_client = redis.Redis(
             host="nonexistent", port=9999, socket_connect_timeout=0.1
         )
@@ -229,12 +229,12 @@ class TestRedisCache:
         keys: list[FullKey] = [(("graph", "node"), "key")]
         result = cache.get(keys)
 
-        # Should return empty dict when Redis unavailable
+        # Redis를 사용할 수 없을 때 빈 dict를 반환해야 함
         assert result == {}
 
     def test_redis_unavailable_set(self) -> None:
-        """Test behavior when Redis is unavailable during set operations."""
-        # Create cache with non-existent Redis server
+        """set 작업 중 Redis를 사용할 수 없을 때의 동작을 테스트합니다."""
+        # 존재하지 않는 Redis 서버로 캐시 생성
         bad_client = redis.Redis(
             host="nonexistent", port=9999, socket_connect_timeout=0.1
         )
@@ -243,13 +243,13 @@ class TestRedisCache:
         keys: list[FullKey] = [(("graph", "node"), "key")]
         values = {keys[0]: ({"data": "test"}, None)}
 
-        # Should not raise exception when Redis unavailable
-        cache.set(values)  # Should silently fail
+        # Redis를 사용할 수 없을 때 예외를 발생시키지 않아야 함
+        cache.set(values)  # 조용히 실패해야 함
 
     @pytest.mark.asyncio
     async def test_redis_unavailable_async(self) -> None:
-        """Test async behavior when Redis is unavailable."""
-        # Create sync cache with non-existent Redis server (like main integration tests)
+        """Redis를 사용할 수 없을 때의 비동기 동작을 테스트합니다."""
+        # 존재하지 않는 Redis 서버로 동기 캐시 생성 (메인 통합 테스트와 유사)
         bad_client = redis.Redis(
             host="nonexistent", port=9999, socket_connect_timeout=0.1
         )
@@ -258,25 +258,25 @@ class TestRedisCache:
         keys: list[FullKey] = [(("graph", "node"), "key")]
         values = {keys[0]: ({"data": "test"}, None)}
 
-        # Should return empty dict for get (delegates to sync)
+        # get에 대해 빈 dict를 반환해야 함 (동기로 위임)
         result = await cache.aget(keys)
         assert result == {}
 
-        # Should not raise exception for set (delegates to sync)
-        await cache.aset(values)  # Should silently fail
+        # set에 대해 예외를 발생시키지 않아야 함 (동기로 위임)
+        await cache.aset(values)  # 조용히 실패해야 함
 
     def test_corrupted_data_handling(self) -> None:
-        """Test handling of corrupted data in Redis."""
-        # Set some valid data first
+        """Redis에서 손상된 데이터를 처리하는 것을 테스트합니다."""
+        # 먼저 유효한 데이터 설정
         keys: list[FullKey] = [(("graph", "node"), "valid_key")]
         values = {keys[0]: ({"data": "valid"}, None)}
         self.cache.set(values)
 
-        # Manually insert corrupted data
+        # 수동으로 손상된 데이터 삽입
         corrupted_key = self.cache._make_key(("graph", "node"), "corrupted_key")
         self.client.set(corrupted_key, b"invalid:data:format:too:many:colons")
 
-        # Should skip corrupted entry and return only valid ones
+        # 손상된 항목을 건너뛰고 유효한 항목만 반환해야 함
         all_keys: list[FullKey] = [keys[0], (("graph", "node"), "corrupted_key")]
         result = self.cache.get(all_keys)
 
@@ -284,15 +284,15 @@ class TestRedisCache:
         assert result[keys[0]] == {"data": "valid"}
 
     def test_key_parsing_edge_cases(self) -> None:
-        """Test key parsing with edge cases."""
-        # Test empty namespace
+        """엣지 케이스에서 키 파싱을 테스트합니다."""
+        # 빈 네임스페이스 테스트
         key1: FullKey = ((), "empty_ns")
         values = {key1: ({"data": "empty_ns"}, None)}
         self.cache.set(values)
         result = self.cache.get([key1])
         assert result[key1] == {"data": "empty_ns"}
 
-        # Test namespace with special characters
+        # 특수 문자가 있는 네임스페이스 테스트
         key2: FullKey = (
             ("graph:with:colons", "node-with-dashes"),
             "key_with_underscores",
@@ -303,8 +303,8 @@ class TestRedisCache:
         assert result[key2] == {"data": "special_chars"}
 
     def test_large_data_serialization(self) -> None:
-        """Test handling of large data objects."""
-        # Create a large data structure
+        """큰 데이터 객체를 처리하는 것을 테스트합니다."""
+        # 큰 데이터 구조 생성
         large_data = {"large_list": list(range(1000)), "nested": {"data": "x" * 1000}}
         key: FullKey = (("graph", "node"), "large_key")
         values = {key: (large_data, None)}

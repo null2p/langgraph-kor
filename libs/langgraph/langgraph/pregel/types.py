@@ -1,4 +1,4 @@
-"""Re-export types moved to langgraph.types"""
+"""langgraph.types로 이동된 타입을 재내보내기합니다"""
 
 from langgraph.types import (
     All,
@@ -31,8 +31,8 @@ from warnings import warn
 from langgraph.warnings import LangGraphDeprecatedSinceV10
 
 warn(
-    "Importing from langgraph.pregel.types is deprecated. "
-    "Please use 'from langgraph.types import ...' instead.",
+    "langgraph.pregel.types에서 임포트하는 것은 더 이상 사용되지 않습니다. "
+    "대신 'from langgraph.types import ...'를 사용하세요.",
     LangGraphDeprecatedSinceV10,
     stacklevel=2,
 )

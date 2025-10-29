@@ -40,24 +40,24 @@ logger = logging.getLogger(__name__)
 
 
 class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Conn]):
-    """Asynchronous Postgres-backed store with optional vector search using pgvector.
+    """pgvector를 사용한 선택적 벡터 검색 기능이 있는 비동기 Postgres 기반 저장소입니다.
 
-    !!! example "Examples"
-        Basic setup and usage:
+    !!! example "예제"
+        기본 설정 및 사용:
         ```python
         from langgraph.store.postgres import AsyncPostgresStore
 
         conn_string = "postgresql://user:pass@localhost:5432/dbname"
 
         async with AsyncPostgresStore.from_conn_string(conn_string) as store:
-            await store.setup()  # Run migrations. Done once
+            await store.setup()  # 마이그레이션 실행. 한 번만 수행
 
-            # Store and retrieve data
+            # 데이터 저장 및 검색
             await store.aput(("users", "123"), "prefs", {"theme": "dark"})
             item = await store.aget(("users", "123"), "prefs")
         ```
 
-        Vector search using LangChain embeddings:
+        LangChain 임베딩을 사용한 벡터 검색:
         ```python
         from langchain.embeddings import init_embeddings
         from langgraph.store.postgres import AsyncPostgresStore
@@ -69,21 +69,21 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
             index={
                 "dims": 1536,
                 "embed": init_embeddings("openai:text-embedding-3-small"),
-                "fields": ["text"]  # specify which fields to embed. Default is the whole serialized value
+                "fields": ["text"]  # 임베드할 필드 지정. 기본값은 전체 직렬화된 값
             }
         ) as store:
-            await store.setup()  # Run migrations. Done once
+            await store.setup()  # 마이그레이션 실행. 한 번만 수행
 
-            # Store documents
+            # 문서 저장
             await store.aput(("docs",), "doc1", {"text": "Python tutorial"})
             await store.aput(("docs",), "doc2", {"text": "TypeScript guide"})
-            await store.aput(("docs",), "doc3", {"text": "Other guide"}, index=False)  # don't index
+            await store.aput(("docs",), "doc3", {"text": "Other guide"}, index=False)  # 인덱싱하지 않음
 
-            # Search by similarity
+            # 유사도로 검색
             results = await store.asearch(("docs",), query="programming guides", limit=2)
         ```
 
-        Using connection pooling for better performance:
+        더 나은 성능을 위한 연결 풀링 사용:
         ```python
         from langgraph.store.postgres import AsyncPostgresStore, PoolConfig
 
@@ -96,25 +96,25 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
                 max_size=20
             )
         ) as store:
-            await store.setup()  # Run migrations. Done once
-            # Use store with connection pooling...
+            await store.setup()  # 마이그레이션 실행. 한 번만 수행
+            # 연결 풀링과 함께 저장소 사용...
         ```
 
     Warning:
-        Make sure to:
-        1. Call `setup()` before first use to create necessary tables and indexes
-        2. Have the pgvector extension available to use vector search
-        3. Use Python 3.10+ for async functionality
+        다음을 확인하세요:
+        1. 필요한 테이블과 인덱스를 생성하기 위해 처음 사용하기 전에 `setup()`을 호출
+        2. 벡터 검색을 사용하려면 pgvector 확장이 사용 가능해야 함
+        3. 비동기 기능을 위해 Python 3.10+ 사용
 
     Note:
-        Semantic search is disabled by default. You can enable it by providing an `index` configuration
-        when creating the store. Without this configuration, all `index` arguments passed to
-        `put` or `aput` will have no effect.
+        의미론적 검색은 기본적으로 비활성화되어 있습니다. 저장소를 생성할 때 `index` 구성을
+        제공하여 활성화할 수 있습니다. 이 구성이 없으면 `put` 또는 `aput`에 전달된 모든
+        `index` 인수는 효과가 없습니다.
 
     Note:
-        If you provide a TTL configuration, you must explicitly call `start_ttl_sweeper()` to begin
-        the background task that removes expired items. Call `stop_ttl_sweeper()` to properly
-        clean up resources when you're done with the store.
+        TTL 구성을 제공하는 경우, 만료된 항목을 제거하는 백그라운드 작업을 시작하려면
+        명시적으로 `start_ttl_sweeper()`를 호출해야 합니다. 저장소 사용이 끝나면
+        `stop_ttl_sweeper()`를 호출하여 리소스를 적절히 정리하세요.
     """
 
     __slots__ = (
@@ -141,7 +141,7 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
     ) -> None:
         if isinstance(conn, AsyncConnectionPool) and pipe is not None:
             raise ValueError(
-                "Pipeline should be used only with a single AsyncConnection, not AsyncConnectionPool."
+                "파이프라인은 AsyncConnectionPool이 아닌 단일 AsyncConnection에서만 사용해야 합니다."
             )
         super().__init__()
         self._deserializer = deserializer
@@ -161,6 +161,14 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
         self._ttl_stop_event = asyncio.Event()
 
     async def abatch(self, ops: Iterable[Op]) -> list[Result]:
+        """작업 배치를 비동기적으로 실행합니다.
+
+        Args:
+            ops: 실행할 작업들의 iterable입니다.
+
+        Returns:
+            각 작업의 결과 리스트입니다.
+        """
         grouped_ops, num_ops = _group_ops(ops)
         results: list[Result] = [None] * num_ops
 
@@ -184,18 +192,18 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
         index: PostgresIndexConfig | None = None,
         ttl: TTLConfig | None = None,
     ) -> AsyncIterator[AsyncPostgresStore]:
-        """Create a new AsyncPostgresStore instance from a connection string.
+        """연결 문자열에서 새 AsyncPostgresStore 인스턴스를 생성합니다.
 
         Args:
-            conn_string: The Postgres connection info string.
-            pipeline: Whether to use AsyncPipeline (only for single connections)
-            pool_config: Configuration for the connection pool.
-                If provided, will create a connection pool and use it instead of a single connection.
-                This overrides the `pipeline` argument.
-            index: The embedding config.
+            conn_string: Postgres 연결 정보 문자열입니다.
+            pipeline: AsyncPipeline을 사용할지 여부 (단일 연결에만 해당)
+            pool_config: 연결 풀 구성입니다.
+                제공되면 단일 연결 대신 연결 풀을 생성하여 사용합니다.
+                이는 `pipeline` 인수를 재정의합니다.
+            index: 임베딩 구성입니다.
 
         Returns:
-            AsyncPostgresStore: A new AsyncPostgresStore instance.
+            AsyncPostgresStore: 새로운 AsyncPostgresStore 인스턴스입니다.
         """
         if pool_config is not None:
             pc = pool_config.copy()
@@ -226,11 +234,11 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
                     yield cls(conn=conn, index=index, ttl=ttl)
 
     async def setup(self) -> None:
-        """Set up the store database asynchronously.
+        """저장소 데이터베이스를 비동기적으로 설정합니다.
 
-        This method creates the necessary tables in the Postgres database if they don't
-        already exist and runs database migrations. It MUST be called directly by the user
-        the first time the store is used.
+        이 메서드는 Postgres 데이터베이스에 필요한 테이블이 아직 존재하지 않으면 생성하고
+        데이터베이스 마이그레이션을 실행합니다. 저장소를 처음 사용할 때 사용자가 직접
+        호출해야 합니다.
         """
 
         async def _get_version(cur: AsyncCursor[DictRow], table: str) -> int:
@@ -273,10 +281,10 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
                     )
 
     async def sweep_ttl(self) -> int:
-        """Delete expired store items based on TTL.
+        """TTL을 기반으로 만료된 저장소 항목을 삭제합니다.
 
         Returns:
-            int: The number of deleted items.
+            int: 삭제된 항목의 수입니다.
         """
         async with self._cursor() as cur:
             await cur.execute(
@@ -291,10 +299,10 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
     async def start_ttl_sweeper(
         self, sweep_interval_minutes: int | None = None
     ) -> asyncio.Task[None]:
-        """Periodically delete expired store items based on TTL.
+        """TTL을 기반으로 만료된 저장소 항목을 주기적으로 삭제합니다.
 
         Returns:
-            Task that can be awaited or cancelled.
+            대기하거나 취소할 수 있는 Task입니다.
         """
         if not self.ttl_config:
             return asyncio.create_task(asyncio.sleep(0))
@@ -307,7 +315,7 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
         interval = float(
             sweep_interval_minutes or self.ttl_config.get("sweep_interval_minutes") or 5
         )
-        logger.info(f"Starting store TTL sweeper with interval {interval} minutes")
+        logger.info(f"{interval}분 간격으로 저장소 TTL 스위퍼를 시작합니다")
 
         async def _sweep_loop() -> None:
             while not self._ttl_stop_event.is_set():
@@ -323,11 +331,11 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
 
                     expired_items = await self.sweep_ttl()
                     if expired_items > 0:
-                        logger.info(f"Store swept {expired_items} expired items")
+                        logger.info(f"저장소에서 {expired_items}개의 만료된 항목을 정리했습니다")
                 except asyncio.CancelledError:
                     break
                 except Exception as exc:
-                    logger.exception("Store TTL sweep iteration failed", exc_info=exc)
+                    logger.exception("저장소 TTL 정리 반복이 실패했습니다", exc_info=exc)
 
         task = asyncio.create_task(_sweep_loop())
         task.set_name("ttl_sweeper")
@@ -335,20 +343,20 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
         return task
 
     async def stop_ttl_sweeper(self, timeout: float | None = None) -> bool:
-        """Stop the TTL sweeper task if it's running.
+        """실행 중인 경우 TTL 스위퍼 작업을 중지합니다.
 
         Args:
-            timeout: Maximum time to wait for the task to stop, in seconds.
-                If `None`, wait indefinitely.
+            timeout: 작업이 중지될 때까지 대기할 최대 시간(초)입니다.
+                `None`이면 무기한 대기합니다.
 
         Returns:
-            bool: True if the task was successfully stopped or wasn't running,
-                False if the timeout was reached before the task stopped.
+            bool: 작업이 성공적으로 중지되었거나 실행 중이 아니면 True,
+                작업이 중지되기 전에 시간 초과에 도달하면 False입니다.
         """
         if self._ttl_sweeper_task is None or self._ttl_sweeper_task.done():
             return True
 
-        logger.info("Stopping TTL sweeper task")
+        logger.info("TTL 스위퍼 작업을 중지합니다")
         self._ttl_stop_event.set()
 
         if timeout is not None:
@@ -363,13 +371,14 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
 
         if success:
             self._ttl_sweeper_task = None
-            logger.info("TTL sweeper task stopped")
+            logger.info("TTL 스위퍼 작업이 중지되었습니다")
         else:
-            logger.warning("Timed out waiting for TTL sweeper task to stop")
+            logger.warning("TTL 스위퍼 작업 중지를 기다리다 시간 초과되었습니다")
 
         return success
 
     async def __aenter__(self) -> AsyncPostgresStore:
+        """비동기 컨텍스트 관리자 진입 시 저장소를 반환합니다."""
         return self
 
     async def __aexit__(
@@ -378,12 +387,13 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        # Ensure the TTL sweeper task is stopped when exiting the context
+        """비동기 컨텍스트 관리자 종료 시 TTL 스위퍼를 정리합니다."""
+        # 컨텍스트 종료 시 TTL 스위퍼 작업이 중지되도록 보장
         if hasattr(self, "_ttl_sweeper_task") and self._ttl_sweeper_task is not None:
-            # Set the event to signal the task to stop
+            # 작업을 중지하도록 이벤트 설정
             self._ttl_stop_event.set()
-            # We don't wait for the task to complete here to avoid blocking
-            # The task will clean up itself gracefully
+            # 차단을 피하기 위해 여기서 작업 완료를 기다리지 않음
+            # 작업은 자체적으로 정상적으로 정리됨
 
     async def _execute_batch(
         self,
@@ -391,6 +401,13 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
         results: list[Result],
         conn: AsyncConnection[DictRow],
     ) -> None:
+        """그룹화된 작업들을 실행합니다.
+
+        Args:
+            grouped_ops: 작업 타입별로 그룹화된 작업 딕셔너리입니다.
+            results: 결과를 저장할 리스트입니다.
+            conn: 사용할 데이터베이스 연결입니다.
+        """
         async with self._cursor(pipeline=True) as cur:
             if GetOp in grouped_ops:
                 await self._batch_get_ops(
@@ -428,6 +445,13 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
         results: list[Result],
         cur: AsyncCursor[DictRow],
     ) -> None:
+        """배치 GET 작업들을 처리합니다.
+
+        Args:
+            get_ops: 인덱스와 GetOp 튜플들의 시퀀스입니다.
+            results: 결과를 저장할 리스트입니다.
+            cur: 사용할 데이터베이스 커서입니다.
+        """
         for query, params, namespace, items in self._get_batch_GET_ops_queries(get_ops):
             await cur.execute(query, params)
             rows = cast(list[Row], await cur.fetchall())
@@ -446,15 +470,20 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
         put_ops: Sequence[tuple[int, PutOp]],
         cur: AsyncCursor[DictRow],
     ) -> None:
+        """배치 PUT 작업들을 처리합니다.
+
+        Args:
+            put_ops: 인덱스와 PutOp 튜플들의 시퀀스입니다.
+            cur: 사용할 데이터베이스 커서입니다.
+        """
         queries, embedding_request = self._prepare_batch_PUT_queries(put_ops)
         if embedding_request:
             if self.embeddings is None:
-                # Should not get here since the embedding config is required
-                # to return an embedding_request above
+                # 위에서 embedding_request를 반환하려면 임베딩 구성이 필요하므로
+                # 여기에 도달해서는 안 됨
                 raise ValueError(
-                    "Embedding configuration is required for vector operations "
-                    f"(for semantic search). "
-                    f"Please provide an EmbeddingConfig when initializing the {self.__class__.__name__}."
+                    "벡터 작업(의미론적 검색용)에는 임베딩 구성이 필요합니다. "
+                    f"{self.__class__.__name__}을 초기화할 때 EmbeddingConfig를 제공하세요."
                 )
             query, txt_params = embedding_request
             vectors = await self.embeddings.aembed_documents(
@@ -482,6 +511,13 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
         results: list[Result],
         cur: AsyncCursor[DictRow],
     ) -> None:
+        """배치 SEARCH 작업들을 처리합니다.
+
+        Args:
+            search_ops: 인덱스와 SearchOp 튜플들의 시퀀스입니다.
+            results: 결과를 저장할 리스트입니다.
+            cur: 사용할 데이터베이스 커서입니다.
+        """
         queries, embedding_requests = self._prepare_batch_search_queries(search_ops)
 
         if embedding_requests and self.embeddings:
@@ -511,6 +547,13 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
         results: list[Result],
         cur: AsyncCursor[DictRow],
     ) -> None:
+        """배치 LIST_NAMESPACES 작업들을 처리합니다.
+
+        Args:
+            list_ops: 인덱스와 ListNamespacesOp 튜플들의 시퀀스입니다.
+            results: 결과를 저장할 리스트입니다.
+            cur: 사용할 데이터베이스 커서입니다.
+        """
         queries = self._get_batch_list_namespaces_queries(list_ops)
         for (query, params), (idx, _) in zip(queries, list_ops, strict=False):
             await cur.execute(query, params)
@@ -522,18 +565,17 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
     async def _cursor(
         self, *, pipeline: bool = False
     ) -> AsyncIterator[AsyncCursor[DictRow]]:
-        """Create a database cursor as a context manager.
+        """컨텍스트 관리자로 데이터베이스 커서를 생성합니다.
 
         Args:
-            pipeline: whether to use pipeline for the DB operations inside the context manager.
-                Will be applied regardless of whether the PostgresStore instance was initialized with a pipeline.
-                If pipeline mode is not supported, will fall back to using transaction context manager.
+            pipeline: 컨텍스트 관리자 내부의 DB 작업에 파이프라인을 사용할지 여부입니다.
+                PostgresStore 인스턴스가 파이프라인으로 초기화되었는지 여부와 관계없이 적용됩니다.
+                파이프라인 모드가 지원되지 않으면 트랜잭션 컨텍스트 관리자를 사용하도록 대체됩니다.
         """
         async with _ainternal.get_connection(self.conn) as conn:
             if self.pipe:
-                # a connection in pipeline mode can be used concurrently
-                # in multiple threads/coroutines, but only one cursor can be
-                # used at a time
+                # 파이프라인 모드의 연결은 여러 스레드/코루틴에서 동시에 사용할 수 있지만
+                # 한 번에 하나의 커서만 사용할 수 있음
                 try:
                     async with conn.cursor(binary=True, row_factory=dict_row) as cur:
                         yield cur
@@ -541,8 +583,8 @@ class AsyncPostgresStore(AsyncBatchedBaseStore, BasePostgresStore[_ainternal.Con
                     if pipeline:
                         await self.pipe.sync()
             elif pipeline:
-                # a connection not in pipeline mode can only be used by one
-                # thread/coroutine at a time, so we acquire a lock
+                # 파이프라인 모드가 아닌 연결은 한 번에 하나의 스레드/코루틴에서만
+                # 사용할 수 있으므로 락을 획득함
                 if self.supports_pipeline:
                     async with (
                         self.lock,

@@ -1,30 +1,30 @@
-# How to integrate LangGraph into your React application
+# React 애플리케이션에 LangGraph를 통합하는 방법
 
-!!! info "Prerequisites"
+!!! info "사전 요구사항"
 
     - [LangGraph Platform](../../concepts/langgraph_platform.md)
     - [LangGraph Server](../../concepts/langgraph_server.md)
 
-The `useStream()` React hook provides a seamless way to integrate LangGraph into your React applications. It handles all the complexities of streaming, state management, and branching logic, letting you focus on building great chat experiences.
+`useStream()` React 훅은 LangGraph를 React 애플리케이션에 통합하는 원활한 방법을 제공합니다. 스트리밍, 상태 관리 및 분기 논리의 모든 복잡성을 처리하여 훌륭한 채팅 경험을 구축하는 데 집중할 수 있게 합니다.
 
-Key features:
+주요 기능:
 
-- Messages streaming: Handle a stream of message chunks to form a complete message
-- Automatic state management for messages, interrupts, loading states, and errors
-- Conversation branching: Create alternate conversation paths from any point in the chat history
-- UI-agnostic design: bring your own components and styling
+- 메시지 스트리밍: 메시지 청크 스트림을 처리하여 완전한 메시지 형성
+- 메시지, 인터럽트, 로딩 상태 및 오류에 대한 자동 상태 관리
+- 대화 분기: 채팅 히스토리의 모든 지점에서 대체 대화 경로 생성
+- UI 독립적 설계: 자신만의 컴포넌트 및 스타일링 사용
 
-Let's explore how to use `useStream()` in your React application.
+React 애플리케이션에서 `useStream()`을 사용하는 방법을 살펴보겠습니다.
 
-The `useStream()` provides a solid foundation for creating bespoke chat experiences. For pre-built chat components and interfaces, we also recommend checking out [CopilotKit](https://docs.copilotkit.ai/coagents/quickstart/langgraph) and [assistant-ui](https://www.assistant-ui.com/docs/runtimes/langgraph).
+`useStream()`은 맞춤형 채팅 경험을 만들기 위한 견고한 기반을 제공합니다. 미리 만들어진 채팅 컴포넌트 및 인터페이스의 경우 [CopilotKit](https://docs.copilotkit.ai/coagents/quickstart/langgraph) 및 [assistant-ui](https://www.assistant-ui.com/docs/runtimes/langgraph)도 확인하는 것이 좋습니다.
 
-## Installation
+## 설치
 
 ```bash
 npm install @langchain/langgraph-sdk @langchain/core
 ```
 
-## Example
+## 예제
 
 ```tsx
 "use client";
@@ -73,25 +73,25 @@ export default function App() {
 }
 ```
 
-## Customizing Your UI
+## UI 커스터마이징
 
-The `useStream()` hook takes care of all the complex state management behind the scenes, providing you with simple interfaces to build your UI. Here's what you get out of the box:
+`useStream()` 훅은 모든 복잡한 상태 관리를 백그라운드에서 처리하며, UI를 구축할 수 있는 간단한 인터페이스를 제공합니다. 기본적으로 제공되는 기능:
 
-- Thread state management
-- Loading and error states
-- Interrupts
-- Message handling and updates
-- Branching support
+- 스레드 상태 관리
+- 로딩 및 오류 상태
+- 인터럽트
+- 메시지 처리 및 업데이트
+- 분기 지원
 
-Here are some examples on how to use these features effectively:
+다음은 이러한 기능을 효과적으로 사용하는 몇 가지 예제입니다:
 
-### Loading States
+### 로딩 상태
 
-The `isLoading` property tells you when a stream is active, enabling you to:
+`isLoading` 속성은 스트림이 활성화되어 있는지 알려주며, 다음을 수행할 수 있습니다:
 
-- Show a loading indicator
-- Disable input fields during processing
-- Display a cancel button
+- 로딩 표시기 표시
+- 처리 중 입력 필드 비활성화
+- 취소 버튼 표시
 
 ```tsx
 export default function App() {
@@ -113,9 +113,9 @@ export default function App() {
 }
 ```
 
-### Resume a stream after page refresh
+### 페이지 새로고침 후 스트림 재개
 
-The `useStream()` hook can automatically resume an ongoing run upon mounting by setting `reconnectOnMount: true`. This is useful for continuing a stream after a page refresh, ensuring no messages and events generated during the downtime are lost.
+`useStream()` 훅은 `reconnectOnMount: true`를 설정하여 마운트 시 진행 중인 실행을 자동으로 재개할 수 있습니다. 이는 페이지 새로고침 후 스트림을 계속하는 데 유용하며, 다운타임 동안 생성된 메시지 및 이벤트가 손실되지 않도록 보장합니다.
 
 ```tsx
 const thread = useStream<{ messages: Message[] }>({
@@ -125,7 +125,7 @@ const thread = useStream<{ messages: Message[] }>({
 });
 ```
 
-By default the ID of the created run is stored in `window.sessionStorage`, which can be swapped by passing a custom storage in `reconnectOnMount` instead. The storage is used to persist the in-flight run ID for a thread (under `lg:stream:${threadId}` key).
+기본적으로 생성된 실행의 ID는 `window.sessionStorage`에 저장되며, `reconnectOnMount`에 커스텀 스토리지를 전달하여 바꿀 수 있습니다. 스토리지는 스레드의 진행 중인 실행 ID를 지속하는 데 사용됩니다(`lg:stream:${threadId}` 키 아래).
 
 ```tsx
 const thread = useStream<{ messages: Message[] }>({
@@ -135,7 +135,7 @@ const thread = useStream<{ messages: Message[] }>({
 });
 ```
 
-You can also manually manage the resuming process by using the run callbacks to persist the run metadata and the `joinStream` function to resume the stream. Make sure to pass `streamResumable: true` when creating the run; otherwise some events might be lost.
+또한 실행 콜백을 사용하여 실행 메타데이터를 지속하고 `joinStream` 함수를 사용하여 스트림을 재개하는 방식으로 재개 프로세스를 수동으로 관리할 수도 있습니다. 실행을 생성할 때 `streamResumable: true`를 전달해야 합니다. 그렇지 않으면 일부 이벤트가 손실될 수 있습니다.
 
 ```tsx
 import type { Message } from "@langchain/langgraph-sdk";
@@ -222,9 +222,9 @@ function useSearchParam(key: string) {
 }
 ```
 
-### Thread Management
+### 스레드 관리
 
-Keep track of conversations with built-in thread management. You can access the current thread ID and get notified when new threads are created:
+내장된 스레드 관리로 대화를 추적하세요. 현재 스레드 ID에 액세스하고 새 스레드가 생성될 때 알림을 받을 수 있습니다:
 
 ```tsx
 const [threadId, setThreadId] = useState<string | null>(null);
@@ -238,13 +238,13 @@ const thread = useStream<{ messages: Message[] }>({
 });
 ```
 
-We recommend storing the `threadId` in your URL's query parameters to let users resume conversations after page refreshes.
+페이지 새로고침 후 사용자가 대화를 재개할 수 있도록 URL의 쿼리 매개변수에 `threadId`를 저장하는 것이 좋습니다.
 
-### Messages Handling
+### 메시지 처리
 
-The `useStream()` hook will keep track of the message chunks received from the server and concatenate them together to form a complete message. The completed message chunks can be retrieved via the `messages` property.
+`useStream()` 훅은 서버에서 수신한 메시지 청크를 추적하고 이를 연결하여 완전한 메시지를 형성합니다. 완성된 메시지 청크는 `messages` 속성을 통해 검색할 수 있습니다.
 
-By default, the `messagesKey` is set to `messages`, where it will append the new messages chunks to `values["messages"]`. If you store messages in a different key, you can change the value of `messagesKey`.
+기본적으로 `messagesKey`는 `messages`로 설정되어 `values["messages"]`에 새 메시지 청크를 추가합니다. 다른 키에 메시지를 저장하는 경우 `messagesKey`의 값을 변경할 수 있습니다.
 
 ```tsx
 import type { Message } from "@langchain/langgraph-sdk";
@@ -267,16 +267,16 @@ export default function HomePage() {
 }
 ```
 
-Under the hood, the `useStream()` hook will use the `streamMode: "messages-tuple"` to receive a stream of messages (i.e. individual LLM tokens) from any LangChain chat model invocations inside your graph nodes. Learn more about messages streaming in the [streaming](../how-tos/streaming.md#messages) guide.
+내부적으로 `useStream()` 훅은 `streamMode: "messages-tuple"`을 사용하여 그래프 노드 내부의 모든 LangChain 채팅 모델 호출에서 메시지 스트림(즉, 개별 LLM 토큰)을 수신합니다. 메시지 스트리밍에 대한 자세한 내용은 [스트리밍](../how-tos/streaming.md#messages) 가이드를 참조하세요.
 
-### Interrupts
+### 인터럽트
 
-The `useStream()` hook exposes the `interrupt` property, which will be filled with the last interrupt from the thread. You can use interrupts to:
+`useStream()` 훅은 스레드의 마지막 인터럽트로 채워지는 `interrupt` 속성을 노출합니다. 인터럽트를 사용하여 다음을 수행할 수 있습니다:
 
-- Render a confirmation UI before executing a node
-- Wait for human input, allowing agent to ask the user with clarifying questions
+- 노드 실행 전 확인 UI 렌더링
+- 에이전트가 사용자에게 명확한 질문을 할 수 있도록 사람의 입력 대기
 
-Learn more about interrupts in the [How to handle interrupts](../../how-tos/human_in_the_loop/wait-user-input.ipynb) guide.
+인터럽트에 대한 자세한 내용은 [인터럽트 처리 방법](../../how-tos/human_in_the_loop/wait-user-input.ipynb) 가이드를 참조하세요.
 
 ```tsx
 const thread = useStream<{ messages: Message[] }, { InterruptType: string }>({
@@ -303,14 +303,14 @@ if (thread.interrupt) {
 }
 ```
 
-### Branching
+### 분기
 
-For each message, you can use `getMessagesMetadata()` to get the first checkpoint from which the message has been first seen. You can then create a new run from the checkpoint preceding the first seen checkpoint to create a new branch in a thread.
+각 메시지에 대해 `getMessagesMetadata()`를 사용하여 메시지가 처음 표시된 체크포인트를 가져올 수 있습니다. 그런 다음 처음 표시된 체크포인트 이전의 체크포인트에서 새 실행을 생성하여 스레드에 새 분기를 만들 수 있습니다.
 
-A branch can be created in following ways:
+분기는 다음과 같은 방법으로 생성할 수 있습니다:
 
-1. Edit a previous user message.
-2. Request a regeneration of a previous assistant message.
+1. 이전 사용자 메시지 편집
+2. 이전 어시스턴트 메시지 재생성 요청
 
 ```tsx
 "use client";
@@ -474,11 +474,11 @@ export default function App() {
 }
 ```
 
-For advanced use cases you can use the `experimental_branchTree` property to get the tree representation of the thread, which can be used to render branching controls for non-message based graphs.
+고급 사용 사례의 경우 `experimental_branchTree` 속성을 사용하여 스레드의 트리 표현을 가져올 수 있으며, 이는 메시지 기반이 아닌 그래프에 대한 분기 제어를 렌더링하는 데 사용할 수 있습니다.
 
-### Optimistic Updates
+### 낙관적 업데이트
 
-You can optimistically update the client state before performing a network request to the agent, allowing you to provide immediate feedback to the user, such as showing the user message immediately before the agent has seen the request.
+에이전트에 네트워크 요청을 수행하기 전에 클라이언트 상태를 낙관적으로 업데이트하여 에이전트가 요청을 보기 전에 사용자 메시지를 즉시 표시하는 등 사용자에게 즉각적인 피드백을 제공할 수 있습니다.
 
 ```tsx
 const stream = useStream({
@@ -503,9 +503,9 @@ const handleSubmit = (text: string) => {
 };
 ```
 
-### Cached Thread Display
+### 캐시된 스레드 표시
 
-Use the `initialValues` option to display cached thread data immediately while the history is being loaded from the server. This improves user experience by showing cached data instantly when navigating to existing threads.
+`initialValues` 옵션을 사용하여 히스토리가 서버에서 로드되는 동안 캐시된 스레드 데이터를 즉시 표시합니다. 이렇게 하면 기존 스레드로 이동할 때 캐시된 데이터를 즉시 표시하여 사용자 경험이 향상됩니다.
 
 ```tsx
 import { useStream } from "@langchain/langgraph-sdk/react";
@@ -530,9 +530,9 @@ const CachedThreadExample = ({ threadId, cachedThreadData }) => {
 };
 ```
 
-### Optimistic Thread Creation
+### 낙관적 스레드 생성
 
-Use the `threadId` option in `submit` function to enable optimistic UI patterns where you need to know the thread ID before the thread is actually created.
+`submit` 함수의 `threadId` 옵션을 사용하여 스레드가 실제로 생성되기 전에 스레드 ID를 알아야 하는 낙관적 UI 패턴을 활성화합니다.
 
 ```tsx
 import { useState } from "react";
@@ -573,7 +573,7 @@ const OptimisticThreadExample = () => {
 
 ### TypeScript
 
-The `useStream()` hook is friendly for apps written in TypeScript and you can specify types for the state to get better type safety and IDE support.
+`useStream()` 훅은 TypeScript로 작성된 앱에 친화적이며, 더 나은 타입 안전성과 IDE 지원을 위해 상태에 대한 타입을 지정할 수 있습니다.
 
 ```tsx
 // Define your types
@@ -590,12 +590,12 @@ const thread = useStream<State>({
 });
 ```
 
-You can also optionally specify types for different scenarios, such as:
+다음과 같은 다양한 시나리오에 대한 타입을 선택적으로 지정할 수도 있습니다:
 
-- `ConfigurableType`: Type for the `config.configurable` property (default: `Record<string, unknown>`)
-- `InterruptType`: Type for the interrupt value - i.e. contents of `interrupt(...)` function (default: `unknown`)
-- `CustomEventType`: Type for the custom events (default: `unknown`)
-- `UpdateType`: Type for the submit function (default: `Partial<State>`)
+- `ConfigurableType`: `config.configurable` 속성의 타입 (기본값: `Record<string, unknown>`)
+- `InterruptType`: 인터럽트 값의 타입 - 즉, `interrupt(...)` 함수의 내용 (기본값: `unknown`)
+- `CustomEventType`: 커스텀 이벤트의 타입 (기본값: `unknown`)
+- `UpdateType`: submit 함수의 타입 (기본값: `Partial<State>`)
 
 ```tsx
 const thread = useStream<
@@ -621,7 +621,7 @@ const thread = useStream<
 });
 ```
 
-If you're using LangGraph.js, you can also reuse your graph's annotation types. However, make sure to only import the types of the annotation schema in order to avoid importing the entire LangGraph.js runtime (i.e. via `import type { ... }` directive).
+LangGraph.js를 사용하는 경우 그래프의 주석 타입을 재사용할 수도 있습니다. 그러나 전체 LangGraph.js 런타임을 가져오지 않도록 주석 스키마의 타입만 가져와야 합니다(즉, `import type { ... }` 지시문을 통해).
 
 ```tsx
 import {
@@ -646,16 +646,16 @@ const thread = useStream<
 });
 ```
 
-## Event Handling
+## 이벤트 처리
 
-The `useStream()` hook provides several callback options to help you respond to different events:
+`useStream()` 훅은 다양한 이벤트에 응답할 수 있도록 여러 콜백 옵션을 제공합니다:
 
-- `onError`: Called when an error occurs.
-- `onFinish`: Called when the stream is finished.
-- `onUpdateEvent`: Called when an update event is received.
-- `onCustomEvent`: Called when a custom event is received. See the [streaming](../../how-tos/streaming.md#stream-custom-data) guide to learn how to stream custom events.
-- `onMetadataEvent`: Called when a metadata event is received, which contains the Run ID and Thread ID.
+- `onError`: 오류가 발생할 때 호출됩니다.
+- `onFinish`: 스트림이 완료될 때 호출됩니다.
+- `onUpdateEvent`: 업데이트 이벤트를 수신할 때 호출됩니다.
+- `onCustomEvent`: 커스텀 이벤트를 수신할 때 호출됩니다. 커스텀 이벤트를 스트리밍하는 방법은 [스트리밍](../../how-tos/streaming.md#stream-custom-data) 가이드를 참조하세요.
+- `onMetadataEvent`: Run ID와 Thread ID를 포함하는 메타데이터 이벤트를 수신할 때 호출됩니다.
 
-## Learn More
+## 더 알아보기
 
-- [JS/TS SDK Reference](../reference/sdk/js_ts_sdk_ref.md)
+- [JS/TS SDK 레퍼런스](../reference/sdk/js_ts_sdk_ref.md)

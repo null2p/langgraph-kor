@@ -7,23 +7,23 @@ hide:
   - tags
 ---
 
-# Multi-agent
+# 멀티-에이전트
 
-A single agent might struggle if it needs to specialize in multiple domains or manage many tools. To tackle this, you can break your agent into smaller, independent agents and compose them into a [multi-agent system](../concepts/multi_agent.md).
+단일 에이전트는 여러 도메인을 전문화하거나 많은 도구를 관리해야 하는 경우 어려움을 겪을 수 있습니다. 이를 해결하기 위해 에이전트를 더 작고 독립적인 에이전트로 분해하고 이를 [멀티-에이전트 시스템](../concepts/multi_agent.md)으로 구성할 수 있습니다.
 
-In multi-agent systems, agents need to communicate between each other. They do so via [handoffs](#handoffs) — a primitive that describes which agent to hand control to and the payload to send to that agent.
+멀티-에이전트 시스템에서 에이전트는 서로 통신해야 합니다. 이는 [handoff](#handoffs)를 통해 이루어지며, 이는 어떤 에이전트에게 제어권을 넘길지와 그 에이전트에게 전달할 페이로드를 설명하는 프리미티브입니다.
 
-Two of the most popular multi-agent architectures are:
+가장 인기 있는 두 가지 멀티-에이전트 아키텍처는 다음과 같습니다:
 
-- [supervisor](#supervisor) — individual agents are coordinated by a central supervisor agent. The supervisor controls all communication flow and task delegation, making decisions about which agent to invoke based on the current context and task requirements.
-- [swarm](#swarm) — agents dynamically hand off control to one another based on their specializations. The system remembers which agent was last active, ensuring that on subsequent interactions, the conversation resumes with that agent.
+- [supervisor](#supervisor) — 개별 에이전트가 중앙 supervisor 에이전트에 의해 조정됩니다. supervisor는 모든 통신 흐름과 작업 위임을 제어하며, 현재 컨텍스트와 작업 요구 사항을 기반으로 어떤 에이전트를 호출할지 결정합니다.
+- [swarm](#swarm) — 에이전트가 전문성에 따라 서로에게 동적으로 제어권을 넘깁니다. 시스템은 마지막으로 활성화된 에이전트를 기억하여, 후속 상호작용에서 해당 에이전트와 대화가 재개되도록 합니다.
 
 ## Supervisor
 
 ![Supervisor](./assets/supervisor.png)
 
 :::python
-Use [`langgraph-supervisor`](https://github.com/langchain-ai/langgraph-supervisor-py) library to create a supervisor multi-agent system:
+[`langgraph-supervisor`](https://github.com/langchain-ai/langgraph-supervisor-py) 라이브러리를 사용하여 supervisor 멀티-에이전트 시스템을 만드세요:
 
 ```bash
 pip install langgraph-supervisor
@@ -86,7 +86,7 @@ for chunk in supervisor.stream(
 :::
 
 :::js
-Use [`@langchain/langgraph-supervisor`](https://github.com/langchain-ai/langgraphjs/tree/main/libs/langgraph-supervisor) library to create a supervisor multi-agent system:
+[`@langchain/langgraph-supervisor`](https://github.com/langchain-ai/langgraphjs/tree/main/libs/langgraph-supervisor) 라이브러리를 사용하여 supervisor 멀티-에이전트 시스템을 만드세요:
 
 ```bash
 npm install @langchain/langgraph-supervisor
@@ -153,7 +153,7 @@ for await (const chunk of supervisor.stream({
 ![Swarm](./assets/swarm.png)
 
 :::python
-Use [`langgraph-swarm`](https://github.com/langchain-ai/langgraph-swarm-py) library to create a swarm multi-agent system:
+[`langgraph-swarm`](https://github.com/langchain-ai/langgraph-swarm-py) 라이브러리를 사용하여 swarm 멀티-에이전트 시스템을 만드세요:
 
 ```bash
 pip install langgraph-swarm
@@ -213,7 +213,7 @@ for chunk in swarm.stream(
 :::
 
 :::js
-Use [`@langchain/langgraph-swarm`](https://github.com/langchain-ai/langgraphjs/tree/main/libs/langgraph-swarm) library to create a swarm multi-agent system:
+[`@langchain/langgraph-swarm`](https://github.com/langchain-ai/langgraphjs/tree/main/libs/langgraph-swarm) 라이브러리를 사용하여 swarm 멀티-에이전트 시스템을 만드세요:
 
 ```bash
 npm install @langchain/langgraph-swarm
@@ -275,17 +275,17 @@ for await (const chunk of swarm.stream({
 
 ## Handoffs
 
-A common pattern in multi-agent interactions is **handoffs**, where one agent _hands off_ control to another. Handoffs allow you to specify:
+멀티-에이전트 상호작용의 일반적인 패턴은 **handoff**로, 한 에이전트가 다른 에이전트에게 제어권을 _넘기는_ 것입니다. handoff를 사용하면 다음을 지정할 수 있습니다:
 
-- **destination**: target agent to navigate to
-- **payload**: information to pass to that agent
+- **destination**: 이동할 대상 에이전트
+- **payload**: 해당 에이전트에게 전달할 정보
 
 :::python
-This is used both by `langgraph-supervisor` (supervisor hands off to individual agents) and `langgraph-swarm` (an individual agent can hand off to other agents).
+이는 `langgraph-supervisor`(supervisor가 개별 에이전트에게 handoff)와 `langgraph-swarm`(개별 에이전트가 다른 에이전트에게 handoff 가능) 모두에서 사용됩니다.
 
-To implement handoffs with `create_react_agent`, you need to:
+`create_react_agent`로 handoff를 구현하려면 다음이 필요합니다:
 
-1.  Create a special tool that can transfer control to a different agent
+1.  다른 에이전트로 제어권을 전송할 수 있는 특별한 도구를 만듭니다
 
     ```python
     def transfer_to_bob():
@@ -304,7 +304,7 @@ To implement handoffs with `create_react_agent`, you need to:
         )
     ```
 
-2.  Create individual agents that have access to handoff tools:
+2.  handoff 도구에 접근할 수 있는 개별 에이전트를 만듭니다:
 
     ```python
     flight_assistant = create_react_agent(
@@ -315,7 +315,7 @@ To implement handoffs with `create_react_agent`, you need to:
     )
     ```
 
-3.  Define a parent graph that contains individual agents as nodes:
+3.  개별 에이전트를 노드로 포함하는 부모 그래프를 정의합니다:
 
     ```python
     from langgraph.graph import StateGraph, MessagesState
@@ -330,11 +330,11 @@ To implement handoffs with `create_react_agent`, you need to:
 :::
 
 :::js
-This is used both by `@langchain/langgraph-supervisor` (supervisor hands off to individual agents) and `@langchain/langgraph-swarm` (an individual agent can hand off to other agents).
+이는 `@langchain/langgraph-supervisor`(supervisor가 개별 에이전트에게 handoff)와 `@langchain/langgraph-swarm`(개별 에이전트가 다른 에이전트에게 handoff 가능) 모두에서 사용됩니다.
 
-To implement handoffs with `createReactAgent`, you need to:
+`createReactAgent`로 handoff를 구현하려면 다음이 필요합니다:
 
-1.  Create a special tool that can transfer control to a different agent
+1.  다른 에이전트로 제어권을 전송할 수 있는 특별한 도구를 만듭니다
 
     ```typescript
     function transferToBob() {
@@ -354,7 +354,7 @@ To implement handoffs with `createReactAgent`, you need to:
     }
     ```
 
-2.  Create individual agents that have access to handoff tools:
+2.  handoff 도구에 접근할 수 있는 개별 에이전트를 만듭니다:
 
     ```typescript
     const flightAssistant = createReactAgent({
@@ -365,7 +365,7 @@ To implement handoffs with `createReactAgent`, you need to:
     });
     ```
 
-3.  Define a parent graph that contains individual agents as nodes:
+3.  개별 에이전트를 노드로 포함하는 부모 그래프를 정의합니다:
 
     ```typescript
     import { StateGraph, MessagesZodState } from "@langchain/langgraph";
@@ -377,7 +377,7 @@ To implement handoffs with `createReactAgent`, you need to:
 
     :::
 
-Putting this together, here is how you can implement a simple multi-agent system with two agents — a flight booking assistant and a hotel booking assistant:
+이를 종합하여, 다음은 항공편 예약 도우미와 호텔 예약 도우미라는 두 에이전트가 있는 간단한 멀티-에이전트 시스템을 구현하는 방법입니다:
 
 :::python
 
@@ -476,11 +476,11 @@ for chunk in multi_agent_graph.stream(
     print("\n")
 ```
 
-1. Access agent's state
-2. The `Command` primitive allows specifying a state update and a node transition as a single operation, making it useful for implementing handoffs.
-3. Name of the agent or node to hand off to.
-4. Take the agent's messages and **add** them to the parent's **state** as part of the handoff. The next agent will see the parent state.
-5. Indicate to LangGraph that we need to navigate to agent node in a **parent** multi-agent graph.
+1. 에이전트의 state에 접근
+2. `Command` 프리미티브를 사용하면 state 업데이트와 노드 전환을 단일 작업으로 지정할 수 있어 handoff를 구현하는 데 유용합니다.
+3. handoff할 에이전트 또는 노드의 이름
+4. 에이전트의 메시지를 가져와서 handoff의 일부로 부모의 **state**에 **추가**합니다. 다음 에이전트는 부모 state를 보게 됩니다.
+5. **부모** 멀티-에이전트 그래프의 에이전트 노드로 이동해야 한다는 것을 LangGraph에 표시합니다.
    :::
 
 :::js
@@ -614,25 +614,25 @@ for await (const chunk of multiAgentGraph.stream({
 }
 ```
 
-1. Access agent's state
-2. The `Command` primitive allows specifying a state update and a node transition as a single operation, making it useful for implementing handoffs.
-3. Name of the agent or node to hand off to.
-4. Take the agent's messages and **add** them to the parent's **state** as part of the handoff. The next agent will see the parent state.
-5. Indicate to LangGraph that we need to navigate to agent node in a **parent** multi-agent graph.
+1. 에이전트의 state에 접근
+2. `Command` 프리미티브를 사용하면 state 업데이트와 노드 전환을 단일 작업으로 지정할 수 있어 handoff를 구현하는 데 유용합니다.
+3. handoff할 에이전트 또는 노드의 이름
+4. 에이전트의 메시지를 가져와서 handoff의 일부로 부모의 **state**에 **추가**합니다. 다음 에이전트는 부모 state를 보게 됩니다.
+5. **부모** 멀티-에이전트 그래프의 에이전트 노드로 이동해야 한다는 것을 LangGraph에 표시합니다.
 
 :::
 
 !!! Note
 
-    This handoff implementation assumes that:
+    이 handoff 구현은 다음을 가정합니다:
 
-    - each agent receives overall message history (across all agents) in the multi-agent system as its input
-    - each agent outputs its internal messages history to the overall message history of the multi-agent system
+    - 각 에이전트는 멀티-에이전트 시스템의 전체 메시지 기록(모든 에이전트 전체)을 입력으로 받습니다
+    - 각 에이전트는 내부 메시지 기록을 멀티-에이전트 시스템의 전체 메시지 기록으로 출력합니다
 
 :::python
-Check out LangGraph [supervisor](https://github.com/langchain-ai/langgraph-supervisor-py#customizing-handoff-tools) and [swarm](https://github.com/langchain-ai/langgraph-swarm-py#customizing-handoff-tools) documentation to learn how to customize handoffs.
+handoff를 커스터마이징하는 방법을 알아보려면 LangGraph [supervisor](https://github.com/langchain-ai/langgraph-supervisor-py#customizing-handoff-tools) 및 [swarm](https://github.com/langchain-ai/langgraph-swarm-py#customizing-handoff-tools) 문서를 확인하세요.
 :::
 
 :::js
-Check out LangGraph [supervisor](https://github.com/langchain-ai/langgraphjs/tree/main/libs/langgraph-supervisor#customizing-handoff-tools) and [swarm](https://github.com/langchain-ai/langgraphjs/tree/main/libs/langgraph-swarm#customizing-handoff-tools) documentation to learn how to customize handoffs.
+handoff를 커스터마이징하는 방법을 알아보려면 LangGraph [supervisor](https://github.com/langchain-ai/langgraphjs/tree/main/libs/langgraph-supervisor#customizing-handoff-tools) 및 [swarm](https://github.com/langchain-ai/langgraphjs/tree/main/libs/langgraph-swarm#customizing-handoff-tools) 문서를 확인하세요.
 :::

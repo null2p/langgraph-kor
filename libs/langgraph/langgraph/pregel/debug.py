@@ -64,7 +64,7 @@ TASK_NAMESPACE = UUID("6ba7b831-9dad-11d1-80b4-00c04fd430c8")
 
 
 def map_debug_tasks(tasks: Iterable[PregelExecutableTask]) -> Iterator[TaskPayload]:
-    """Produce "task" events for stream_mode=debug."""
+    """stream_mode=debug를 위한 "task" 이벤트를 생성합니다."""
     for task in tasks:
         if task.config is not None and TAG_HIDDEN in task.config.get("tags", []):
             continue
@@ -78,7 +78,7 @@ def map_debug_tasks(tasks: Iterable[PregelExecutableTask]) -> Iterator[TaskPaylo
 
 
 def is_multiple_channel_write(value: Any) -> bool:
-    """Return True if the payload already wraps multiple writes from the same channel."""
+    """페이로드가 이미 동일한 채널의 여러 쓰기를 래핑하는 경우 True를 반환합니다."""
     return (
         isinstance(value, dict)
         and "$writes" in value
@@ -87,10 +87,10 @@ def is_multiple_channel_write(value: Any) -> bool:
 
 
 def map_task_result_writes(writes: Sequence[tuple[str, Any]]) -> dict[str, Any]:
-    """Folds task writes into a result dict and aggregates multiple writes to the same channel.
+    """작업 쓰기를 결과 dict로 접고 동일한 채널에 대한 여러 쓰기를 집계합니다.
 
-    If the channel contains a single write, we record the write in the result dict as `{channel: write}`
-    If the channel contains multiple writes, we record the writes in the result dict as `{channel: {'$writes': [write1, write2, ...]}}`"""
+    채널에 단일 쓰기가 포함된 경우 결과 dict에 `{channel: write}`로 쓰기를 기록합니다.
+    채널에 여러 쓰기가 포함된 경우 결과 dict에 `{channel: {'$writes': [write1, write2, ...]}}`로 쓰기를 기록합니다."""
 
     result: dict[str, Any] = {}
     for channel, value in writes:
@@ -113,7 +113,7 @@ def map_debug_task_results(
     task_tup: tuple[PregelExecutableTask, Sequence[tuple[str, Any]]],
     stream_keys: str | Sequence[str],
 ) -> Iterator[TaskResultPayload]:
-    """Produce "task_result" events for stream_mode=debug."""
+    """stream_mode=debug를 위한 "task_result" 이벤트를 생성합니다."""
     stream_channels_list = (
         [stream_keys] if isinstance(stream_keys, str) else stream_keys
     )
@@ -135,7 +135,7 @@ def map_debug_task_results(
 
 
 def rm_pregel_keys(config: RunnableConfig | None) -> RunnableConfig | None:
-    """Remove pregel-specific keys from the config."""
+    """config에서 pregel 관련 키를 제거합니다."""
     if config is None:
         return config
     return {
@@ -157,7 +157,7 @@ def map_debug_checkpoint(
     parent_config: RunnableConfig | None,
     output_keys: str | Sequence[str],
 ) -> Iterator[CheckpointPayload]:
-    """Produce "checkpoint" events for stream_mode=debug."""
+    """stream_mode=debug를 위한 "checkpoint" 이벤트를 생성합니다."""
 
     parent_ns = config[CONF].get(CONFIG_KEY_CHECKPOINT_NS, "")
     task_states: dict[str, RunnableConfig | StateSnapshot] = {}
@@ -218,7 +218,7 @@ def tasks_w_writes(
     states: dict[str, RunnableConfig | StateSnapshot] | None,
     output_keys: str | Sequence[str],
 ) -> tuple[PregelTask, ...]:
-    """Apply writes / subgraph states to tasks to be returned in a StateSnapshot."""
+    """StateSnapshot에서 반환할 작업에 쓰기/서브그래프 상태를 적용합니다."""
     pending_writes = pending_writes or []
     out: list[PregelTask] = []
     for task in tasks:
@@ -299,10 +299,10 @@ COLOR_MAPPING = {
 
 
 def get_colored_text(text: str, color: str) -> str:
-    """Get colored text."""
+    """색상이 적용된 텍스트를 가져옵니다."""
     return f"\033[1;3{COLOR_MAPPING[color]}m{text}\033[0m"
 
 
 def get_bolded_text(text: str) -> str:
-    """Get bolded text."""
+    """굵게 표시된 텍스트를 가져옵니다."""
     return f"\033[1m{text}\033[0m"

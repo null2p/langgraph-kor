@@ -3,16 +3,16 @@ search:
   boost: 2
 ---
 
-# Time Travel ⏱️
+# 타임 트래블 ⏱️
 
-When working with non-deterministic systems that make model-based decisions (e.g., agents powered by LLMs), it can be useful to examine their decision-making process in detail:
+모델 기반 결정을 내리는 비결정론적 시스템(예: LLM으로 구동되는 에이전트)으로 작업할 때, 의사 결정 프로세스를 세부적으로 검토하는 것이 유용할 수 있습니다:
 
-1. 🤔 **Understand reasoning**: Analyze the steps that led to a successful result.
-2. 🐞 **Debug mistakes**: Identify where and why errors occurred.
-3. 🔍 **Explore alternatives**: Test different paths to uncover better solutions.
+1. 🤔 **추론 이해**: 성공적인 결과로 이어진 단계를 분석합니다.
+2. 🐞 **실수 디버그**: 오류가 발생한 위치와 이유를 식별합니다.
+3. 🔍 **대안 탐색**: 더 나은 솔루션을 찾기 위해 다양한 경로를 테스트합니다.
 
-LangGraph provides [time travel functionality](../how-tos/human_in_the_loop/time-travel.md) to support these use cases. Specifically, you can resume execution from a prior checkpoint — either replaying the same state or modifying it to explore alternatives. In all cases, resuming past execution produces a new fork in the history.
+LangGraph는 이러한 사용 사례를 지원하기 위해 [타임 트래블 기능](../how-tos/human_in_the_loop/time-travel.md)을 제공합니다. 구체적으로, 이전 체크포인트에서 실행을 재개할 수 있습니다 — 동일한 상태를 재생하거나 대안을 탐색하기 위해 수정할 수 있습니다. 모든 경우에 과거 실행을 재개하면 히스토리에서 새로운 분기가 생성됩니다.
 
 !!! tip
 
-    For information on how to use time travel, see [Use time travel](../how-tos/human_in_the_loop/time-travel.md) and [Time travel using Server API](../cloud/how-tos/human_in_the_loop_time_travel.md).
+    타임 트래블 사용 방법에 대한 정보는 [타임 트래블 사용](../how-tos/human_in_the_loop/time-travel.md) 및 [Server API를 사용한 타임 트래블](../cloud/how-tos/human_in_the_loop_time_travel.md)을 참조하세요.

@@ -1,42 +1,41 @@
 # Context
 
-**Context engineering** is the practice of building dynamic systems that provide the right information and tools, in the right format, so that an AI application can accomplish a task. Context can be characterized along two key dimensions:
+**Context engineering**은 AI 애플리케이션이 작업을 수행할 수 있도록 올바른 정보와 도구를 올바른 형식으로 제공하는 동적 시스템을 구축하는 관행입니다. Context는 두 가지 주요 차원으로 특징지을 수 있습니다:
 
-1. By **mutability**:
-    - **Static context**: Immutable data that doesn't change during execution (e.g., user metadata, database connections, tools)
-    - **Dynamic context**: Mutable data that evolves as the application runs (e.g., conversation history, intermediate results, tool call observations)
-2. By **lifetime**:
-    - **Runtime context**: Data scoped to a single run or invocation
-    - **Cross-conversation context**: Data that persists across multiple conversations or sessions
+1. **가변성(mutability)**에 따라:
+    - **Static context**: 실행 중 변경되지 않는 불변 데이터 (예: 사용자 메타데이터, 데이터베이스 연결, 도구)
+    - **Dynamic context**: 애플리케이션이 실행되면서 변화하는 가변 데이터 (예: 대화 히스토리, 중간 결과, 도구 호출 관찰 결과)
+2. **생명 주기(lifetime)**에 따라:
+    - **Runtime context**: 단일 실행 또는 호출에 범위가 지정된 데이터
+    - **Cross-conversation context**: 여러 대화 또는 세션에 걸쳐 유지되는 데이터
 
 !!! tip "Runtime context vs LLM context"
 
-    Runtime context refers to local context: data and dependencies your code needs to run. It does **not** refer to:
+    Runtime context는 로컬 컨텍스트를 의미합니다: 코드가 실행되기 위해 필요한 데이터 및 의존성입니다. 다음을 의미하지 **않습니다**:
 
-    * The LLM context, which is the data passed into the LLM's prompt.
-    * The "context window", which is the maximum number of tokens that can be passed to the LLM.
+    * LLM context, 즉 LLM의 프롬프트에 전달되는 데이터.
+    * "context window", 즉 LLM에 전달할 수 있는 최대 토큰 수.
 
-    Runtime context can be used to optimize the LLM context. For example, you can use user metadata
-    in the runtime context to fetch user preferences and feed them into the context window.
+    Runtime context는 LLM context를 최적화하는 데 사용할 수 있습니다. 예를 들어, runtime context의 사용자 메타데이터를 사용하여 사용자 선호도를 가져와서 context window에 제공할 수 있습니다.
 
-LangGraph provides three ways to manage context, which combines the mutability and lifetime dimensions:
+LangGraph는 가변성과 생명 주기 차원을 결합하여 context를 관리하는 세 가지 방법을 제공합니다:
 
 :::python
 
-| Context type                                                                                | Description                                            | Mutability | Lifetime           | Access method                           |
+| Context 타입                                                                                | 설명                                            | 가변성  | 생명 주기         | 접근 방법                           |
 | ------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ---------- | ------------------ | --------------------------------------- |
-| [**Static runtime context**](#static-runtime-context)                                       | User metadata, tools, db connections passed at startup | Static     | Single run         | `context` argument to `invoke`/`stream` |
-| [**Dynamic runtime context (state)**](#dynamic-runtime-context-state)                       | Mutable data that evolves during a single run          | Dynamic    | Single run         | LangGraph state object                  |
-| [**Dynamic cross-conversation context (store)**](#dynamic-cross-conversation-context-store) | Persistent data shared across conversations            | Dynamic    | Cross-conversation | LangGraph store                         |
+| [**Static runtime context**](#static-runtime-context)                                       | 시작 시 전달되는 사용자 메타데이터, 도구, db 연결 | Static     | Single run         | `context` argument to `invoke`/`stream` |
+| [**Dynamic runtime context (state)**](#dynamic-runtime-context-state)                       | 단일 실행 중 변화하는 가변 데이터          | Dynamic    | Single run         | LangGraph state object                  |
+| [**Dynamic cross-conversation context (store)**](#dynamic-cross-conversation-context-store) | 대화 간에 공유되는 영구 데이터            | Dynamic    | Cross-conversation | LangGraph store                         |
 
 ## Static runtime context
 
-**Static runtime context** represents immutable data like user metadata, tools, and database connections that are passed to an application at the start of a run via the `context` argument to `invoke`/`stream`. This data does not change during execution.
+**Static runtime context**는 실행 시작 시 `invoke`/`stream`의 `context` 인수를 통해 애플리케이션에 전달되는 사용자 메타데이터, 도구, 데이터베이스 연결과 같은 불변 데이터를 나타냅니다. 이 데이터는 실행 중 변경되지 않습니다.
 
 !!! version-added "Added in version 0.6.0: `context` replaces `config['configurable']`"
 
-    Runtime context is now passed to the `context` argument of `invoke`/`stream`,
-    which replaces the previous pattern of passing application configuration to `config['configurable']`.
+    Runtime context는 이제 `invoke`/`stream`의 `context` 인수로 전달되며,
+    이는 `config['configurable']`에 애플리케이션 구성을 전달하던 이전 패턴을 대체합니다.
 
 ```python
 @dataclass
@@ -50,9 +49,9 @@ graph.invoke( # (1)!
 )
 ```
 
-1. This is the invocation of the agent or graph. The `invoke` method runs the underlying graph with the provided input.
-2. This example uses messages as an input, which is common, but your application may use different input structures.
-3. This is where you pass the runtime data. The `context` parameter allows you to provide additional dependencies that the agent can use during its execution.
+1. 이것은 에이전트 또는 그래프의 호출입니다. `invoke` 메서드는 제공된 입력으로 기본 그래프를 실행합니다.
+2. 이 예제는 메시지를 입력으로 사용하며, 이는 일반적이지만 애플리케이션은 다른 입력 구조를 사용할 수 있습니다.
+3. 여기에서 runtime 데이터를 전달합니다. `context` 매개변수를 사용하면 에이전트가 실행 중에 사용할 수 있는 추가 의존성을 제공할 수 있습니다.
 
 === "Agent prompt"
 
@@ -82,7 +81,7 @@ graph.invoke( # (1)!
     )
     ```
 
-    * See [Agents](../agents/agents.md) for details.
+    * 자세한 내용은 [Agents](../agents/agents.md)를 참조하세요.
 
 === "Workflow node"
 
@@ -95,7 +94,7 @@ graph.invoke( # (1)!
         ...
     ```
 
-    * See [the Graph API](https://langchain-ai.github.io/langgraph/how-tos/graph-api/#add-runtime-configuration) for details.
+    * 자세한 내용은 [Graph API](https://langchain-ai.github.io/langgraph/how-tos/graph-api/#add-runtime-configuration)를 참조하세요.
 
 === "In a tool"
 
@@ -112,28 +111,28 @@ graph.invoke( # (1)!
         return email
     ```
 
-    See the [tool calling guide](../how-tos/tool-calling.md#configuration) for details.
+    자세한 내용은 [tool calling guide](../how-tos/tool-calling.md#configuration)를 참조하세요.
 
 !!! tip
 
-    The `Runtime` object can be used to access static context and other utilities like the active store and stream writer.
-    See the [Runtime][langgraph.runtime.Runtime] documentation for details.
+    `Runtime` 객체는 static context 및 활성 store, stream writer와 같은 다른 유틸리티에 액세스하는 데 사용할 수 있습니다.
+    자세한 내용은 [Runtime][langgraph.runtime.Runtime] 문서를 참조하세요.
 
 :::
 
 :::js
 
-| Context type                                                                                | Description                                   | Mutability | Lifetime           |
+| Context 타입                                                                                | 설명                                   | 가변성  | 생명 주기         |
 | ------------------------------------------------------------------------------------------- | --------------------------------------------- | ---------- | ------------------ |
-| [**Config**](#config-static-context)                                                        | data passed at the start of a run             | Static     | Single run         |
-| [**Dynamic runtime context (state)**](#dynamic-runtime-context-state)                       | Mutable data that evolves during a single run | Dynamic    | Single run         |
-| [**Dynamic cross-conversation context (store)**](#dynamic-cross-conversation-context-store) | Persistent data shared across conversations   | Dynamic    | Cross-conversation |
+| [**Config**](#config-static-context)                                                        | 실행 시작 시 전달되는 데이터             | Static     | Single run         |
+| [**Dynamic runtime context (state)**](#dynamic-runtime-context-state)                       | 단일 실행 중 변화하는 가변 데이터 | Dynamic    | Single run         |
+| [**Dynamic cross-conversation context (store)**](#dynamic-cross-conversation-context-store) | 대화 간에 공유되는 영구 데이터   | Dynamic    | Cross-conversation |
 
 ## Config (static context)
 
-Config is for immutable data like user metadata or API keys. Use this when you have values that don't change mid-run.
+Config는 사용자 메타데이터 또는 API 키와 같은 불변 데이터를 위한 것입니다. 실행 중에 변경되지 않는 값이 있을 때 사용합니다.
 
-Specify configuration using a key called **"configurable"** which is reserved for this purpose.
+**"configurable"**이라는 키를 사용하여 구성을 지정합니다. 이 키는 이 목적으로 예약되어 있습니다.
 
 ```typescript
 await graph.invoke(
@@ -148,13 +147,13 @@ await graph.invoke(
 
 ## Dynamic runtime context (state)
 
-**Dynamic runtime context** represents mutable data that can evolve during a single run and is managed through the LangGraph state object. This includes conversation history, intermediate results, and values derived from tools or LLM outputs. In LangGraph, the state object acts as [short-term memory](../concepts/memory.md) during a run.
+**Dynamic runtime context**는 단일 실행 중 변화할 수 있는 가변 데이터를 나타내며 LangGraph state 객체를 통해 관리됩니다. 여기에는 대화 히스토리, 중간 결과, 도구 또는 LLM 출력에서 파생된 값이 포함됩니다. LangGraph에서 state 객체는 실행 중 [단기 메모리](../concepts/memory.md) 역할을 합니다.
 
 === "In an agent"
 
-    Example shows how to incorporate state into an agent **prompt**.
+    예제는 **prompt**에 state를 통합하는 방법을 보여줍니다.
 
-    State can also be accessed by the agent's **tools**, which can read or update the state as needed. See [tool calling guide](../how-tos/tool-calling.md#short-term-memory) for details.
+    State는 에이전트의 **도구**에서도 액세스할 수 있으며, 필요에 따라 state를 읽거나 업데이트할 수 있습니다. 자세한 내용은 [tool calling guide](../how-tos/tool-calling.md#short-term-memory)를 참조하세요.
 
     :::python
     ```python
@@ -189,8 +188,8 @@ await graph.invoke(
     })
     ```
 
-    1. Define a custom state schema that extends `AgentState` or `MessagesState`.
-    2. Pass the custom state schema to the agent. This allows the agent to access and modify the state during execution.
+    1. `AgentState` 또는 `MessagesState`를 확장하는 커스텀 state 스키마를 정의합니다.
+    2. 커스텀 state 스키마를 에이전트에 전달합니다. 이를 통해 에이전트가 실행 중에 state에 액세스하고 수정할 수 있습니다.
     :::
 
     :::js
@@ -229,8 +228,8 @@ await graph.invoke(
     });
     ```
 
-    1. Define a custom state schema that extends `MessagesZodState` or creates a new schema.
-    2. Pass the custom state schema to the agent. This allows the agent to access and modify the state during execution.
+    1. `MessagesZodState`를 확장하거나 새 스키마를 생성하는 커스텀 state 스키마를 정의합니다.
+    2. 커스텀 state 스키마를 에이전트에 전달합니다. 이를 통해 에이전트가 실행 중에 state에 액세스하고 수정할 수 있습니다.
     :::
 
 === "In a workflow"
@@ -261,9 +260,9 @@ await graph.invoke(
     graph = builder.compile()
     ```
 
-    1. Define a custom state
-    2. Access the state in any node or tool
-    3. The Graph API is designed to work as easily as possible with state. The return value of a node represents a requested update to the state.
+    1. 커스텀 state를 정의합니다
+    2. 모든 노드나 도구에서 state에 액세스합니다
+    3. Graph API는 state와 최대한 쉽게 작동하도록 설계되었습니다. 노드의 반환 값은 state에 대한 요청된 업데이트를 나타냅니다.
     :::
 
     :::js
@@ -292,17 +291,17 @@ await graph.invoke(
     const graph = builder.compile();
     ```
 
-    1. Define a custom state
-    2. Access the state in any node or tool
-    3. The Graph API is designed to work as easily as possible with state. The return value of a node represents a requested update to the state.
+    1. 커스텀 state를 정의합니다
+    2. 모든 노드나 도구에서 state에 액세스합니다
+    3. Graph API는 state와 최대한 쉽게 작동하도록 설계되었습니다. 노드의 반환 값은 state에 대한 요청된 업데이트를 나타냅니다.
     :::
 
 !!! tip "Turning on memory"
 
-    Please see the [memory guide](../how-tos/memory/add-memory.md) for more details on how to enable memory. This is a powerful feature that allows you to persist the agent's state across multiple invocations. Otherwise, the state is scoped only to a single run.
+    메모리를 활성화하는 방법에 대한 자세한 내용은 [memory guide](../how-tos/memory/add-memory.md)를 참조하세요. 이는 여러 호출에 걸쳐 에이전트의 state를 유지할 수 있는 강력한 기능입니다. 그렇지 않으면 state는 단일 실행으로만 범위가 지정됩니다.
 
 ## Dynamic cross-conversation context (store)
 
-**Dynamic cross-conversation context** represents persistent, mutable data that spans across multiple conversations or sessions and is managed through the LangGraph store. This includes user profiles, preferences, and historical interactions. The LangGraph store acts as [long-term memory](../concepts/memory.md#long-term-memory) across multiple runs. This can be used to read or update persistent facts (e.g., user profiles, preferences, prior interactions).
+**Dynamic cross-conversation context**는 여러 대화 또는 세션에 걸쳐 지속되는 영구적이고 가변적인 데이터를 나타내며 LangGraph store를 통해 관리됩니다. 여기에는 사용자 프로필, 선호도, 과거 상호작용이 포함됩니다. LangGraph store는 여러 실행에 걸친 [장기 메모리](../concepts/memory.md#long-term-memory) 역할을 합니다. 이는 영구적인 사실(예: 사용자 프로필, 선호도, 이전 상호작용)을 읽거나 업데이트하는 데 사용할 수 있습니다.
 
-For more information, see the [Memory guide](../how-tos/memory/add-memory.md).
+자세한 내용은 [Memory guide](../how-tos/memory/add-memory.md)를 참조하세요.

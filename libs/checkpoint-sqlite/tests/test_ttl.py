@@ -1,4 +1,4 @@
-"""Test SQLite store Time-To-Live (TTL) functionality."""
+"""SQLite 저장소의 TTL(Time-To-Live) 기능을 테스트합니다."""
 
 import asyncio
 import os
@@ -15,7 +15,7 @@ from langgraph.store.sqlite.aio import AsyncSqliteStore
 
 @pytest.fixture
 def temp_db_file() -> Generator[str, None, None]:
-    """Create a temporary database file for testing."""
+    """테스트용 임시 데이터베이스 파일을 생성합니다."""
     fd, path = tempfile.mkstemp()
     os.close(fd)
     yield path
@@ -23,7 +23,7 @@ def temp_db_file() -> Generator[str, None, None]:
 
 
 def test_ttl_basic(temp_db_file: str) -> None:
-    """Test basic TTL functionality with synchronous API."""
+    """동기 API를 사용한 기본 TTL 기능을 테스트합니다."""
     ttl_seconds = 1
     ttl_minutes = ttl_seconds / 60
 
@@ -48,7 +48,7 @@ def test_ttl_basic(temp_db_file: str) -> None:
 
 @pytest.mark.flaky(retries=3)
 def test_ttl_refresh(temp_db_file: str) -> None:
-    """Test TTL refresh on read."""
+    """읽기 시 TTL 갱신을 테스트합니다."""
     ttl_seconds = 1
     ttl_minutes = ttl_seconds / 60
 
@@ -57,15 +57,15 @@ def test_ttl_refresh(temp_db_file: str) -> None:
     ) as store:
         store.setup()
 
-        # Store an item with TTL
+        # TTL을 가진 항목 저장
         store.put(("test",), "item1", {"value": "test"})
 
-        # Sleep almost to expiration
+        # 만료 시간에 거의 다가갈 때까지 대기
         time.sleep(ttl_seconds - 0.5)
         swept = store.sweep_ttl()
         assert swept == 0
 
-        # Get the item and refresh TTL
+        # 항목을 가져오고 TTL 갱신
         item = store.get(("test",), "item1", refresh_ttl=True)
         assert item is not None
 
@@ -73,24 +73,24 @@ def test_ttl_refresh(temp_db_file: str) -> None:
         swept = store.sweep_ttl()
         assert swept == 0
 
-        # Get the item, should still be there
+        # 항목을 가져오기, 여전히 존재해야 함
         item = store.get(("test",), "item1")
         assert item is not None
         assert item.value["value"] == "test"
 
-        # Sleep again but don't refresh this time
+        # 다시 대기하지만 이번에는 갱신하지 않음
         time.sleep(ttl_seconds + 0.75)
 
         swept = store.sweep_ttl()
         assert swept == 1
 
-        # Item should be gone now
+        # 이제 항목이 사라져야 함
         item = store.get(("test",), "item1")
         assert item is None
 
 
 def test_ttl_sweeper(temp_db_file: str) -> None:
-    """Test TTL sweeper thread."""
+    """TTL 스위퍼 스레드를 테스트합니다."""
     ttl_seconds = 2
     ttl_minutes = ttl_seconds / 60
 
@@ -104,102 +104,102 @@ def test_ttl_sweeper(temp_db_file: str) -> None:
     ) as store:
         store.setup()
 
-        # Start the TTL sweeper
+        # TTL 스위퍼 시작
         store.start_ttl_sweeper()
 
-        # Store an item with TTL
+        # TTL을 가진 항목 저장
         store.put(("test",), "item1", {"value": "test"})
 
-        # Item should be there initially
+        # 초기에는 항목이 존재해야 함
         item = store.get(("test",), "item1")
         assert item is not None
 
-        # Wait for TTL to expire and the sweeper to run
+        # TTL이 만료되고 스위퍼가 실행될 때까지 대기
         time.sleep(ttl_seconds + (ttl_seconds / 2) + 0.5)
 
-        # Item should be gone now (swept automatically)
+        # 이제 항목이 사라져야 함 (자동으로 스윕됨)
         item = store.get(("test",), "item1")
         assert item is None
 
-        # Stop the sweeper
+        # 스위퍼 중지
         store.stop_ttl_sweeper()
 
 
 @pytest.mark.flaky(retries=3)
 def test_ttl_custom_value(temp_db_file: str) -> None:
-    """Test TTL with custom value per item."""
+    """항목별 사용자 정의 TTL 값을 테스트합니다."""
     with SqliteStore.from_conn_string(temp_db_file) as store:
         store.setup()
 
-        # Store items with different TTLs
-        store.put(("test",), "item1", {"value": "short"}, ttl=1 / 60)  # 1 second
-        store.put(("test",), "item2", {"value": "long"}, ttl=3 / 60)  # 3 seconds
+        # 서로 다른 TTL을 가진 항목들 저장
+        store.put(("test",), "item1", {"value": "short"}, ttl=1 / 60)  # 1초
+        store.put(("test",), "item2", {"value": "long"}, ttl=3 / 60)  # 3초
 
-        # Item with short TTL
-        time.sleep(2)  # Wait for short TTL
+        # 짧은 TTL을 가진 항목
+        time.sleep(2)  # 짧은 TTL이 만료될 때까지 대기
         store.sweep_ttl()
 
-        # Short TTL item should be gone, long TTL item should remain
+        # 짧은 TTL 항목은 사라지고, 긴 TTL 항목은 남아 있어야 함
         item1 = store.get(("test",), "item1")
         item2 = store.get(("test",), "item2")
         assert item1 is None
         assert item2 is not None
 
-        # Wait for the second item's TTL
+        # 두 번째 항목의 TTL이 만료될 때까지 대기
         time.sleep(4)
         store.sweep_ttl()
 
-        # Now both should be gone
+        # 이제 둘 다 사라져야 함
         item2 = store.get(("test",), "item2")
         assert item2 is None
 
 
 @pytest.mark.flaky(retries=3)
 def test_ttl_override_default(temp_db_file: str) -> None:
-    """Test overriding default TTL at the item level."""
+    """항목 수준에서 기본 TTL을 재정의하는 것을 테스트합니다."""
     with SqliteStore.from_conn_string(
         temp_db_file,
-        ttl={"default_ttl": 5 / 60},  # 5 seconds default
+        ttl={"default_ttl": 5 / 60},  # 기본값 5초
     ) as store:
         store.setup()
 
-        # Store an item with shorter than default TTL
-        store.put(("test",), "item1", {"value": "override"}, ttl=1 / 60)  # 1 second
+        # 기본값보다 짧은 TTL을 가진 항목 저장
+        store.put(("test",), "item1", {"value": "override"}, ttl=1 / 60)  # 1초
 
-        # Store an item with default TTL
-        store.put(("test",), "item2", {"value": "default"})  # Uses default 5 seconds
+        # 기본 TTL을 가진 항목 저장
+        store.put(("test",), "item2", {"value": "default"})  # 기본값 5초 사용
 
-        # Store an item with no TTL
+        # TTL이 없는 항목 저장
         store.put(("test",), "item3", {"value": "permanent"}, ttl=None)
 
-        # Wait for the override TTL to expire
+        # 재정의된 TTL이 만료될 때까지 대기
         time.sleep(2)
         store.sweep_ttl()
 
-        # Check results
+        # 결과 확인
         item1 = store.get(("test",), "item1")
         item2 = store.get(("test",), "item2")
         item3 = store.get(("test",), "item3")
 
-        assert item1 is None  # Should be expired
-        assert item2 is not None  # Default TTL, should still be there
-        assert item3 is not None  # No TTL, should still be there
+        assert item1 is None  # 만료되어야 함
+        assert item2 is not None  # 기본 TTL, 여전히 존재해야 함
+        assert item3 is not None  # TTL 없음, 여전히 존재해야 함
 
-        # Wait for default TTL to expire
+        # 기본 TTL이 만료될 때까지 대기
         time.sleep(4)
         store.sweep_ttl()
 
-        # Check results again
+        # 결과를 다시 확인
         item2 = store.get(("test",), "item2")
         item3 = store.get(("test",), "item3")
 
-        assert item2 is None  # Default TTL item should be gone
-        assert item3 is not None  # No TTL item should still be there
+        assert item2 is None  # 기본 TTL 항목은 사라져야 함
+        assert item3 is not None  # TTL 없는 항목은 여전히 존재해야 함
 
 
 @pytest.mark.flaky(retries=3)
 def test_search_with_ttl(temp_db_file: str) -> None:
-    """Test TTL with search operations."""
+    """검색 작업과 함께 TTL을 테스트합니다."""
     ttl_seconds = 1
     ttl_minutes = ttl_seconds / 60
 
@@ -208,27 +208,27 @@ def test_search_with_ttl(temp_db_file: str) -> None:
     ) as store:
         store.setup()
 
-        # Store items
+        # 항목들 저장
         store.put(("test",), "item1", {"value": "apple"})
         store.put(("test",), "item2", {"value": "banana"})
 
-        # Search before expiration
+        # 만료 전 검색
         results = store.search(("test",), filter={"value": "apple"})
         assert len(results) == 1
         assert results[0].key == "item1"
 
-        # Wait for TTL to expire
+        # TTL이 만료될 때까지 대기
         time.sleep(ttl_seconds + 1)
         store.sweep_ttl()
 
-        # Search after expiration
+        # 만료 후 검색
         results = store.search(("test",), filter={"value": "apple"})
         assert len(results) == 0
 
 
 @pytest.mark.asyncio
 async def test_async_ttl_basic(temp_db_file: str) -> None:
-    """Test basic TTL functionality with asynchronous API."""
+    """비동기 API를 사용한 기본 TTL 기능을 테스트합니다."""
     ttl_seconds = 1
     ttl_minutes = ttl_seconds / 60
 
@@ -237,21 +237,21 @@ async def test_async_ttl_basic(temp_db_file: str) -> None:
     ) as store:
         await store.setup()
 
-        # Store an item with TTL
+        # TTL을 가진 항목 저장
         await store.aput(("test",), "item1", {"value": "test"})
 
-        # Get the item before expiration
+        # 만료 전에 항목 가져오기
         item = await store.aget(("test",), "item1")
         assert item is not None
         assert item.value["value"] == "test"
 
-        # Wait for TTL to expire
+        # TTL이 만료될 때까지 대기
         await asyncio.sleep(ttl_seconds + 1.0)
 
-        # Manual sweep needed without the sweeper thread
+        # 스위퍼 스레드 없이 수동 스윕 필요
         await store.sweep_ttl()
 
-        # Item should be gone now
+        # 이제 항목이 사라져야 함
         item = await store.aget(("test",), "item1")
         assert item is None
 
@@ -259,7 +259,7 @@ async def test_async_ttl_basic(temp_db_file: str) -> None:
 @pytest.mark.asyncio
 @pytest.mark.flaky(retries=3)
 async def test_async_ttl_refresh(temp_db_file: str) -> None:
-    """Test TTL refresh on read with async API."""
+    """비동기 API를 사용하여 읽기 시 TTL 갱신을 테스트합니다."""
     ttl_seconds = 1
     ttl_minutes = ttl_seconds / 60
 
@@ -268,38 +268,38 @@ async def test_async_ttl_refresh(temp_db_file: str) -> None:
     ) as store:
         await store.setup()
 
-        # Store an item with TTL
+        # TTL을 가진 항목 저장
         await store.aput(("test",), "item1", {"value": "test"})
 
-        # Sleep almost to expiration
+        # 만료 시간에 거의 다가갈 때까지 대기
         await asyncio.sleep(ttl_seconds - 0.5)
 
-        # Get the item and refresh TTL
+        # 항목을 가져오고 TTL 갱신
         item = await store.aget(("test",), "item1", refresh_ttl=True)
         assert item is not None
 
-        # Sleep again - without refresh, would have expired by now
+        # 다시 대기 - 갱신하지 않았다면 지금쯤 만료되었을 것임
         await asyncio.sleep(ttl_seconds - 0.5)
 
-        # Get the item, should still be there
+        # 항목을 가져오기, 여전히 존재해야 함
         item = await store.aget(("test",), "item1")
         assert item is not None
         assert item.value["value"] == "test"
 
-        # Sleep again but don't refresh this time
+        # 다시 대기하지만 이번에는 갱신하지 않음
         await asyncio.sleep(ttl_seconds + 1.0)
 
-        # Manual sweep
+        # 수동 스윕
         await store.sweep_ttl()
 
-        # Item should be gone now
+        # 이제 항목이 사라져야 함
         item = await store.aget(("test",), "item1")
         assert item is None
 
 
 @pytest.mark.asyncio
 async def test_async_ttl_sweeper(temp_db_file: str) -> None:
-    """Test TTL sweeper thread with async API."""
+    """비동기 API를 사용하여 TTL 스위퍼 스레드를 테스트합니다."""
     ttl_seconds = 2
     ttl_minutes = ttl_seconds / 60
 
@@ -314,31 +314,31 @@ async def test_async_ttl_sweeper(temp_db_file: str) -> None:
     ) as store:
         await store.setup()
 
-        # Start the TTL sweeper
+        # TTL 스위퍼 시작
         await store.start_ttl_sweeper()
 
-        # Store an item with TTL
+        # TTL을 가진 항목 저장
         await store.aput(("test",), "item1", {"value": "test"})
 
-        # Item should be there initially
+        # 초기에는 항목이 존재해야 함
         item = await store.aget(("test",), "item1")
         assert item is not None
 
-        # Wait for TTL to expire and the sweeper to run
+        # TTL이 만료되고 스위퍼가 실행될 때까지 대기
         await asyncio.sleep(ttl_seconds + (ttl_seconds / 2) + 0.5)
 
-        # Item should be gone now (swept automatically)
+        # 이제 항목이 사라져야 함 (자동으로 스윕됨)
         item = await store.aget(("test",), "item1")
         assert item is None
 
-        # Stop the sweeper
+        # 스위퍼 중지
         await store.stop_ttl_sweeper()
 
 
 @pytest.mark.asyncio
 @pytest.mark.flaky(retries=3)
 async def test_async_search_with_ttl(temp_db_file: str) -> None:
-    """Test TTL with search operations using async API."""
+    """비동기 API를 사용하여 검색 작업과 함께 TTL을 테스트합니다."""
     ttl_seconds = 1
     ttl_minutes = ttl_seconds / 60
 
@@ -347,20 +347,20 @@ async def test_async_search_with_ttl(temp_db_file: str) -> None:
     ) as store:
         await store.setup()
 
-        # Store items
+        # 항목들 저장
         await store.aput(("test",), "item1", {"value": "apple"})
         await store.aput(("test",), "item2", {"value": "banana"})
 
-        # Search before expiration
+        # 만료 전 검색
         results = await store.asearch(("test",), filter={"value": "apple"})
         assert len(results) == 1
         assert results[0].key == "item1"
 
-        # Wait for TTL to expire
+        # TTL이 만료될 때까지 대기
         await asyncio.sleep(ttl_seconds + 1)
         await store.sweep_ttl()
 
-        # Search after expiration
+        # 만료 후 검색
         results = await store.asearch(("test",), filter={"value": "apple"})
         assert len(results) == 0
 
@@ -368,8 +368,8 @@ async def test_async_search_with_ttl(temp_db_file: str) -> None:
 @pytest.mark.asyncio
 @pytest.mark.flaky(retries=3)
 async def test_async_asearch_refresh_ttl(temp_db_file: str) -> None:
-    """Test TTL refresh on asearch with async API."""
-    ttl_seconds = 4.0  # Increased TTL for less sensitivity to timing
+    """비동기 API를 사용하여 asearch에서 TTL 갱신을 테스트합니다."""
+    ttl_seconds = 4.0  # 타이밍에 덜 민감하도록 TTL 증가
     ttl_minutes = ttl_seconds / 60.0
 
     async with AsyncSqliteStore.from_conn_string(
@@ -378,52 +378,52 @@ async def test_async_asearch_refresh_ttl(temp_db_file: str) -> None:
         await store.setup()
 
         namespace = ("docs", "user1")
-        # t=0: items put, expire at t=4.0s
+        # t=0: 항목 저장, t=4.0초에 만료
         await store.aput(namespace, "item1", {"text": "content1", "id": 1})
         await store.aput(namespace, "item2", {"text": "content2", "id": 2})
 
-        # t=3.0s: (after sleep ttl_seconds * 0.75 = 3s)
+        # t=3.0초: (sleep ttl_seconds * 0.75 = 3초 이후)
         await asyncio.sleep(ttl_seconds * 0.75)
 
-        # Perform asearch with refresh_ttl=True for item1.
-        # item1's TTL should be refreshed. New expiry: t=3.0s + 4.0s = t=7.0s.
-        # item2's TTL is not affected. Expires at t=4.0s.
+        # item1에 대해 refresh_ttl=True로 asearch 수행.
+        # item1의 TTL이 갱신되어야 함. 새로운 만료 시간: t=3.0초 + 4.0초 = t=7.0초.
+        # item2의 TTL은 영향받지 않음. t=4.0초에 만료됨.
         searched_items = await store.asearch(
             namespace, filter={"id": 1}, refresh_ttl=True
         )
         assert len(searched_items) == 1
         assert searched_items[0].key == "item1"
 
-        # t=5.0s: (after sleep ttl_seconds * 0.5 = 2s more. Total elapsed: 3s + 2s = 5s)
+        # t=5.0초: (sleep ttl_seconds * 0.5 = 2초 더 대기. 총 경과 시간: 3초 + 2초 = 5초)
         await asyncio.sleep(ttl_seconds * 0.5)
-        # At this point:
-        # - item1 (refreshed by asearch) should expire at t=7.0s. Should be ALIVE.
-        # - item2 (original TTL) should have expired at t=4.0s. Should be GONE after sweep.
+        # 이 시점에서:
+        # - item1 (asearch로 갱신됨)은 t=7.0초에 만료될 예정. 아직 살아있어야 함.
+        # - item2 (원래 TTL)는 t=4.0초에 만료됨. 스윕 후 사라져야 함.
 
         await store.sweep_ttl()
 
-        # Check item1 (should exist due to asearch refresh)
+        # item1 확인 (asearch 갱신으로 인해 존재해야 함)
         item1_check1 = await store.aget(namespace, "item1", refresh_ttl=False)
         assert item1_check1 is not None, (
-            "Item1 should exist after asearch refresh and first sweep"
+            "Item1은 asearch 갱신 후와 첫 번째 스윕 이후에도 존재해야 합니다"
         )
         assert item1_check1.value["text"] == "content1"
 
-        # Check item2 (should be gone)
+        # item2 확인 (사라져야 함)
         item2_check1 = await store.aget(namespace, "item2", refresh_ttl=False)
         assert item2_check1 is None, (
-            "Item2 should be gone after its original TTL expired"
+            "Item2는 원래 TTL이 만료된 후 사라져야 합니다"
         )
 
-        # t=7.5s: (after sleep ttl_seconds * 0.625 = 2.5s more. Total elapsed: 5s + 2.5s = 7.5s)
+        # t=7.5초: (sleep ttl_seconds * 0.625 = 2.5초 더 대기. 총 경과 시간: 5초 + 2.5초 = 7.5초)
         await asyncio.sleep(ttl_seconds * 0.625)
-        # At this point:
-        # - item1 (refreshed by asearch, expired at t=7.0s) should be GONE after sweep.
+        # 이 시점에서:
+        # - item1 (asearch로 갱신됨, t=7.0초에 만료)은 스윕 후 사라져야 함.
 
         await store.sweep_ttl()
 
-        # Check item1 again (should be gone now)
+        # item1 다시 확인 (이제 사라져야 함)
         item1_final_check = await store.aget(namespace, "item1", refresh_ttl=False)
         assert item1_final_check is None, (
-            "Item1 should be gone after its refreshed TTL expired"
+            "Item1은 갱신된 TTL이 만료된 후 사라져야 합니다"
         )

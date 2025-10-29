@@ -37,25 +37,25 @@ logger = logging.getLogger(__name__)
 
 
 class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
-    """Asynchronous SQLite-backed store with optional vector search.
+    """선택적 벡터 검색 기능이 있는 비동기 SQLite 기반 저장소입니다.
 
-    This class provides an asynchronous interface for storing and retrieving data
-    using a SQLite database with support for vector search capabilities.
+    이 클래스는 벡터 검색 기능을 지원하는 SQLite 데이터베이스를 사용하여
+    데이터를 저장하고 검색하는 비동기 인터페이스를 제공합니다.
 
     Examples:
-        Basic setup and usage:
+        기본 설정 및 사용법:
         ```python
         from langgraph.store.sqlite import AsyncSqliteStore
 
         async with AsyncSqliteStore.from_conn_string(":memory:") as store:
-            await store.setup()  # Run migrations
+            await store.setup()  # 마이그레이션 실행
 
-            # Store and retrieve data
+            # 데이터 저장 및 검색
             await store.aput(("users", "123"), "prefs", {"theme": "dark"})
             item = await store.aget(("users", "123"), "prefs")
         ```
 
-        Vector search using LangChain embeddings:
+        LangChain 임베딩을 사용한 벡터 검색:
         ```python
         from langchain_openai import OpenAIEmbeddings
         from langgraph.store.sqlite import AsyncSqliteStore
@@ -65,25 +65,25 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
             index={
                 "dims": 1536,
                 "embed": OpenAIEmbeddings(),
-                "fields": ["text"]  # specify which fields to embed
+                "fields": ["text"]  # 임베딩할 필드 지정
             }
         ) as store:
-            await store.setup()  # Run migrations once
+            await store.setup()  # 마이그레이션 한 번 실행
 
-            # Store documents
+            # 문서 저장
             await store.aput(("docs",), "doc1", {"text": "Python tutorial"})
             await store.aput(("docs",), "doc2", {"text": "TypeScript guide"})
-            await store.aput(("docs",), "doc3", {"text": "Other guide"}, index=False)  # don't index
+            await store.aput(("docs",), "doc3", {"text": "Other guide"}, index=False)  # 인덱싱 안 함
 
-            # Search by similarity
+            # 유사도로 검색
             results = await store.asearch(("docs",), query="programming guides", limit=2)
         ```
 
     Warning:
-        Make sure to call `setup()` before first use to create necessary tables and indexes.
+        필요한 테이블과 인덱스를 생성하려면 첫 사용 전에 `setup()`을 호출해야 합니다.
 
     Note:
-        This class requires the aiosqlite package. Install with `pip install aiosqlite`.
+        이 클래스는 aiosqlite 패키지가 필요합니다. `pip install aiosqlite`로 설치하세요.
     """
 
     def __init__(
@@ -95,13 +95,13 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
         index: SqliteIndexConfig | None = None,
         ttl: TTLConfig | None = None,
     ):
-        """Initialize the async SQLite store.
+        """비동기 SQLite 저장소를 초기화합니다.
 
         Args:
-            conn: The SQLite database connection.
-            deserializer: Optional custom deserializer function for values.
-            index: Optional vector search configuration.
-            ttl: Optional time-to-live configuration.
+            conn: SQLite 데이터베이스 연결입니다.
+            deserializer: 값에 대한 선택적 사용자 정의 역직렬화 함수입니다.
+            index: 선택적 벡터 검색 구성입니다.
+            ttl: 선택적 time-to-live 구성입니다.
         """
         super().__init__()
         self._deserializer = deserializer
@@ -127,30 +127,30 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
         index: SqliteIndexConfig | None = None,
         ttl: TTLConfig | None = None,
     ) -> AsyncIterator[AsyncSqliteStore]:
-        """Create a new AsyncSqliteStore instance from a connection string.
+        """연결 문자열에서 새 AsyncSqliteStore 인스턴스를 생성합니다.
 
         Args:
-            conn_string: The SQLite connection string.
-            index: Optional vector search configuration.
-            ttl: Optional time-to-live configuration.
+            conn_string: SQLite 연결 문자열입니다.
+            index: 선택적 벡터 검색 구성입니다.
+            ttl: 선택적 time-to-live 구성입니다.
 
         Returns:
-            An AsyncSqliteStore instance wrapped in an async context manager.
+            비동기 컨텍스트 관리자로 래핑된 AsyncSqliteStore 인스턴스입니다.
         """
         async with aiosqlite.connect(conn_string, isolation_level=None) as conn:
             yield cls(conn, index=index, ttl=ttl)
 
     async def setup(self) -> None:
-        """Set up the store database.
+        """저장소 데이터베이스를 설정합니다.
 
-        This method creates the necessary tables in the SQLite database if they don't
-        already exist and runs database migrations. It should be called before first use.
+        이 메서드는 SQLite 데이터베이스에 필요한 테이블이 없는 경우 생성하고
+        데이터베이스 마이그레이션을 실행합니다. 첫 사용 전에 호출해야 합니다.
         """
         async with self.lock:
             if self.is_setup:
                 return
 
-            # Create migrations table if it doesn't exist
+            # 마이그레이션 테이블이 없으면 생성
             await self.conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS store_migrations (
@@ -159,7 +159,7 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
                 """
             )
 
-            # Check current migration version
+            # 현재 마이그레이션 버전 확인
             async with self.conn.execute(
                 "SELECT v FROM store_migrations ORDER BY v DESC LIMIT 1"
             ) as cur:
@@ -169,16 +169,16 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
                 else:
                     version = row[0]
 
-            # Apply migrations
+            # 마이그레이션 적용
             for v, sql in enumerate(self.MIGRATIONS[version + 1 :], start=version + 1):
                 await self.conn.executescript(sql)
                 await self.conn.execute(
                     "INSERT INTO store_migrations (v) VALUES (?)", (v,)
                 )
 
-            # Apply vector migrations if index config is provided
+            # 인덱스 config가 제공된 경우 벡터 마이그레이션 적용
             if self.index_config:
-                # Create vector migrations table if it doesn't exist
+                # 벡터 마이그레이션 테이블이 없으면 생성
                 await self.conn.enable_load_extension(True)
                 await self.conn.load_extension(sqlite_vec.loadable_path())
                 await self.conn.enable_load_extension(False)
@@ -190,7 +190,7 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
                     """
                 )
 
-                # Check current vector migration version
+                # 현재 벡터 마이그레이션 버전 확인
                 async with self.conn.execute(
                     "SELECT v FROM vector_migrations ORDER BY v DESC LIMIT 1"
                 ) as cur:
@@ -200,7 +200,7 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
                     else:
                         version = row[0]
 
-                # Apply vector migrations
+                # 벡터 마이그레이션 적용
                 for v, sql in enumerate(
                     self.VECTOR_MIGRATIONS[version + 1 :], start=version + 1
                 ):
@@ -215,13 +215,13 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
     async def _cursor(
         self, *, transaction: bool = True
     ) -> AsyncIterator[aiosqlite.Cursor]:
-        """Get a cursor for the SQLite database.
+        """SQLite 데이터베이스에 대한 커서를 가져옵니다.
 
         Args:
-            transaction: Whether to use a transaction for database operations.
+            transaction: 데이터베이스 작업에 트랜잭션을 사용할지 여부입니다.
 
         Yields:
-            An SQLite cursor object.
+            SQLite 커서 객체입니다.
         """
         if not self.is_setup:
             await self.setup()
@@ -237,10 +237,10 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
                         await self.conn.execute("COMMIT")
 
     async def sweep_ttl(self) -> int:
-        """Delete expired store items based on TTL.
+        """TTL을 기반으로 만료된 저장소 항목을 삭제합니다.
 
         Returns:
-            int: The number of deleted items.
+            int: 삭제된 항목의 수입니다.
         """
         async with self._cursor() as cur:
             await cur.execute(
@@ -255,10 +255,10 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
     async def start_ttl_sweeper(
         self, sweep_interval_minutes: int | None = None
     ) -> asyncio.Task[None]:
-        """Periodically delete expired store items based on TTL.
+        """TTL을 기반으로 만료된 저장소 항목을 주기적으로 삭제합니다.
 
         Returns:
-            Task that can be awaited or cancelled.
+            대기하거나 취소할 수 있는 Task입니다.
         """
         if not self.ttl_config:
             return asyncio.create_task(asyncio.sleep(0))
@@ -299,15 +299,15 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
         return task
 
     async def stop_ttl_sweeper(self, timeout: float | None = None) -> bool:
-        """Stop the TTL sweeper task if it's running.
+        """실행 중인 경우 TTL sweeper 작업을 중지합니다.
 
         Args:
-            timeout: Maximum time to wait for the task to stop, in seconds.
-                If `None`, wait indefinitely.
+            timeout: 작업이 중지될 때까지 대기할 최대 시간(초)입니다.
+                `None`인 경우 무기한 대기합니다.
 
         Returns:
-            bool: True if the task was successfully stopped or wasn't running,
-                False if the timeout was reached before the task stopped.
+            bool: 작업이 성공적으로 중지되었거나 실행 중이 아닌 경우 True,
+                작업이 중지되기 전에 타임아웃에 도달한 경우 False입니다.
         """
         if self._ttl_sweeper_task is None or self._ttl_sweeper_task.done():
             return True
@@ -342,21 +342,21 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        # Ensure the TTL sweeper task is stopped when exiting the context
+        # 컨텍스트를 종료할 때 TTL sweeper 작업이 중지되도록 함
         if hasattr(self, "_ttl_sweeper_task") and self._ttl_sweeper_task is not None:
-            # Set the event to signal the task to stop
+            # 작업 중지를 신호하도록 이벤트 설정
             self._ttl_stop_event.set()
-            # We don't wait for the task to complete here to avoid blocking
-            # The task will clean up itself gracefully
+            # 차단을 피하기 위해 여기서 작업 완료를 기다리지 않음
+            # 작업은 자체적으로 정상적으로 정리됨
 
     async def abatch(self, ops: Iterable[Op]) -> list[Result]:
-        """Execute a batch of operations asynchronously.
+        """작업 배치를 비동기적으로 실행합니다.
 
         Args:
-            ops: Iterable of operations to execute.
+            ops: 실행할 작업의 이터러블입니다.
 
         Returns:
-            List of operation results.
+            작업 결과 목록입니다.
         """
         grouped_ops, num_ops = _group_ops(ops)
         results: list[Result] = [None] * num_ops
@@ -397,21 +397,21 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
         results: list[Result],
         cur: aiosqlite.Cursor,
     ) -> None:
-        """Process batch GET operations.
+        """배치 GET 작업을 처리합니다.
 
         Args:
-            get_ops: Sequence of GET operations.
-            results: List to store results in.
-            cur: Database cursor.
+            get_ops: GET 작업 시퀀스입니다.
+            results: 결과를 저장할 리스트입니다.
+            cur: 데이터베이스 커서입니다.
         """
-        # Group all queries by namespace to execute all operations for each namespace together
+        # 각 네임스페이스의 모든 작업을 함께 실행하기 위해 네임스페이스별로 모든 쿼리 그룹화
         namespace_queries = defaultdict(list)
         for prepared_query in self._get_batch_GET_ops_queries(get_ops):
             namespace_queries[prepared_query.namespace].append(prepared_query)
 
-        # Process each namespace's operations
+        # 각 네임스페이스의 작업 처리
         for namespace, queries in namespace_queries.items():
-            # Execute TTL refresh queries first
+            # TTL 새로 고침 쿼리 먼저 실행
             for query in queries:
                 if query.kind == "refresh":
                     try:
@@ -459,17 +459,17 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
         put_ops: Sequence[tuple[int, PutOp]],
         cur: aiosqlite.Cursor,
     ) -> None:
-        """Process batch PUT operations.
+        """배치 PUT 작업을 처리합니다.
 
         Args:
-            put_ops: Sequence of PUT operations.
-            cur: Database cursor.
+            put_ops: PUT 작업 시퀀스입니다.
+            cur: 데이터베이스 커서입니다.
         """
         queries, embedding_request = self._prepare_batch_PUT_queries(put_ops)
         if embedding_request:
             if self.embeddings is None:
-                # Should not get here since the embedding config is required
-                # to return an embedding_request above
+                # 위에서 embedding_request를 반환하려면 임베딩 config가 필요하므로
+                # 여기에 도달하면 안 됨
                 raise ValueError(
                     "Embedding configuration is required for vector operations "
                     f"(for semantic search). "
@@ -477,12 +477,12 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
                 )
 
             query, txt_params = embedding_request
-            # Update the params to replace the raw text with the vectors
+            # 원시 텍스트를 벡터로 대체하도록 params 업데이트
             vectors = await self.embeddings.aembed_documents(
                 [param[-1] for param in txt_params]
             )
 
-            # Convert vectors to SQLite-friendly format
+            # 벡터를 SQLite 친화적 형식으로 변환
             vector_params = []
             for (ns, k, pathname, _), vector in zip(txt_params, vectors, strict=False):
                 vector_params.extend(
@@ -500,18 +500,18 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
         results: list[Result],
         cur: aiosqlite.Cursor,
     ) -> None:
-        """Process batch SEARCH operations.
+        """배치 SEARCH 작업을 처리합니다.
 
         Args:
-            search_ops: Sequence of SEARCH operations.
-            results: List to store results in.
-            cur: Database cursor.
+            search_ops: SEARCH 작업 시퀀스입니다.
+            results: 결과를 저장할 리스트입니다.
+            cur: 데이터베이스 커서입니다.
         """
         prepared_queries, embedding_requests = self._prepare_batch_search_queries(
             search_ops
         )
 
-        # Setup dot_product function if it doesn't exist
+        # dot_product 함수가 없으면 설정
         if embedding_requests and self.embeddings:
             vectors = await self.embeddings.aembed_documents(
                 [query for _, query in embedding_requests]
@@ -608,12 +608,12 @@ class AsyncSqliteStore(AsyncBatchedBaseStore, BaseSqliteStore):
         results: list[Result],
         cur: aiosqlite.Cursor,
     ) -> None:
-        """Process batch LIST NAMESPACES operations.
+        """배치 LIST NAMESPACES 작업을 처리합니다.
 
         Args:
-            list_ops: Sequence of LIST NAMESPACES operations.
-            results: List to store results in.
-            cur: Database cursor.
+            list_ops: LIST NAMESPACES 작업 시퀀스입니다.
+            results: 결과를 저장할 리스트입니다.
+            cur: 데이터베이스 커서입니다.
         """
         queries = self._get_batch_list_namespaces_queries(list_ops)
         for (query, params), (idx, _) in zip(queries, list_ops, strict=False):

@@ -14,16 +14,16 @@ __all__ = (
 )
 
 StateT = TypeVar("StateT", bound=StateLike)
-"""Type variable used to represent the state in a graph."""
+"""그래프의 상태를 나타내는 데 사용되는 타입 변수입니다."""
 
 StateT_co = TypeVar("StateT_co", bound=StateLike, covariant=True)
 
 StateT_contra = TypeVar("StateT_contra", bound=StateLike, contravariant=True)
 
 ContextT = TypeVar("ContextT", bound=StateLike | None, default=None)
-"""Type variable used to represent graph run scoped context.
+"""그래프 실행 범위 컨텍스트를 나타내는 데 사용되는 타입 변수입니다.
 
-Defaults to `None`.
+기본값은 `None`입니다.
 """
 
 ContextT_contra = TypeVar(
@@ -31,18 +31,18 @@ ContextT_contra = TypeVar(
 )
 
 InputT = TypeVar("InputT", bound=StateLike, default=StateT)
-"""Type variable used to represent the input to a state graph.
+"""상태 그래프의 입력을 나타내는 데 사용되는 타입 변수입니다.
 
-Defaults to `StateT`.
+기본값은 `StateT`입니다.
 """
 
 OutputT = TypeVar("OutputT", bound=StateLike, default=StateT)
-"""Type variable used to represent the output of a state graph.
+"""상태 그래프의 출력을 나타내는 데 사용되는 타입 변수입니다.
 
-Defaults to `StateT`.
+기본값은 `StateT`입니다.
 """
 
 NodeInputT = TypeVar("NodeInputT", bound=StateLike)
-"""Type variable used to represent the input to a node."""
+"""노드의 입력을 나타내는 데 사용되는 타입 변수입니다."""
 
 NodeInputT_contra = TypeVar("NodeInputT_contra", bound=StateLike, contravariant=True)

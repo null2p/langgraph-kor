@@ -25,29 +25,28 @@ from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 from langgraph.checkpoint.sqlite.utils import search_where
 
 _AIO_ERROR_MSG = (
-    "The SqliteSaver does not support async methods. "
-    "Consider using AsyncSqliteSaver instead.\n"
+    "SqliteSaver는 비동기 메서드를 지원하지 않습니다. "
+    "대신 AsyncSqliteSaver를 사용하세요.\n"
     "from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver\n"
-    "Note: AsyncSqliteSaver requires the aiosqlite package to use.\n"
-    "Install with:\n`pip install aiosqlite`\n"
-    "See https://langchain-ai.github.io/langgraph/reference/checkpoints/#langgraph.checkpoint.sqlite.aio.AsyncSqliteSaver"
-    "for more information."
+    "참고: AsyncSqliteSaver를 사용하려면 aiosqlite 패키지가 필요합니다.\n"
+    "설치 방법:\n`pip install aiosqlite`\n"
+    "자세한 내용은 https://langchain-ai.github.io/langgraph/reference/checkpoints/#langgraph.checkpoint.sqlite.aio.AsyncSqliteSaver"
+    "를 참조하세요."
 )
 
 
 class SqliteSaver(BaseCheckpointSaver[str]):
-    """A checkpoint saver that stores checkpoints in a SQLite database.
+    """체크포인트를 SQLite 데이터베이스에 저장하는 체크포인트 세이버입니다.
 
-    Note:
-        This class is meant for lightweight, synchronous use cases
-        (demos and small projects) and does not
-        scale to multiple threads.
-        For a similar sqlite saver with `async` support,
-        consider using [AsyncSqliteSaver][langgraph.checkpoint.sqlite.aio.AsyncSqliteSaver].
+    참고:
+        이 클래스는 가벼운 동기 사용 사례(데모 및 소규모 프로젝트)를 위한 것이며
+        여러 스레드로 확장되지 않습니다.
+        `async` 지원이 포함된 유사한 sqlite 세이버를 원하면
+        [AsyncSqliteSaver][langgraph.checkpoint.sqlite.aio.AsyncSqliteSaver]를 사용하세요.
 
     Args:
-        conn (sqlite3.Connection): The SQLite database connection.
-        serde (Optional[SerializerProtocol]): The serializer to use for serializing and deserializing checkpoints. Defaults to JsonPlusSerializerCompat.
+        conn (sqlite3.Connection): SQLite 데이터베이스 연결입니다.
+        serde (Optional[SerializerProtocol]): 체크포인트를 직렬화 및 역직렬화하는 데 사용할 직렬화 도구입니다. 기본값은 JsonPlusSerializerCompat입니다.
 
     Examples:
 
@@ -59,9 +58,9 @@ class SqliteSaver(BaseCheckpointSaver[str]):
         >>> builder.add_node("add_one", lambda x: x + 1)
         >>> builder.set_entry_point("add_one")
         >>> builder.set_finish_point("add_one")
-        >>> # Create a new SqliteSaver instance
-        >>> # Note: check_same_thread=False is OK as the implementation uses a lock
-        >>> # to ensure thread safety.
+        >>> # 새 SqliteSaver 인스턴스 생성
+        >>> # 참고: check_same_thread=False는 구현이 락을 사용하므로 괜찮습니다
+        >>> # 스레드 안전성을 보장합니다.
         >>> conn = sqlite3.connect("checkpoints.sqlite", check_same_thread=False)
         >>> memory = SqliteSaver(conn)
         >>> graph = builder.compile(checkpointer=memory)
@@ -90,22 +89,22 @@ class SqliteSaver(BaseCheckpointSaver[str]):
     @classmethod
     @contextmanager
     def from_conn_string(cls, conn_string: str) -> Iterator[SqliteSaver]:
-        """Create a new SqliteSaver instance from a connection string.
+        """연결 문자열에서 새 SqliteSaver 인스턴스를 생성합니다.
 
         Args:
-            conn_string: The SQLite connection string.
+            conn_string: SQLite 연결 문자열입니다.
 
         Yields:
-            SqliteSaver: A new SqliteSaver instance.
+            SqliteSaver: 새 SqliteSaver 인스턴스입니다.
 
         Examples:
 
-            In memory:
+            메모리 내:
 
                 with SqliteSaver.from_conn_string(":memory:") as memory:
                     ...
 
-            To disk:
+            디스크에:
 
                 with SqliteSaver.from_conn_string("checkpoints.sqlite") as memory:
                     ...
@@ -120,11 +119,10 @@ class SqliteSaver(BaseCheckpointSaver[str]):
             yield cls(conn)
 
     def setup(self) -> None:
-        """Set up the checkpoint database.
+        """체크포인트 데이터베이스를 설정합니다.
 
-        This method creates the necessary tables in the SQLite database if they don't
-        already exist. It is called automatically when needed and should not be called
-        directly by the user.
+        이 메서드는 SQLite 데이터베이스에 필요한 테이블이 없는 경우 생성합니다.
+        필요할 때 자동으로 호출되며 사용자가 직접 호출해서는 안 됩니다.
         """
         if self.is_setup:
             return
@@ -160,16 +158,16 @@ class SqliteSaver(BaseCheckpointSaver[str]):
 
     @contextmanager
     def cursor(self, transaction: bool = True) -> Iterator[sqlite3.Cursor]:
-        """Get a cursor for the SQLite database.
+        """SQLite 데이터베이스에 대한 커서를 가져옵니다.
 
-        This method returns a cursor for the SQLite database. It is used internally
-        by the SqliteSaver and should not be called directly by the user.
+        이 메서드는 SQLite 데이터베이스에 대한 커서를 반환합니다. SqliteSaver에서 내부적으로
+        사용되며 사용자가 직접 호출해서는 안 됩니다.
 
         Args:
-            transaction (bool): Whether to commit the transaction when the cursor is closed. Defaults to True.
+            transaction (bool): 커서가 닫힐 때 트랜잭션을 커밋할지 여부입니다. 기본값은 True입니다.
 
         Yields:
-            sqlite3.Cursor: A cursor for the SQLite database.
+            sqlite3.Cursor: SQLite 데이터베이스에 대한 커서입니다.
         """
         with self.lock:
             self.setup()
@@ -182,28 +180,27 @@ class SqliteSaver(BaseCheckpointSaver[str]):
                 cur.close()
 
     def get_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
-        """Get a checkpoint tuple from the database.
+        """데이터베이스에서 체크포인트 튜플을 가져옵니다.
 
-        This method retrieves a checkpoint tuple from the SQLite database based on the
-        provided config. If the config contains a `checkpoint_id` key, the checkpoint with
-        the matching thread ID and checkpoint ID is retrieved. Otherwise, the latest checkpoint
-        for the given thread ID is retrieved.
+        이 메서드는 제공된 config를 기반으로 SQLite 데이터베이스에서 체크포인트 튜플을 가져옵니다.
+        config에 `checkpoint_id` 키가 포함되어 있으면 일치하는 스레드 ID와 체크포인트 ID를 가진
+        체크포인트가 검색됩니다. 그렇지 않으면 주어진 스레드 ID에 대한 최신 체크포인트가 검색됩니다.
 
         Args:
-            config: The config to use for retrieving the checkpoint.
+            config: 체크포인트를 검색하는 데 사용할 config입니다.
 
         Returns:
-            The retrieved checkpoint tuple, or None if no matching checkpoint was found.
+            검색된 체크포인트 튜플이거나, 일치하는 체크포인트를 찾지 못한 경우 None입니다.
 
         Examples:
 
-            Basic:
+            기본:
             >>> config = {"configurable": {"thread_id": "1"}}
             >>> checkpoint_tuple = memory.get_tuple(config)
             >>> print(checkpoint_tuple)
             CheckpointTuple(...)
 
-            With checkpoint ID:
+            체크포인트 ID 포함:
 
             >>> config = {
             ...    "configurable": {
@@ -218,7 +215,7 @@ class SqliteSaver(BaseCheckpointSaver[str]):
         """  # noqa
         checkpoint_ns = config["configurable"].get("checkpoint_ns", "")
         with self.cursor(transaction=False) as cur:
-            # find the latest checkpoint for the thread_id
+            # thread_id에 대한 최신 체크포인트 찾기
             if checkpoint_id := get_checkpoint_id(config):
                 cur.execute(
                     "SELECT thread_id, checkpoint_id, parent_checkpoint_id, type, checkpoint, metadata FROM checkpoints WHERE thread_id = ? AND checkpoint_ns = ? AND checkpoint_id = ?",
@@ -233,7 +230,7 @@ class SqliteSaver(BaseCheckpointSaver[str]):
                     "SELECT thread_id, checkpoint_id, parent_checkpoint_id, type, checkpoint, metadata FROM checkpoints WHERE thread_id = ? AND checkpoint_ns = ? ORDER BY checkpoint_id DESC LIMIT 1",
                     (str(config["configurable"]["thread_id"]), checkpoint_ns),
                 )
-            # if a checkpoint is found, return it
+            # 체크포인트가 발견되면 반환
             if value := cur.fetchone():
                 (
                     thread_id,
@@ -251,7 +248,7 @@ class SqliteSaver(BaseCheckpointSaver[str]):
                             "checkpoint_id": checkpoint_id,
                         }
                     }
-                # find any pending writes
+                # 대기 중인 쓰기 찾기
                 cur.execute(
                     "SELECT task_id, channel, type, value FROM writes WHERE thread_id = ? AND checkpoint_ns = ? AND checkpoint_id = ? ORDER BY task_id, idx",
                     (
@@ -260,7 +257,7 @@ class SqliteSaver(BaseCheckpointSaver[str]):
                         str(config["configurable"]["checkpoint_id"]),
                     ),
                 )
-                # deserialize the checkpoint and metadata
+                # 체크포인트와 메타데이터 역직렬화
                 return CheckpointTuple(
                     config,
                     self.serde.loads_typed((type, checkpoint)),
@@ -293,24 +290,24 @@ class SqliteSaver(BaseCheckpointSaver[str]):
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> Iterator[CheckpointTuple]:
-        """List checkpoints from the database.
+        """데이터베이스에서 체크포인트 목록을 조회합니다.
 
-        This method retrieves a list of checkpoint tuples from the SQLite database based
-        on the provided config. The checkpoints are ordered by checkpoint ID in descending order (newest first).
+        이 메서드는 제공된 config를 기반으로 SQLite 데이터베이스에서 체크포인트 튜플 목록을 검색합니다.
+        체크포인트는 체크포인트 ID를 기준으로 내림차순(최신 우선)으로 정렬됩니다.
 
         Args:
-            config: The config to use for listing the checkpoints.
-            filter: Additional filtering criteria for metadata.
-            before: If provided, only checkpoints before the specified checkpoint ID are returned.
-            limit: The maximum number of checkpoints to return.
+            config: 체크포인트 목록을 조회하는 데 사용할 config입니다.
+            filter: 메타데이터에 대한 추가 필터링 기준입니다.
+            before: 제공된 경우 지정된 체크포인트 ID 이전의 체크포인트만 반환됩니다.
+            limit: 반환할 최대 체크포인트 수입니다.
 
         Yields:
-            An iterator of checkpoint tuples.
+            체크포인트 튜플의 이터레이터입니다.
 
         Examples:
             >>> from langgraph.checkpoint.sqlite import SqliteSaver
             >>> with SqliteSaver.from_conn_string(":memory:") as memory:
-            ... # Run a graph, then list the checkpoints
+            ... # 그래프를 실행한 다음 체크포인트 목록 조회
             >>>     config = {"configurable": {"thread_id": "1"}}
             >>>     checkpoints = list(memory.list(config, limit=2))
             >>> print(checkpoints)
@@ -319,7 +316,7 @@ class SqliteSaver(BaseCheckpointSaver[str]):
             >>> config = {"configurable": {"thread_id": "1"}}
             >>> before = {"configurable": {"checkpoint_id": "1ef4f797-8335-6428-8001-8a1503f9b875"}}
             >>> with SqliteSaver.from_conn_string(":memory:") as memory:
-            ... # Run a graph, then list the checkpoints
+            ... # 그래프를 실행한 다음 체크포인트 목록 조회
             >>>     checkpoints = list(memory.list(config, before=before))
             >>> print(checkpoints)
             [CheckpointTuple(...), ...]
@@ -383,19 +380,19 @@ class SqliteSaver(BaseCheckpointSaver[str]):
         metadata: CheckpointMetadata,
         new_versions: ChannelVersions,
     ) -> RunnableConfig:
-        """Save a checkpoint to the database.
+        """체크포인트를 데이터베이스에 저장합니다.
 
-        This method saves a checkpoint to the SQLite database. The checkpoint is associated
-        with the provided config and its parent config (if any).
+        이 메서드는 체크포인트를 SQLite 데이터베이스에 저장합니다. 체크포인트는 제공된
+        config 및 해당 부모 config(있는 경우)와 연결됩니다.
 
         Args:
-            config: The config to associate with the checkpoint.
-            checkpoint: The checkpoint to save.
-            metadata: Additional metadata to save with the checkpoint.
-            new_versions: New channel versions as of this write.
+            config: 체크포인트와 연결할 config입니다.
+            checkpoint: 저장할 체크포인트입니다.
+            metadata: 체크포인트와 함께 저장할 추가 메타데이터입니다.
+            new_versions: 이 쓰기 시점의 새 채널 버전입니다.
 
         Returns:
-            RunnableConfig: Updated configuration after storing the checkpoint.
+            RunnableConfig: 체크포인트 저장 후 업데이트된 구성입니다.
 
         Examples:
 
@@ -441,15 +438,15 @@ class SqliteSaver(BaseCheckpointSaver[str]):
         task_id: str,
         task_path: str = "",
     ) -> None:
-        """Store intermediate writes linked to a checkpoint.
+        """체크포인트에 연결된 중간 쓰기를 저장합니다.
 
-        This method saves intermediate writes associated with a checkpoint to the SQLite database.
+        이 메서드는 체크포인트와 연결된 중간 쓰기를 SQLite 데이터베이스에 저장합니다.
 
         Args:
-            config: Configuration of the related checkpoint.
-            writes: List of writes to store, each as (channel, value) pair.
-            task_id: Identifier for the task creating the writes.
-            task_path: Path of the task creating the writes.
+            config: 관련 체크포인트의 구성입니다.
+            writes: 저장할 쓰기 목록이며, 각각 (channel, value) 쌍입니다.
+            task_id: 쓰기를 생성하는 작업의 식별자입니다.
+            task_path: 쓰기를 생성하는 작업의 경로입니다.
         """
         query = (
             "INSERT OR REPLACE INTO writes (thread_id, checkpoint_ns, checkpoint_id, task_id, idx, channel, type, value) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
@@ -474,10 +471,10 @@ class SqliteSaver(BaseCheckpointSaver[str]):
             )
 
     def delete_thread(self, thread_id: str) -> None:
-        """Delete all checkpoints and writes associated with a thread ID.
+        """스레드 ID와 연결된 모든 체크포인트 및 쓰기를 삭제합니다.
 
         Args:
-            thread_id: The thread ID to delete.
+            thread_id: 삭제할 스레드 ID입니다.
 
         Returns:
             None
@@ -493,11 +490,11 @@ class SqliteSaver(BaseCheckpointSaver[str]):
             )
 
     async def aget_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
-        """Get a checkpoint tuple from the database asynchronously.
+        """데이터베이스에서 체크포인트 튜플을 비동기적으로 가져옵니다.
 
-        Note:
-            This async method is not supported by the SqliteSaver class.
-            Use get_tuple() instead, or consider using [AsyncSqliteSaver][langgraph.checkpoint.sqlite.aio.AsyncSqliteSaver].
+        참고:
+            이 비동기 메서드는 SqliteSaver 클래스에서 지원되지 않습니다.
+            대신 get_tuple()을 사용하거나 [AsyncSqliteSaver][langgraph.checkpoint.sqlite.aio.AsyncSqliteSaver]를 사용하세요.
         """
         raise NotImplementedError(_AIO_ERROR_MSG)
 
@@ -509,11 +506,11 @@ class SqliteSaver(BaseCheckpointSaver[str]):
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> AsyncIterator[CheckpointTuple]:
-        """List checkpoints from the database asynchronously.
+        """데이터베이스에서 체크포인트 목록을 비동기적으로 조회합니다.
 
-        Note:
-            This async method is not supported by the SqliteSaver class.
-            Use list() instead, or consider using [AsyncSqliteSaver][langgraph.checkpoint.sqlite.aio.AsyncSqliteSaver].
+        참고:
+            이 비동기 메서드는 SqliteSaver 클래스에서 지원되지 않습니다.
+            대신 list()를 사용하거나 [AsyncSqliteSaver][langgraph.checkpoint.sqlite.aio.AsyncSqliteSaver]를 사용하세요.
         """
         raise NotImplementedError(_AIO_ERROR_MSG)
         yield
@@ -525,24 +522,24 @@ class SqliteSaver(BaseCheckpointSaver[str]):
         metadata: CheckpointMetadata,
         new_versions: ChannelVersions,
     ) -> RunnableConfig:
-        """Save a checkpoint to the database asynchronously.
+        """체크포인트를 데이터베이스에 비동기적으로 저장합니다.
 
-        Note:
-            This async method is not supported by the SqliteSaver class.
-            Use put() instead, or consider using [AsyncSqliteSaver][langgraph.checkpoint.sqlite.aio.AsyncSqliteSaver].
+        참고:
+            이 비동기 메서드는 SqliteSaver 클래스에서 지원되지 않습니다.
+            대신 put()을 사용하거나 [AsyncSqliteSaver][langgraph.checkpoint.sqlite.aio.AsyncSqliteSaver]를 사용하세요.
         """
         raise NotImplementedError(_AIO_ERROR_MSG)
 
     def get_next_version(self, current: str | None, channel: None) -> str:
-        """Generate the next version ID for a channel.
+        """채널에 대한 다음 버전 ID를 생성합니다.
 
-        This method creates a new version identifier for a channel based on its current version.
+        이 메서드는 현재 버전을 기반으로 채널에 대한 새 버전 식별자를 생성합니다.
 
         Args:
-            current (Optional[str]): The current version identifier of the channel.
+            current (Optional[str]): 채널의 현재 버전 식별자입니다.
 
         Returns:
-            str: The next version identifier, which is guaranteed to be monotonically increasing.
+            str: 단조 증가하도록 보장된 다음 버전 식별자입니다.
         """
         if current is None:
             current_v = 0

@@ -109,23 +109,23 @@ def _get_node_name(node: StateNode[Any, ContextT]) -> str:
 
 
 class StateGraph(Generic[StateT, ContextT, InputT, OutputT]):
-    """A graph whose nodes communicate by reading and writing to a shared state.
-    The signature of each node is State -> Partial<State>.
+    """공유 상태를 읽고 쓰는 방식으로 노드들이 통신하는 그래프입니다.
+    각 노드의 시그니처는 State -> Partial<State>입니다.
 
-    Each state key can optionally be annotated with a reducer function that
-    will be used to aggregate the values of that key received from multiple nodes.
-    The signature of a reducer function is `(Value, Value) -> Value`.
+    각 상태 키는 선택적으로 리듀서 함수로 어노테이션할 수 있으며,
+    이 함수는 여러 노드로부터 받은 해당 키의 값들을 집계하는 데 사용됩니다.
+    리듀서 함수의 시그니처는 `(Value, Value) -> Value`입니다.
 
     Args:
-        state_schema: The schema class that defines the state.
-        context_schema: The schema class that defines the runtime context.
-            Use this to expose immutable context data to your nodes, like `user_id`, `db_conn`, etc.
-        input_schema: The schema class that defines the input to the graph.
-        output_schema: The schema class that defines the output from the graph.
+        state_schema: 상태를 정의하는 스키마 클래스입니다.
+        context_schema: 런타임 컨텍스트를 정의하는 스키마 클래스입니다.
+            이를 사용하여 `user_id`, `db_conn` 등과 같은 불변 컨텍스트 데이터를 노드에 노출할 수 있습니다.
+        input_schema: 그래프의 입력을 정의하는 스키마 클래스입니다.
+        output_schema: 그래프의 출력을 정의하는 스키마 클래스입니다.
 
-    !!! warning "`config_schema` Deprecated"
-        The `config_schema` parameter is deprecated in v0.6.0 and support will be removed in v2.0.0.
-        Please use `context_schema` instead to specify the schema for run-scoped context.
+    !!! warning "`config_schema` 지원 중단"
+        `config_schema` 파라미터는 v0.6.0에서 지원 중단되었으며 v2.0.0에서 제거될 예정입니다.
+        대신 `context_schema`를 사용하여 실행 범위 컨텍스트의 스키마를 지정하십시오.
 
     Example:
         ```python
@@ -289,8 +289,8 @@ class StateGraph(Generic[StateT, ContextT, InputT, OutputT]):
         destinations: dict[str, str] | tuple[str, ...] | None = None,
         **kwargs: Unpack[DeprecatedKwargs],
     ) -> Self:
-        """Add a new node to the state graph, input schema is inferred as the state schema.
-        Will take the name of the function/runnable as the node name.
+        """상태 그래프에 새 노드를 추가합니다. 입력 스키마는 상태 스키마로 추론됩니다.
+        함수/runnable의 이름을 노드 이름으로 사용합니다.
         """
         ...
 
@@ -307,8 +307,8 @@ class StateGraph(Generic[StateT, ContextT, InputT, OutputT]):
         destinations: dict[str, str] | tuple[str, ...] | None = None,
         **kwargs: Unpack[DeprecatedKwargs],
     ) -> Self:
-        """Add a new node to the state graph, input schema is specified.
-        Will take the name of the function/runnable as the node name.
+        """상태 그래프에 새 노드를 추가합니다. 입력 스키마가 지정됩니다.
+        함수/runnable의 이름을 노드 이름으로 사용합니다.
         """
         ...
 
@@ -326,7 +326,7 @@ class StateGraph(Generic[StateT, ContextT, InputT, OutputT]):
         destinations: dict[str, str] | tuple[str, ...] | None = None,
         **kwargs: Unpack[DeprecatedKwargs],
     ) -> Self:
-        """Add a new node to the state graph, input schema is inferred as the state schema."""
+        """상태 그래프에 새 노드를 추가합니다. 입력 스키마는 상태 스키마로 추론됩니다."""
         ...
 
     @overload
@@ -343,7 +343,7 @@ class StateGraph(Generic[StateT, ContextT, InputT, OutputT]):
         destinations: dict[str, str] | tuple[str, ...] | None = None,
         **kwargs: Unpack[DeprecatedKwargs],
     ) -> Self:
-        """Add a new node to the state graph, input schema is specified."""
+        """상태 그래프에 새 노드를 추가합니다. 입력 스키마가 지정됩니다."""
         ...
 
     def add_node(
@@ -359,27 +359,27 @@ class StateGraph(Generic[StateT, ContextT, InputT, OutputT]):
         destinations: dict[str, str] | tuple[str, ...] | None = None,
         **kwargs: Unpack[DeprecatedKwargs],
     ) -> Self:
-        """Add a new node to the state graph.
+        """상태 그래프에 새 노드를 추가합니다.
 
         Args:
-            node: The function or runnable this node will run.
-                If a string is provided, it will be used as the node name, and action will be used as the function or runnable.
-            action: The action associated with the node.
-                Will be used as the node function or runnable if `node` is a string (node name).
-            defer: Whether to defer the execution of the node until the run is about to end.
-            metadata: The metadata associated with the node.
-            input_schema: The input schema for the node. (default: the graph's state schema)
-            retry_policy: The retry policy for the node.
-                If a sequence is provided, the first matching policy will be applied.
-            cache_policy: The cache policy for the node.
-            destinations: Destinations that indicate where a node can route to.
-                This is useful for edgeless graphs with nodes that return `Command` objects.
-                If a `dict` is provided, the keys will be used as the target node names and the values will be used as the labels for the edges.
-                If a `tuple` is provided, the values will be used as the target node names.
+            node: 이 노드가 실행할 함수 또는 runnable입니다.
+                문자열이 제공되면 노드 이름으로 사용되며, action이 함수 또는 runnable로 사용됩니다.
+            action: 노드와 연결된 액션입니다.
+                `node`가 문자열(노드 이름)인 경우 노드 함수 또는 runnable로 사용됩니다.
+            defer: 실행이 끝나기 직전까지 노드 실행을 지연할지 여부입니다.
+            metadata: 노드와 연결된 메타데이터입니다.
+            input_schema: 노드의 입력 스키마입니다. (기본값: 그래프의 상태 스키마)
+            retry_policy: 노드의 재시도 정책입니다.
+                시퀀스가 제공되면 첫 번째로 일치하는 정책이 적용됩니다.
+            cache_policy: 노드의 캐시 정책입니다.
+            destinations: 노드가 라우팅할 수 있는 목적지를 나타냅니다.
+                `Command` 객체를 반환하는 노드가 있는 엣지 없는 그래프에 유용합니다.
+                `dict`가 제공되면 키는 대상 노드 이름으로 사용되고 값은 엣지의 레이블로 사용됩니다.
+                `tuple`이 제공되면 값이 대상 노드 이름으로 사용됩니다.
 
                 !!! note
 
-                    This is only used for graph rendering and doesn't have any effect on the graph execution.
+                    이것은 그래프 렌더링에만 사용되며 그래프 실행에는 영향을 미치지 않습니다.
 
         Example:
             ```python
@@ -416,7 +416,7 @@ class StateGraph(Generic[StateT, ContextT, InputT, OutputT]):
             ```
 
         Returns:
-            Self: The instance of the state graph, allowing for method chaining.
+            Self: 메서드 체이닝을 허용하는 상태 그래프의 인스턴스입니다.
         """
         if (retry := kwargs.get("retry", MISSING)) is not MISSING:
             warnings.warn(
@@ -557,21 +557,21 @@ class StateGraph(Generic[StateT, ContextT, InputT, OutputT]):
         return self
 
     def add_edge(self, start_key: str | list[str], end_key: str) -> Self:
-        """Add a directed edge from the start node (or list of start nodes) to the end node.
+        """시작 노드(또는 시작 노드 목록)에서 종료 노드로의 방향성 엣지를 추가합니다.
 
-        When a single start node is provided, the graph will wait for that node to complete
-        before executing the end node. When multiple start nodes are provided,
-        the graph will wait for ALL of the start nodes to complete before executing the end node.
+        단일 시작 노드가 제공되면 그래프는 해당 노드가 완료될 때까지 기다린 후
+        종료 노드를 실행합니다. 여러 시작 노드가 제공되면
+        그래프는 모든 시작 노드가 완료될 때까지 기다린 후 종료 노드를 실행합니다.
 
         Args:
-            start_key: The key(s) of the start node(s) of the edge.
-            end_key: The key of the end node of the edge.
+            start_key: 엣지의 시작 노드 키입니다.
+            end_key: 엣지의 종료 노드 키입니다.
 
         Raises:
-            ValueError: If the start key is `'END'` or if the start key or end key is not present in the graph.
+            ValueError: 시작 키가 `'END'`이거나 시작 키 또는 종료 키가 그래프에 없는 경우 발생합니다.
 
         Returns:
-            Self: The instance of the state graph, allowing for method chaining.
+            Self: 메서드 체이닝을 허용하는 상태 그래프의 인스턴스입니다.
         """
         if self.compiled:
             logger.warning(
@@ -618,23 +618,22 @@ class StateGraph(Generic[StateT, ContextT, InputT, OutputT]):
         | Runnable[Any, Hashable | Sequence[Hashable]],
         path_map: dict[Hashable, str] | list[str] | None = None,
     ) -> Self:
-        """Add a conditional edge from the starting node to any number of destination nodes.
+        """시작 노드에서 여러 목적지 노드로의 조건부 엣지를 추가합니다.
 
         Args:
-            source: The starting node. This conditional edge will run when
-                exiting this node.
-            path: The callable that determines the next
-                node or nodes. If not specifying `path_map` it should return one or
-                more nodes. If it returns `'END'`, the graph will stop execution.
-            path_map: Optional mapping of paths to node
-                names. If omitted the paths returned by `path` should be node names.
+            source: 시작 노드입니다. 이 조건부 엣지는 이 노드를 종료할 때 실행됩니다.
+            path: 다음 노드를 결정하는 호출 가능 객체입니다.
+                `path_map`을 지정하지 않으면 하나 이상의 노드를 반환해야 합니다.
+                `'END'`를 반환하면 그래프 실행이 중지됩니다.
+            path_map: 경로를 노드 이름에 매핑하는 선택적 매핑입니다.
+                생략하면 `path`가 반환하는 경로가 노드 이름이어야 합니다.
 
         Returns:
-            Self: The instance of the graph, allowing for method chaining.
+            Self: 메서드 체이닝을 허용하는 그래프의 인스턴스입니다.
 
         !!! warning
-            Without type hints on the `path` function's return value (e.g., `-> Literal["foo", "__end__"]:`)
-            or a path_map, the graph visualization assumes the edge could transition to any node in the graph.
+            `path` 함수의 반환 값에 대한 타입 힌트(예: `-> Literal["foo", "__end__"]:`)
+            또는 path_map이 없으면 그래프 시각화는 엣지가 그래프의 모든 노드로 전환될 수 있다고 가정합니다.
 
         """  # noqa: E501
         if self.compiled:
@@ -664,19 +663,19 @@ class StateGraph(Generic[StateT, ContextT, InputT, OutputT]):
             | tuple[str, StateNode[NodeInputT, ContextT]]
         ],
     ) -> Self:
-        """Add a sequence of nodes that will be executed in the provided order.
+        """제공된 순서대로 실행될 노드 시퀀스를 추가합니다.
 
         Args:
-            nodes: A sequence of `StateNode` (callables that accept a `state` arg) or `(name, StateNode)` tuples.
-                If no names are provided, the name will be inferred from the node object (e.g. a `Runnable` or a `Callable` name).
-                Each node will be executed in the order provided.
+            nodes: `StateNode`(`state` 인자를 받는 호출 가능 객체) 또는 `(name, StateNode)` 튜플의 시퀀스입니다.
+                이름이 제공되지 않으면 노드 객체(예: `Runnable` 또는 `Callable` 이름)에서 이름이 추론됩니다.
+                각 노드는 제공된 순서대로 실행됩니다.
 
         Raises:
-            ValueError: If the sequence is empty.
-            ValueError: If the sequence contains duplicate node names.
+            ValueError: 시퀀스가 비어 있는 경우 발생합니다.
+            ValueError: 시퀀스에 중복된 노드 이름이 포함된 경우 발생합니다.
 
         Returns:
-            Self: The instance of the state graph, allowing for method chaining.
+            Self: 메서드 체이닝을 허용하는 상태 그래프의 인스턴스입니다.
         """
         if len(nodes) < 1:
             raise ValueError("Sequence requires at least one node.")
@@ -703,15 +702,15 @@ class StateGraph(Generic[StateT, ContextT, InputT, OutputT]):
         return self
 
     def set_entry_point(self, key: str) -> Self:
-        """Specifies the first node to be called in the graph.
+        """그래프에서 호출할 첫 번째 노드를 지정합니다.
 
-        Equivalent to calling `add_edge(START, key)`.
+        `add_edge(START, key)`를 호출하는 것과 동일합니다.
 
         Parameters:
-            key (str): The key of the node to set as the entry point.
+            key (str): 진입점으로 설정할 노드의 키입니다.
 
         Returns:
-            Self: The instance of the graph, allowing for method chaining.
+            Self: 메서드 체이닝을 허용하는 그래프의 인스턴스입니다.
         """
         return self.add_edge(START, key)
 
@@ -722,30 +721,30 @@ class StateGraph(Generic[StateT, ContextT, InputT, OutputT]):
         | Runnable[Any, Hashable | Sequence[Hashable]],
         path_map: dict[Hashable, str] | list[str] | None = None,
     ) -> Self:
-        """Sets a conditional entry point in the graph.
+        """그래프에 조건부 진입점을 설정합니다.
 
         Args:
-            path: The callable that determines the next
-                node or nodes. If not specifying `path_map` it should return one or
-                more nodes. If it returns END, the graph will stop execution.
-            path_map: Optional mapping of paths to node
-                names. If omitted the paths returned by `path` should be node names.
+            path: 다음 노드를 결정하는 호출 가능 객체입니다.
+                `path_map`을 지정하지 않으면 하나 이상의 노드를 반환해야 합니다.
+                END를 반환하면 그래프 실행이 중지됩니다.
+            path_map: 경로를 노드 이름에 매핑하는 선택적 매핑입니다.
+                생략하면 `path`가 반환하는 경로가 노드 이름이어야 합니다.
 
         Returns:
-            Self: The instance of the graph, allowing for method chaining.
+            Self: 메서드 체이닝을 허용하는 그래프의 인스턴스입니다.
         """
         return self.add_conditional_edges(START, path, path_map)
 
     def set_finish_point(self, key: str) -> Self:
-        """Marks a node as a finish point of the graph.
+        """노드를 그래프의 종료 지점으로 표시합니다.
 
-        If the graph reaches this node, it will cease execution.
+        그래프가 이 노드에 도달하면 실행이 중지됩니다.
 
         Parameters:
-            key (str): The key of the node to set as the finish point.
+            key (str): 종료 지점으로 설정할 노드의 키입니다.
 
         Returns:
-            Self: The instance of the graph, allowing for method chaining.
+            Self: 메서드 체이닝을 허용하는 그래프의 인스턴스입니다.
         """
         return self.add_edge(key, END)
 
@@ -809,24 +808,24 @@ class StateGraph(Generic[StateT, ContextT, InputT, OutputT]):
         debug: bool = False,
         name: str | None = None,
     ) -> CompiledStateGraph[StateT, ContextT, InputT, OutputT]:
-        """Compiles the state graph into a `CompiledStateGraph` object.
+        """상태 그래프를 `CompiledStateGraph` 객체로 컴파일합니다.
 
-        The compiled graph implements the `Runnable` interface and can be invoked,
-        streamed, batched, and run asynchronously.
+        컴파일된 그래프는 `Runnable` 인터페이스를 구현하며 호출, 스트리밍,
+        배치 처리 및 비동기 실행이 가능합니다.
 
         Args:
-            checkpointer: A checkpoint saver object or flag.
-                If provided, this `Checkpointer` serves as a fully versioned "short-term memory" for the graph,
-                allowing it to be paused, resumed, and replayed from any point.
-                If `None`, it may inherit the parent graph's checkpointer when used as a subgraph.
-                If `False`, it will not use or inherit any checkpointer.
-            interrupt_before: An optional list of node names to interrupt before.
-            interrupt_after: An optional list of node names to interrupt after.
-            debug: A flag indicating whether to enable debug mode.
-            name: The name to use for the compiled graph.
+            checkpointer: 체크포인트 저장 객체 또는 플래그입니다.
+                제공되면 이 `Checkpointer`는 그래프의 완전히 버전이 지정된 "단기 메모리" 역할을 하며,
+                모든 지점에서 일시 중지, 재개 및 재생할 수 있습니다.
+                `None`이면 서브그래프로 사용될 때 부모 그래프의 checkpointer를 상속할 수 있습니다.
+                `False`이면 어떤 checkpointer도 사용하거나 상속하지 않습니다.
+            interrupt_before: 이전에 중단할 노드 이름의 선택적 목록입니다.
+            interrupt_after: 이후에 중단할 노드 이름의 선택적 목록입니다.
+            debug: 디버그 모드를 활성화할지 여부를 나타내는 플래그입니다.
+            name: 컴파일된 그래프에 사용할 이름입니다.
 
         Returns:
-            CompiledStateGraph: The compiled state graph.
+            CompiledStateGraph: 컴파일된 상태 그래프입니다.
         """
         # assign default values
         interrupt_before = interrupt_before or []
@@ -1118,7 +1117,7 @@ class CompiledStateGraph(
         self.nodes[start].writers.append(branch.run(get_writes, reader))
 
     def _migrate_checkpoint(self, checkpoint: Checkpoint) -> None:
-        """Migrate a checkpoint to new channel layout."""
+        """체크포인트를 새 채널 레이아웃으로 마이그레이션합니다."""
         super()._migrate_checkpoint(checkpoint)
 
         values = checkpoint["channel_values"]

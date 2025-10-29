@@ -1,4 +1,4 @@
-"""Internal modules for LangGraph.
+"""LangGraph의 내부 모듈입니다.
 
-This module is not part of the public API, and thus stability is not guaranteed.
+이 모듈은 공개 API의 일부가 아니므로 안정성이 보장되지 않습니다.
 """

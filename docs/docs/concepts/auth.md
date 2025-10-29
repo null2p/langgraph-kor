@@ -3,73 +3,73 @@ search:
   boost: 2
 ---
 
-# Authentication & Access Control
+# 인증 및 액세스 제어
 
-LangGraph Platform provides a flexible authentication and authorization system that can integrate with most authentication schemes.
+LangGraph Platform은 대부분의 인증 체계와 통합할 수 있는 유연한 인증 및 권한 부여 시스템을 제공합니다.
 
-## Core Concepts
+## 핵심 개념
 
-### Authentication vs Authorization
+### 인증 vs 권한 부여
 
-While often used interchangeably, these terms represent distinct security concepts:
+종종 혼용되지만, 이 용어들은 서로 다른 보안 개념을 나타냅니다:
 
-- [**Authentication**](#authentication) ("AuthN") verifies _who_ you are. This runs as middleware for every request.
-- [**Authorization**](#authorization) ("AuthZ") determines _what you can do_. This validates the user's privileges and roles on a per-resource basis.
+- [**인증**](#authentication) ("AuthN")은 _당신이 누구인지_를 확인합니다. 이는 모든 요청에 대해 미들웨어로 실행됩니다.
+- [**권한 부여**](#authorization) ("AuthZ")는 _당신이 무엇을 할 수 있는지_를 결정합니다. 이는 리소스별로 사용자의 권한과 역할을 검증합니다.
 
 :::python
-In LangGraph Platform, authentication is handled by your [`@auth.authenticate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.authenticate) handler, and authorization is handled by your [`@auth.on`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.on) handlers.
+LangGraph Platform에서 인증은 [`@auth.authenticate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.authenticate) 핸들러로 처리되고, 권한 부여는 [`@auth.on`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.on) 핸들러로 처리됩니다.
 :::
 
 :::js
-In LangGraph Platform, authentication is handled by your [`@auth.authenticate`](../cloud/reference/sdk/typescript_sdk_ref.md#auth.authenticate) handler, and authorization is handled by your [`@auth.on`](../cloud/reference/sdk/typescript_sdk_ref.md#auth.on) handlers.
+LangGraph Platform에서 인증은 [`@auth.authenticate`](../cloud/reference/sdk/typescript_sdk_ref.md#auth.authenticate) 핸들러로 처리되고, 권한 부여는 [`@auth.on`](../cloud/reference/sdk/typescript_sdk_ref.md#auth.on) 핸들러로 처리됩니다.
 :::
 
-## Default Security Models
+## 기본 보안 모델
 
-LangGraph Platform provides different security defaults:
+LangGraph Platform은 다양한 보안 기본값을 제공합니다:
 
 ### LangGraph Platform
 
-- Uses LangSmith API keys by default
-- Requires valid API key in `x-api-key` header
-- Can be customized with your auth handler
+- 기본적으로 LangSmith API 키를 사용합니다
+- `x-api-key` 헤더에 유효한 API 키가 필요합니다
+- 인증 핸들러로 사용자 정의할 수 있습니다
 
-!!! note "Custom auth"
+!!! note "사용자 정의 인증"
 
-   Custom auth **is supported** for all plans in LangGraph Platform.
+   사용자 정의 인증은 LangGraph Platform의 모든 플랜에서 **지원됩니다**.
 
 ### Self-Hosted
 
-- No default authentication
-- Complete flexibility to implement your security model
-- You control all aspects of authentication and authorization
+- 기본 인증이 없습니다
+- 보안 모델을 구현할 완전한 유연성을 제공합니다
+- 인증 및 권한 부여의 모든 측면을 제어합니다
 
-## System Architecture
+## 시스템 아키텍처
 
-A typical authentication setup involves three main components:
+일반적인 인증 설정에는 세 가지 주요 구성 요소가 포함됩니다:
 
-1. **Authentication Provider** (Identity Provider/IdP)
+1. **인증 제공자** (Identity Provider/IdP)
 
-   - A dedicated service that manages user identities and credentials
-   - Handles user registration, login, password resets, etc.
-   - Issues tokens (JWT, session tokens, etc.) after successful authentication
-   - Examples: Auth0, Supabase Auth, Okta, or your own auth server
+   - 사용자 신원과 자격 증명을 관리하는 전용 서비스
+   - 사용자 등록, 로그인, 비밀번호 재설정 등을 처리합니다
+   - 인증 성공 후 토큰(JWT, 세션 토큰 등)을 발급합니다
+   - 예시: Auth0, Supabase Auth, Okta 또는 자체 인증 서버
 
-2. **LangGraph Backend** (Resource Server)
+2. **LangGraph 백엔드** (Resource Server)
 
-   - Your LangGraph application that contains business logic and protected resources
-   - Validates tokens with the auth provider
-   - Enforces access control based on user identity and permissions
-   - Doesn't store user credentials directly
+   - 비즈니스 로직과 보호된 리소스를 포함하는 LangGraph 애플리케이션
+   - 인증 제공자와 함께 토큰을 검증합니다
+   - 사용자 신원 및 권한에 따라 액세스 제어를 적용합니다
+   - 사용자 자격 증명을 직접 저장하지 않습니다
 
-3. **Client Application** (Frontend)
+3. **클라이언트 애플리케이션** (Frontend)
 
-   - Web app, mobile app, or API client
-   - Collects time-sensitive user credentials and sends to auth provider
-   - Receives tokens from auth provider
-   - Includes these tokens in requests to LangGraph backend
+   - 웹 앱, 모바일 앱 또는 API 클라이언트
+   - 시간에 민감한 사용자 자격 증명을 수집하여 인증 제공자에게 보냅니다
+   - 인증 제공자로부터 토큰을 받습니다
+   - 이러한 토큰을 LangGraph 백엔드에 대한 요청에 포함합니다
 
-Here's how these components typically interact:
+이러한 구성 요소가 일반적으로 상호 작용하는 방식은 다음과 같습니다:
 
 ```mermaid
 sequenceDiagram
@@ -88,21 +88,21 @@ sequenceDiagram
 ```
 
 :::python
-Your [`@auth.authenticate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.authenticate) handler in LangGraph handles steps 4-6, while your [`@auth.on`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.on) handlers implement step 7.
+LangGraph의 [`@auth.authenticate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.authenticate) 핸들러는 4-6단계를 처리하고, [`@auth.on`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.on) 핸들러는 7단계를 구현합니다.
 :::
 
 :::js
-Your [`auth.authenticate`](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#authenticate) handler in LangGraph handles steps 4-6, while your [`auth.on`](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#on>) handlers implement step 7.
+LangGraph의 [`auth.authenticate`](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#authenticate) 핸들러는 4-6단계를 처리하고, [`auth.on`](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#on>) 핸들러는 7단계를 구현합니다.
 :::
 
-## Authentication
+## 인증
 
 :::python
-Authentication in LangGraph runs as middleware on every request. Your [`@auth.authenticate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.authenticate) handler receives request information and should:
+LangGraph의 인증은 모든 요청에 대해 미들웨어로 실행됩니다. [`@auth.authenticate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.authenticate) 핸들러는 요청 정보를 받아 다음을 수행해야 합니다:
 
-1. Validate the credentials
-2. Return [user info](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.MinimalUserDict) containing the user's identity and user information if valid
-3. Raise an [HTTPException](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.exceptions.HTTPException) or AssertionError if invalid
+1. 자격 증명 검증
+2. 유효한 경우 사용자의 신원과 사용자 정보를 포함하는 [사용자 정보](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.MinimalUserDict) 반환
+3. 유효하지 않은 경우 [HTTPException](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.exceptions.HTTPException) 또는 AssertionError 발생
 
 ```python
 from langgraph_sdk import Auth
@@ -207,9 +207,9 @@ The returned user information is available:
     In many of our tutorials, we will just show the "authorization" parameter to be concise, but you can opt to accept more information as needed
     to implement your custom authentication scheme.
 
-### Agent authentication
+### 에이전트 인증
 
-Custom authentication permits delegated access. The values you return in `@auth.authenticate` are added to the run context, giving agents user-scoped credentials lets them access resources on the user’s behalf.
+사용자 정의 인증은 위임된 액세스를 허용합니다. `@auth.authenticate`에서 반환하는 값은 실행 컨텍스트에 추가되어 에이전트에게 사용자 범위 자격 증명을 제공하여 사용자를 대신하여 리소스에 액세스할 수 있게 합니다.
 
 ```mermaid
 sequenceDiagram
@@ -251,17 +251,17 @@ To enable an agent to act on behalf of the user, use [custom authentication midd
 
 For more information, see the [Use custom auth](../how-tos/auth/custom_auth.md#enable-agent-authentication) guide.
 
-### Agent authentication with MCP
+### MCP를 사용한 에이전트 인증
 
-For information on how to authenticate an agent to an MCP server, see the [MCP conceptual guide](../concepts/mcp.md).
+MCP 서버에 에이전트를 인증하는 방법에 대한 정보는 [MCP 개념 가이드](../concepts/mcp.md)를 참조하세요.
 
-## Authorization
+## 권한 부여
 
-After authentication, LangGraph calls your authorization handlers to control access to specific resources (e.g., threads, assistants, crons). These handlers can:
+인증 후 LangGraph는 권한 부여 핸들러를 호출하여 특정 리소스(예: threads, assistants, crons)에 대한 액세스를 제어합니다. 이러한 핸들러는 다음을 수행할 수 있습니다:
 
-1. Add metadata to be saved during resource creation by mutating the metadata. See the [supported actions table](#supported-actions) for the list of types the value can take for each action.
-2. Filter resources by metadata during search/list or read operations by returning a [filter](#filter-operations).
-3. Raise an HTTP exception if access is denied.
+1. 메타데이터를 변경하여 리소스 생성 중에 저장할 메타데이터를 추가합니다. 각 작업에 대해 값이 가질 수 있는 유형 목록은 [지원되는 작업 테이블](#supported-actions)을 참조하세요.
+2. 검색/목록 또는 읽기 작업 중에 [필터](#filter-operations)를 반환하여 메타데이터별로 리소스를 필터링합니다.
+3. 액세스가 거부된 경우 HTTP 예외를 발생시킵니다.
 
 If you want to just implement simple user-scoped access control, you can use a single authorization handler for all resources and actions. If you want to have different control depending on the resource and action, you can use [resource-specific handlers](#resource-specific-handlers). See the [Supported Resources](#supported-resources) section for a full list of the resources that support access control.
 
@@ -341,7 +341,7 @@ export const auth = new Auth()
 
 :::
 
-### Resource-Specific Handlers {#resource-specific-handlers}
+### 리소스별 핸들러 {#resource-specific-handlers}
 
 You can register handlers for specific resources and actions by chaining the resource and action names together with the authorization decorator.
 When a request is made, the most specific handler that matches that resource and action is called. Below is an example of how to register handlers for specific resources and actions. For the following setup:
@@ -533,7 +533,7 @@ export const auth = new Auth()
 
 Notice that we are mixing global and resource-specific handlers in the above example. Since each request is handled by the most specific handler, a request to create a `thread` would match the `on_thread_create` handler but NOT the `reject_unhandled_requests` handler. A request to `update` a thread, however would be handled by the global handler, since we don't have a more specific handler for that resource and action.
 
-### Filter Operations {#filter-operations}
+### 필터 작업 {#filter-operations}
 
 :::python
 Authorization handlers can return different types of values:
@@ -569,13 +569,13 @@ An object with multiple keys is treated using a logical `AND` filter. For exampl
 See the reference [here](../cloud/reference/sdk/typescript_sdk_ref.md#auth.types.FilterType) for more information.
 :::
 
-## Common Access Patterns
+## 일반적인 액세스 패턴
 
-Here are some typical authorization patterns:
+다음은 일반적인 권한 부여 패턴입니다:
 
-### Single-Owner Resources
+### 단일 소유자 리소스
 
-This common pattern lets you scope all threads, assistants, crons, and runs to a single user. It's useful for common single-user use cases like regular chatbot-style apps.
+이 일반적인 패턴을 사용하면 모든 threads, assistants, crons 및 runs의 범위를 단일 사용자로 지정할 수 있습니다. 일반 챗봇 스타일 앱과 같은 일반적인 단일 사용자 사용 사례에 유용합니다.
 
 :::python
 
@@ -608,9 +608,9 @@ export const auth = new Auth()
 
 :::
 
-### Permission-based Access
+### 권한 기반 액세스
 
-This pattern lets you control access based on **permissions**. It's useful if you want certain roles to have broader or more restricted access to resources.
+이 패턴을 사용하면 **권한**을 기반으로 액세스를 제어할 수 있습니다. 특정 역할이 리소스에 대해 더 광범위하거나 더 제한적인 액세스 권한을 갖도록 하려는 경우 유용합니다.
 
 :::python
 
@@ -688,9 +688,9 @@ export const auth = new Auth()
 
 :::
 
-## Supported Resources
+## 지원되는 리소스
 
-LangGraph provides three levels of authorization handlers, from most general to most specific:
+LangGraph는 가장 일반적인 것부터 가장 구체적인 것까지 세 가지 수준의 권한 부여 핸들러를 제공합니다:
 
 :::python
 
@@ -801,9 +801,9 @@ Here are all the supported action handlers:
     There is a specific `threads:create_run` handler for creating new runs because it had more arguments that you can view in the handler.
     :::
 
-## Next Steps
+## 다음 단계
 
-For implementation details:
+구현 세부 사항은 다음을 참조하세요:
 
-- Check out the introductory tutorial on [setting up authentication](../tutorials/auth/getting_started.md)
-- See the how-to guide on implementing a [custom auth handlers](../how-tos/auth/custom_auth.md)
+- [인증 설정](../tutorials/auth/getting_started.md)에 대한 소개 튜토리얼을 확인하세요
+- [사용자 정의 인증 핸들러](../how-tos/auth/custom_auth.md) 구현에 대한 how-to 가이드를 참조하세요

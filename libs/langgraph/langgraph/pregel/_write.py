@@ -25,30 +25,30 @@ PASSTHROUGH = object()
 
 class ChannelWriteEntry(NamedTuple):
     channel: str
-    """Channel name to write to."""
+    """쓰기할 채널 이름입니다."""
     value: Any = PASSTHROUGH
-    """Value to write, or PASSTHROUGH to use the input."""
+    """쓸 값, 또는 입력을 사용하려면 PASSTHROUGH입니다."""
     skip_none: bool = False
-    """Whether to skip writing if the value is None."""
+    """값이 None일 때 쓰기를 건너뛸지 여부입니다."""
     mapper: Callable | None = None
-    """Function to transform the value before writing."""
+    """쓰기 전에 값을 변환하는 함수입니다."""
 
 
 class ChannelWriteTupleEntry(NamedTuple):
     mapper: Callable[[Any], Sequence[tuple[str, Any]] | None]
-    """Function to extract tuples from value."""
+    """값에서 튜플을 추출하는 함수입니다."""
     value: Any = PASSTHROUGH
-    """Value to write, or PASSTHROUGH to use the input."""
+    """쓸 값, 또는 입력을 사용하려면 PASSTHROUGH입니다."""
     static: Sequence[tuple[str, Any, str | None]] | None = None
-    """Optional, declared writes for static analysis."""
+    """선택적, 정적 분석을 위한 선언된 쓰기입니다."""
 
 
 class ChannelWrite(RunnableCallable):
-    """Implements the logic for sending writes to CONFIG_KEY_SEND.
-    Can be used as a runnable or as a static method to call imperatively."""
+    """CONFIG_KEY_SEND로 쓰기를 전송하는 로직을 구현합니다.
+    runnable로 사용하거나 명령형으로 호출할 정적 메서드로 사용할 수 있습니다."""
 
     writes: list[ChannelWriteEntry | ChannelWriteTupleEntry | Send]
-    """Sequence of write entries or Send objects to write."""
+    """쓰기 항목 또는 Send 객체의 시퀀스입니다."""
 
     def __init__(
         self,

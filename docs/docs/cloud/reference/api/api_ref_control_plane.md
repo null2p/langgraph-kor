@@ -1,43 +1,43 @@
-# LangGraph Control Plane API Reference
+# LangGraph Control Plane API 레퍼런스
 
-The LangGraph Control Plane API is used to programmatically create and manage LangGraph Server deployments. For example, the APIs can be orchestrated to create custom CI/CD workflows.
+LangGraph Control Plane API는 프로그래밍 방식으로 LangGraph Server 배포를 생성하고 관리하는 데 사용됩니다. 예를 들어, API를 조율하여 커스텀 CI/CD 워크플로를 만들 수 있습니다.
 
-Click <a href="https://api.host.langchain.com/docs" target="_blank">here</a> to view the API reference.
+API 레퍼런스를 보려면 <a href="https://api.host.langchain.com/docs" target="_blank">여기</a>를 클릭하세요.
 
-## Host
+## 호스트
 
-LangGraph Control Plane hosts for Cloud SaaS data regions:
+Cloud SaaS 데이터 리전의 LangGraph Control Plane 호스트:
 
 | US | EU |
 |----|----|
 | `https://api.host.langchain.com` | `https://eu.api.host.langchain.com` |
 
-**Note**: Self-hosted deployments of LangGraph Platform will have a custom host for the LangGraph Control Plane.
+**참고**: LangGraph Platform의 셀프 호스팅 배포에는 LangGraph Control Plane에 대한 커스텀 호스트가 있습니다.
 
-## Authentication
+## 인증
 
-To authenticate with the LangGraph Control Plane API, set the `X-Api-Key` header to a valid LangSmith API key.
+LangGraph Control Plane API로 인증하려면 `X-Api-Key` 헤더를 유효한 LangSmith API 키로 설정하세요.
 
-Example `curl` command:
+예제 `curl` 명령:
 ```shell
 curl --request GET \
   --url http://localhost:8124/v2/deployments \
   --header 'X-Api-Key: LANGSMITH_API_KEY'
 ```
 
-## Versioning
+## 버전 관리
 
-Each endpoint path is prefixed with a version (e.g. `v1`, `v2`).
+각 엔드포인트 경로에는 버전이 접두사로 붙습니다(예: `v1`, `v2`).
 
-## Quick Start
+## 빠른 시작
 
-1. Call `POST /v2/deployments` to create a new Deployment. The response body contains the Deployment ID (`id`) and the ID of the latest (and first) revision (`latest_revision_id`).
-1. Call `GET /v2/deployments/{deployment_id}` to retrieve the Deployment. Set `deployment_id` in the URL to the value of Deployment ID (`id`).
-1. Poll for revision `status` until `status` is `DEPLOYED` by calling `GET /v2/deployments/{deployment_id}/revisions/{latest_revision_id}`.
-1. Call `PATCH /v2/deployments/{deployment_id}` to update the deployment.
+1. `POST /v2/deployments`를 호출하여 새 배포를 생성합니다. 응답 본문에는 배포 ID(`id`)와 최신(첫 번째) 리비전의 ID(`latest_revision_id`)가 포함됩니다.
+1. `GET /v2/deployments/{deployment_id}`를 호출하여 배포를 검색합니다. URL의 `deployment_id`를 배포 ID(`id`) 값으로 설정합니다.
+1. `GET /v2/deployments/{deployment_id}/revisions/{latest_revision_id}`를 호출하여 리비전 `status`가 `DEPLOYED`가 될 때까지 폴링합니다.
+1. `PATCH /v2/deployments/{deployment_id}`를 호출하여 배포를 업데이트합니다.
 
-## Example Code
-Below is example Python code that demonstrates how to orchestrate the LangGraph Control Plane APIs to create a deployment, update the deployment, and delete the deployment.
+## 예제 코드
+다음은 LangGraph Control Plane API를 조율하여 배포를 생성, 업데이트 및 삭제하는 방법을 보여주는 Python 예제 코드입니다.
 ```python
 import os
 import time
@@ -48,22 +48,22 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# required environment variables
+# 필수 환경 변수
 CONTROL_PLANE_HOST = os.getenv("CONTROL_PLANE_HOST")
 LANGSMITH_API_KEY = os.getenv("LANGSMITH_API_KEY")
 INTEGRATION_ID = os.getenv("INTEGRATION_ID")
-MAX_WAIT_TIME = 1800  # 30 mins
+MAX_WAIT_TIME = 1800  # 30분
 
 
 def get_headers() -> dict:
-    """Return common headers for requests to LangGraph Control Plane API."""
+    """LangGraph Control Plane API 요청에 대한 공통 헤더를 반환합니다."""
     return {
         "X-Api-Key": LANGSMITH_API_KEY,
     }
 
 
 def create_deployment() -> str:
-    """Create deployment. Return deployment ID."""
+    """배포를 생성합니다. 배포 ID를 반환합니다."""
     headers = get_headers()
     headers["Content-Type"] = "application/json"
 
@@ -116,7 +116,7 @@ def create_deployment() -> str:
 
 
 def get_deployment(deployment_id: str) -> dict:
-    """Get deployment."""
+    """배포를 가져옵니다."""
     response = requests.get(
         url=f"{CONTROL_PLANE_HOST}/v2/deployments/{deployment_id}",
         headers=get_headers(),
@@ -129,9 +129,9 @@ def get_deployment(deployment_id: str) -> dict:
 
 
 def list_revisions(deployment_id: str) -> list[dict]:
-    """List revisions.
+    """리비전 목록을 가져옵니다.
 
-    Return list is sorted by created_at in descending order (latest first).
+    반환 목록은 created_at을 기준으로 내림차순(최신 순)으로 정렬됩니다.
     """
     response = requests.get(
         url=f"{CONTROL_PLANE_HOST}/v2/deployments/{deployment_id}/revisions",
@@ -150,7 +150,7 @@ def get_revision(
     deployment_id: str,
     revision_id: str,
 ) -> dict:
-    """Get revision."""
+    """리비전을 가져옵니다."""
     response = requests.get(
         url=f"{CONTROL_PLANE_HOST}/v2/deployments/{deployment_id}/revisions/{revision_id}",
         headers=get_headers(),
@@ -163,7 +163,7 @@ def get_revision(
 
 
 def patch_deployment(deployment_id: str) -> None:
-    """Patch deployment."""
+    """배포를 패치합니다."""
     headers = get_headers()
     headers["Content-Type"] = "application/json"
 
@@ -188,7 +188,7 @@ def patch_deployment(deployment_id: str) -> None:
 
 
 def wait_for_deployment(deployment_id: str, revision_id: str) -> None:
-    """Wait for revision status to be DEPLOYED."""
+    """리비전 상태가 DEPLOYED가 될 때까지 기다립니다."""
     start_time = time.time()
     revision, status = None, None
     while time.time() - start_time < MAX_WAIT_TIME:
@@ -209,7 +209,7 @@ def wait_for_deployment(deployment_id: str, revision_id: str) -> None:
 
 
 def delete_deployment(deployment_id: str) -> None:
-    """Delete deployment."""
+    """배포를 삭제합니다."""
     response = requests.delete(
         url=f"{CONTROL_PLANE_HOST}/v2/deployments/{deployment_id}",
         headers=get_headers(),
@@ -224,24 +224,24 @@ def delete_deployment(deployment_id: str) -> None:
 
 
 if __name__ == "__main__":
-    # create deployment and get the latest revision
+    # 배포 생성 및 최신 리비전 가져오기
     deployment_id = create_deployment()
     revisions = list_revisions(deployment_id)
     latest_revision = revisions["resources"][0]
     latest_revision_id = latest_revision["id"]
 
-    # wait for latest revision to be DEPLOYED
+    # 최신 리비전이 DEPLOYED 상태가 될 때까지 대기
     wait_for_deployment(deployment_id, latest_revision_id)
 
-    # patch the deployment and get the latest revision
+    # 배포 패치 및 최신 리비전 가져오기
     patch_deployment(deployment_id)
     revisions = list_revisions(deployment_id)
     latest_revision = revisions["resources"][0]
     latest_revision_id = latest_revision["id"]
 
-    # wait for latest revision to be DEPLOYED
+    # 최신 리비전이 DEPLOYED 상태가 될 때까지 대기
     wait_for_deployment(deployment_id, latest_revision_id)
 
-    # delete the deployment
+    # 배포 삭제
     delete_deployment(deployment_id)
 ```

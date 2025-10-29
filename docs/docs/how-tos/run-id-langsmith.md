@@ -1,45 +1,45 @@
-# How to pass custom run ID or set tags and metadata for graph runs in LangSmith
+# LangSmith에서 그래프 run에 대한 커스텀 run ID 전달 또는 태그 및 메타데이터 설정 방법
 
-!!! tip "Prerequisites"
-    This guide assumes familiarity with the following:
-    
-    - [LangSmith Documentation](https://docs.smith.langchain.com)
+!!! tip "사전 요구사항"
+    이 가이드는 다음 내용에 익숙하다고 가정합니다:
+
+    - [LangSmith 문서](https://docs.smith.langchain.com)
     - [LangSmith Platform](https://smith.langchain.com)
     - [RunnableConfig](https://api.python.langchain.com/en/latest/runnables/langchain_core.runnables.config.RunnableConfig.html#langchain_core.runnables.config.RunnableConfig)
-    - [Add metadata and tags to traces](https://docs.smith.langchain.com/how_to_guides/tracing/trace_with_langchain#add-metadata-and-tags-to-traces)
-    - [Customize run name](https://docs.smith.langchain.com/how_to_guides/tracing/trace_with_langchain#customize-run-name)
+    - [추적에 메타데이터 및 태그 추가](https://docs.smith.langchain.com/how_to_guides/tracing/trace_with_langchain#add-metadata-and-tags-to-traces)
+    - [run 이름 커스터마이징](https://docs.smith.langchain.com/how_to_guides/tracing/trace_with_langchain#customize-run-name)
 
-Debugging graph runs can sometimes be difficult to do in an IDE or terminal. [LangSmith](https://docs.smith.langchain.com) lets you use trace data to debug, test, and monitor your LLM apps built with LangGraph — read the [LangSmith documentation](https://docs.smith.langchain.com) for more information on how to get started.
+그래프 run을 디버깅하는 것은 때때로 IDE나 터미널에서 어려울 수 있습니다. [LangSmith](https://docs.smith.langchain.com)를 사용하면 추적 데이터를 사용하여 LangGraph로 구축된 LLM 앱을 디버그, 테스트 및 모니터링할 수 있습니다 — 시작 방법에 대한 자세한 내용은 [LangSmith 문서](https://docs.smith.langchain.com)를 참조하세요.
 
-To make it easier to identify and analyzed traces generated during graph invocation, you can set additional configuration at run time (see [RunnableConfig](https://api.python.langchain.com/en/latest/runnables/langchain_core.runnables.config.RunnableConfig.html#langchain_core.runnables.config.RunnableConfig)):
+그래프 호출 중에 생성된 추적을 더 쉽게 식별하고 분석하기 위해 런타임에 추가 구성을 설정할 수 있습니다([RunnableConfig](https://api.python.langchain.com/en/latest/runnables/langchain_core.runnables.config.RunnableConfig.html#langchain_core.runnables.config.RunnableConfig) 참조):
 
 | **Field**   | **Type**            | **Description**                                                                                                    |
 |-------------|---------------------|--------------------------------------------------------------------------------------------------------------------|
-| run_name    | `str`               | Name for the tracer run for this call. Defaults to the name of the class.                                          |
-| run_id      | `UUID`              | Unique identifier for the tracer run for this call. If not provided, a new UUID will be generated.                 |
-| tags        | `List[str]`         | Tags for this call and any sub-calls (e.g., a Chain calling an LLM). You can use these to filter calls.            |
-| metadata    | `Dict[str, Any]`    | Metadata for this call and any sub-calls (e.g., a Chain calling an LLM). Keys should be strings, values should be JSON-serializable. |
+| run_name    | `str`               | 이 호출에 대한 tracer run의 이름. 기본값은 클래스의 이름입니다.                                          |
+| run_id      | `UUID`              | 이 호출에 대한 tracer run의 고유 식별자. 제공되지 않으면 새 UUID가 생성됩니다.                 |
+| tags        | `List[str]`         | 이 호출 및 모든 하위 호출(예: LLM을 호출하는 Chain)에 대한 태그. 이를 사용하여 호출을 필터링할 수 있습니다.            |
+| metadata    | `Dict[str, Any]`    | 이 호출 및 모든 하위 호출(예: LLM을 호출하는 Chain)에 대한 메타데이터. 키는 문자열이어야 하고 값은 JSON 직렬화 가능해야 합니다. |
 
-LangGraph graphs implement the [LangChain Runnable Interface](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.base.Runnable.html) and accept a second argument (`RunnableConfig`) in methods like `invoke`, `ainvoke`, `stream` etc.
+LangGraph 그래프는 [LangChain Runnable Interface](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.base.Runnable.html)를 구현하며 `invoke`, `ainvoke`, `stream` 등의 메서드에서 두 번째 인수(`RunnableConfig`)를 허용합니다.
 
-The LangSmith platform will allow you to search and filter traces based on `run_name`, `run_id`, `tags` and `metadata`.
+LangSmith 플랫폼을 사용하면 `run_name`, `run_id`, `tags` 및 `metadata`를 기반으로 추적을 검색하고 필터링할 수 있습니다.
 
 ## TLDR
 
 ```python
 import uuid
-# Generate a random UUID -- it must be a UUID
+# 랜덤 UUID 생성 -- UUID여야 합니다
 config = {"run_id": uuid.uuid4()}, "tags": ["my_tag1"], "metadata": {"a": 5}}
-# Works with all standard Runnable methods 
-# like invoke, batch, ainvoke, astream_events etc
+# invoke, batch, ainvoke, astream_events 등과 같은
+# 모든 표준 Runnable 메서드에서 작동합니다
 graph.stream(inputs, config, stream_mode="values")
 ```
 
-The rest of the how to guide will show a full agent.
+나머지 how-to 가이드에서는 전체 에이전트를 보여줍니다.
 
-## Setup
+## 설정
 
-First, let's install the required packages and set our API keys
+먼저 필요한 패키지를 설치하고 API 키를 설정합니다
 
 ```python
 %%capture --no-stderr
@@ -61,11 +61,11 @@ _set_env("LANGSMITH_API_KEY")
 ```
 
 !!! tip
-    Sign up for LangSmith to quickly spot issues and improve the performance of your LangGraph projects. [LangSmith](https://docs.smith.langchain.com) lets you use trace data to debug, test, and monitor your LLM apps built with LangGraph — read more about how to get started [here](https://docs.smith.langchain.com).
+    LangSmith에 가입하여 LangGraph 프로젝트의 문제를 빠르게 발견하고 성능을 개선하세요. [LangSmith](https://docs.smith.langchain.com)를 사용하면 추적 데이터를 사용하여 LangGraph로 구축된 LLM 앱을 디버그, 테스트 및 모니터링할 수 있습니다 — 시작 방법에 대한 자세한 내용은 [여기](https://docs.smith.langchain.com)를 참조하세요.
 
-## Define the graph
+## 그래프 정의
 
-For this example we will use the [prebuilt ReAct agent](https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/).
+이 예제에서는 [prebuilt ReAct agent](https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/)를 사용합니다.
 
 ```python
 from langchain_openai import ChatOpenAI
@@ -73,11 +73,11 @@ from typing import Literal
 from langgraph.prebuilt import create_react_agent
 from langchain_core.tools import tool
 
-# First we initialize the model we want to use.
+# 먼저 사용할 모델을 초기화합니다.
 model = ChatOpenAI(model="gpt-4o", temperature=0)
 
 
-# For this tutorial we will use custom tool that returns pre-defined values for weather in two cities (NYC & SF)
+# 이 튜토리얼에서는 두 도시(NYC & SF)의 날씨에 대해 미리 정의된 값을 반환하는 커스텀 도구를 사용합니다
 @tool
 def get_weather(city: Literal["nyc", "sf"]):
     """Use this to get weather information."""
@@ -92,17 +92,17 @@ def get_weather(city: Literal["nyc", "sf"]):
 tools = [get_weather]
 
 
-# Define the graph
+# 그래프 정의
 graph = create_react_agent(model, tools=tools)
 ```
 
-## Run your graph
+## 그래프 실행
 
-Now that we've defined our graph let's run it once and view the trace in LangSmith. In order for our trace to be easily accessible in LangSmith, we will pass in a custom `run_id` in the config.
+이제 그래프를 정의했으니 한 번 실행하고 LangSmith에서 추적을 확인해봅시다. LangSmith에서 추적에 쉽게 액세스할 수 있도록 config에 커스텀 `run_id`를 전달합니다.
 
-This assumes that you have set your `LANGSMITH_API_KEY` environment variable.
+이는 `LANGSMITH_API_KEY` 환경 변수를 설정했다고 가정합니다.
 
-Note that you can also configure what project to trace to by setting the `LANGCHAIN_PROJECT` environment variable, by default runs will be traced to the `default` project.
+`LANGCHAIN_PROJECT` 환경 변수를 설정하여 추적할 프로젝트를 구성할 수도 있으며, 기본적으로 run은 `default` 프로젝트에 추적됩니다.
 
 ```python
 import uuid
@@ -124,7 +124,7 @@ config = {"run_name": "agent_007", "tags": ["cats are awesome"]}
 print_stream(graph.stream(inputs, config, stream_mode="values"))
 ```
 
-**Output:**
+**출력:**
 ```
 ================================ Human Message ==================================
 
@@ -144,12 +144,12 @@ It's always sunny in sf
 The weather in San Francisco is currently sunny.
 ```
 
-## View the trace in LangSmith
+## LangSmith에서 추적 보기
 
-Now that we've ran our graph, let's head over to LangSmith and view our trace. First click into the project that you traced to (in our case the default project). You should see a run with the custom run name "agent_007".
+이제 그래프를 실행했으니 LangSmith로 이동하여 추적을 확인해봅시다. 먼저 추적한 프로젝트(우리의 경우 default 프로젝트)를 클릭합니다. 커스텀 run 이름 "agent_007"을 가진 run을 볼 수 있습니다.
 
 ![LangSmith Trace View](assets/d38d1f2b-0f4c-4707-b531-a3c749de987f.png)
 
-In addition, you will be able to filter traces after the fact using the tags or metadata provided. For example,
+또한 제공된 태그나 메타데이터를 사용하여 나중에 추적을 필터링할 수 있습니다. 예를 들어,
 
-![LangSmith Filter View](assets/410e0089-2ab8-46bb-a61a-827187fd46b3.png) 
+![LangSmith Filter View](assets/410e0089-2ab8-46bb-a61a-827187fd46b3.png)

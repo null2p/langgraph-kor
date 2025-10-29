@@ -28,35 +28,34 @@ T = TypeVar("T", bound=Callable)
 
 
 class AsyncSqliteSaver(BaseCheckpointSaver[str]):
-    """An asynchronous checkpoint saver that stores checkpoints in a SQLite database.
+    """체크포인트를 SQLite 데이터베이스에 저장하는 비동기 체크포인트 세이버입니다.
 
-    This class provides an asynchronous interface for saving and retrieving checkpoints
-    using a SQLite database. It's designed for use in asynchronous environments and
-    offers better performance for I/O-bound operations compared to synchronous alternatives.
+    이 클래스는 SQLite 데이터베이스를 사용하여 체크포인트를 저장하고 검색하는 비동기 인터페이스를
+    제공합니다. 비동기 환경에서 사용하도록 설계되었으며 동기 대안에 비해 I/O 바운드 작업에 대한
+    더 나은 성능을 제공합니다.
 
     Attributes:
-        conn (aiosqlite.Connection): The asynchronous SQLite database connection.
-        serde (SerializerProtocol): The serializer used for encoding/decoding checkpoints.
+        conn (aiosqlite.Connection): 비동기 SQLite 데이터베이스 연결입니다.
+        serde (SerializerProtocol): 체크포인트 인코딩/디코딩에 사용되는 직렬화 도구입니다.
 
     Tip:
-        Requires the [aiosqlite](https://pypi.org/project/aiosqlite/) package.
-        Install it with `pip install aiosqlite`.
+        [aiosqlite](https://pypi.org/project/aiosqlite/) 패키지가 필요합니다.
+        `pip install aiosqlite`로 설치하세요.
 
     Warning:
-        While this class supports asynchronous checkpointing, it is not recommended
-        for production workloads due to limitations in SQLite's write performance.
-        For production use, consider a more robust database like PostgreSQL.
+        이 클래스는 비동기 체크포인팅을 지원하지만 SQLite의 쓰기 성능 제한으로 인해
+        프로덕션 워크로드에는 권장되지 않습니다.
+        프로덕션 사용에는 PostgreSQL과 같은 보다 강력한 데이터베이스를 고려하세요.
 
     Tip:
-        Remember to **close the database connection** after executing your code,
-        otherwise, you may see the graph "hang" after execution (since the program
-        will not exit until the connection is closed).
+        코드 실행 후 **데이터베이스 연결을 닫아야** 합니다. 그렇지 않으면 그래프가
+        실행 후 "멈춘" 것처럼 보일 수 있습니다(프로그램은 연결이 닫힐 때까지 종료되지 않기 때문입니다).
 
-        The easiest way is to use the `async with` statement as shown in the examples.
+        가장 쉬운 방법은 예제에 표시된 대로 `async with` 문을 사용하는 것입니다.
 
         ```python
         async with AsyncSqliteSaver.from_conn_string("checkpoints.sqlite") as saver:
-            # Your code here
+            # 여기에 코드 작성
             graph = builder.compile(checkpointer=saver)
             config = {"configurable": {"thread_id": "thread-1"}}
             async for event in graph.astream_events(..., config, version="v1"):
@@ -64,7 +63,7 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
         ```
 
     Examples:
-        Usage within StateGraph:
+        StateGraph 내에서 사용:
 
         ```pycon
         >>> import asyncio
@@ -85,7 +84,7 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
         >>> asyncio.run(main())
         Output: [2]
         ```
-        Raw usage:
+        원시 사용:
 
         ```pycon
         >>> import asyncio
@@ -125,40 +124,39 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
     async def from_conn_string(
         cls, conn_string: str
     ) -> AsyncIterator[AsyncSqliteSaver]:
-        """Create a new AsyncSqliteSaver instance from a connection string.
+        """연결 문자열에서 새 AsyncSqliteSaver 인스턴스를 생성합니다.
 
         Args:
-            conn_string: The SQLite connection string.
+            conn_string: SQLite 연결 문자열입니다.
 
         Yields:
-            AsyncSqliteSaver: A new AsyncSqliteSaver instance.
+            AsyncSqliteSaver: 새 AsyncSqliteSaver 인스턴스입니다.
         """
         async with aiosqlite.connect(conn_string) as conn:
             yield cls(conn)
 
     def get_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
-        """Get a checkpoint tuple from the database.
+        """데이터베이스에서 체크포인트 튜플을 가져옵니다.
 
-        This method retrieves a checkpoint tuple from the SQLite database based on the
-        provided config. If the config contains a `checkpoint_id` key, the checkpoint with
-        the matching thread ID and checkpoint ID is retrieved. Otherwise, the latest checkpoint
-        for the given thread ID is retrieved.
+        이 메서드는 제공된 config를 기반으로 SQLite 데이터베이스에서 체크포인트 튜플을 가져옵니다.
+        config에 `checkpoint_id` 키가 포함되어 있으면 일치하는 스레드 ID와 체크포인트 ID를 가진
+        체크포인트가 검색됩니다. 그렇지 않으면 주어진 스레드 ID에 대한 최신 체크포인트가 검색됩니다.
 
         Args:
-            config: The config to use for retrieving the checkpoint.
+            config: 체크포인트를 검색하는 데 사용할 config입니다.
 
         Returns:
-            The retrieved checkpoint tuple, or None if no matching checkpoint was found.
+            검색된 체크포인트 튜플이거나, 일치하는 체크포인트를 찾지 못한 경우 None입니다.
         """
         try:
-            # check if we are in the main thread, only bg threads can block
-            # we don't check in other methods to avoid the overhead
+            # 메인 스레드에 있는지 확인, 백그라운드 스레드만 차단 가능
+            # 오버헤드를 피하기 위해 다른 메서드에서는 확인하지 않음
             if asyncio.get_running_loop() is self.loop:
                 raise asyncio.InvalidStateError(
-                    "Synchronous calls to AsyncSqliteSaver are only allowed from a "
-                    "different thread. From the main thread, use the async interface. "
-                    "For example, use `await checkpointer.aget_tuple(...)` or `await "
-                    "graph.ainvoke(...)`."
+                    "AsyncSqliteSaver에 대한 동기 호출은 다른 스레드에서만 허용됩니다. "
+                    "메인 스레드에서는 비동기 인터페이스를 사용하세요. "
+                    "예를 들어 `await checkpointer.aget_tuple(...)` 또는 `await "
+                    "graph.ainvoke(...)`를 사용하세요."
                 )
         except RuntimeError:
             pass
@@ -174,29 +172,29 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> Iterator[CheckpointTuple]:
-        """List checkpoints from the database asynchronously.
+        """데이터베이스에서 체크포인트 목록을 비동기적으로 조회합니다.
 
-        This method retrieves a list of checkpoint tuples from the SQLite database based
-        on the provided config. The checkpoints are ordered by checkpoint ID in descending order (newest first).
+        이 메서드는 제공된 config를 기반으로 SQLite 데이터베이스에서 체크포인트 튜플 목록을 검색합니다.
+        체크포인트는 체크포인트 ID를 기준으로 내림차순(최신 우선)으로 정렬됩니다.
 
         Args:
-            config: Base configuration for filtering checkpoints.
-            filter: Additional filtering criteria for metadata.
-            before: If provided, only checkpoints before the specified checkpoint ID are returned.
-            limit: Maximum number of checkpoints to return.
+            config: 체크포인트를 필터링하기 위한 기본 구성입니다.
+            filter: 메타데이터에 대한 추가 필터링 기준입니다.
+            before: 제공된 경우 지정된 체크포인트 ID 이전의 체크포인트만 반환됩니다.
+            limit: 반환할 최대 체크포인트 수입니다.
 
         Yields:
-            An iterator of matching checkpoint tuples.
+            일치하는 체크포인트 튜플의 이터레이터입니다.
         """
         try:
-            # check if we are in the main thread, only bg threads can block
-            # we don't check in other methods to avoid the overhead
+            # 메인 스레드에 있는지 확인, 백그라운드 스레드만 차단 가능
+            # 오버헤드를 피하기 위해 다른 메서드에서는 확인하지 않음
             if asyncio.get_running_loop() is self.loop:
                 raise asyncio.InvalidStateError(
-                    "Synchronous calls to AsyncSqliteSaver are only allowed from a "
-                    "different thread. From the main thread, use the async interface. "
-                    "For example, use `checkpointer.alist(...)` or `await "
-                    "graph.ainvoke(...)`."
+                    "AsyncSqliteSaver에 대한 동기 호출은 다른 스레드에서만 허용됩니다. "
+                    "메인 스레드에서는 비동기 인터페이스를 사용하세요. "
+                    "예를 들어 `checkpointer.alist(...)` 또는 `await "
+                    "graph.ainvoke(...)`를 사용하세요."
                 )
         except RuntimeError:
             pass
@@ -217,19 +215,19 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
         metadata: CheckpointMetadata,
         new_versions: ChannelVersions,
     ) -> RunnableConfig:
-        """Save a checkpoint to the database.
+        """체크포인트를 데이터베이스에 저장합니다.
 
-        This method saves a checkpoint to the SQLite database. The checkpoint is associated
-        with the provided config and its parent config (if any).
+        이 메서드는 체크포인트를 SQLite 데이터베이스에 저장합니다. 체크포인트는 제공된
+        config 및 해당 부모 config(있는 경우)와 연결됩니다.
 
         Args:
-            config: The config to associate with the checkpoint.
-            checkpoint: The checkpoint to save.
-            metadata: Additional metadata to save with the checkpoint.
-            new_versions: New channel versions as of this write.
+            config: 체크포인트와 연결할 config입니다.
+            checkpoint: 저장할 체크포인트입니다.
+            metadata: 체크포인트와 함께 저장할 추가 메타데이터입니다.
+            new_versions: 이 쓰기 시점의 새 채널 버전입니다.
 
         Returns:
-            RunnableConfig: Updated configuration after storing the checkpoint.
+            RunnableConfig: 체크포인트 저장 후 업데이트된 구성입니다.
         """
         return asyncio.run_coroutine_threadsafe(
             self.aput(config, checkpoint, metadata, new_versions), self.loop
@@ -247,23 +245,23 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
         ).result()
 
     def delete_thread(self, thread_id: str) -> None:
-        """Delete all checkpoints and writes associated with a thread ID.
+        """스레드 ID와 연결된 모든 체크포인트 및 쓰기를 삭제합니다.
 
         Args:
-            thread_id: The thread ID to delete.
+            thread_id: 삭제할 스레드 ID입니다.
 
         Returns:
             None
         """
         try:
-            # check if we are in the main thread, only bg threads can block
-            # we don't check in other methods to avoid the overhead
+            # 메인 스레드에 있는지 확인, 백그라운드 스레드만 차단 가능
+            # 오버헤드를 피하기 위해 다른 메서드에서는 확인하지 않음
             if asyncio.get_running_loop() is self.loop:
                 raise asyncio.InvalidStateError(
-                    "Synchronous calls to AsyncSqliteSaver are only allowed from a "
-                    "different thread. From the main thread, use the async interface. "
-                    "For example, use `checkpointer.alist(...)` or `await "
-                    "graph.ainvoke(...)`."
+                    "AsyncSqliteSaver에 대한 동기 호출은 다른 스레드에서만 허용됩니다. "
+                    "메인 스레드에서는 비동기 인터페이스를 사용하세요. "
+                    "예를 들어 `checkpointer.alist(...)` 또는 `await "
+                    "graph.ainvoke(...)`를 사용하세요."
                 )
         except RuntimeError:
             pass
@@ -272,11 +270,10 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
         ).result()
 
     async def setup(self) -> None:
-        """Set up the checkpoint database asynchronously.
+        """체크포인트 데이터베이스를 비동기적으로 설정합니다.
 
-        This method creates the necessary tables in the SQLite database if they don't
-        already exist. It is called automatically when needed and should not be called
-        directly by the user.
+        이 메서드는 SQLite 데이터베이스에 필요한 테이블이 없는 경우 생성합니다.
+        필요할 때 자동으로 호출되며 사용자가 직접 호출해서는 안 됩니다.
         """
         async with self.lock:
             if self.is_setup:
@@ -314,23 +311,22 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
             self.is_setup = True
 
     async def aget_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
-        """Get a checkpoint tuple from the database asynchronously.
+        """데이터베이스에서 체크포인트 튜플을 비동기적으로 가져옵니다.
 
-        This method retrieves a checkpoint tuple from the SQLite database based on the
-        provided config. If the config contains a `checkpoint_id` key, the checkpoint with
-        the matching thread ID and checkpoint ID is retrieved. Otherwise, the latest checkpoint
-        for the given thread ID is retrieved.
+        이 메서드는 제공된 config를 기반으로 SQLite 데이터베이스에서 체크포인트 튜플을 가져옵니다.
+        config에 `checkpoint_id` 키가 포함되어 있으면 일치하는 스레드 ID와 체크포인트 ID를 가진
+        체크포인트가 검색됩니다. 그렇지 않으면 주어진 스레드 ID에 대한 최신 체크포인트가 검색됩니다.
 
         Args:
-            config: The config to use for retrieving the checkpoint.
+            config: 체크포인트를 검색하는 데 사용할 config입니다.
 
         Returns:
-            The retrieved checkpoint tuple, or None if no matching checkpoint was found.
+            검색된 체크포인트 튜플이거나, 일치하는 체크포인트를 찾지 못한 경우 None입니다.
         """
         await self.setup()
         checkpoint_ns = config["configurable"].get("checkpoint_ns", "")
         async with self.lock, self.conn.cursor() as cur:
-            # find the latest checkpoint for the thread_id
+            # thread_id에 대한 최신 체크포인트 찾기
             if checkpoint_id := get_checkpoint_id(config):
                 await cur.execute(
                     "SELECT thread_id, checkpoint_id, parent_checkpoint_id, type, checkpoint, metadata FROM checkpoints WHERE thread_id = ? AND checkpoint_ns = ? AND checkpoint_id = ?",
@@ -345,7 +341,7 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
                     "SELECT thread_id, checkpoint_id, parent_checkpoint_id, type, checkpoint, metadata FROM checkpoints WHERE thread_id = ? AND checkpoint_ns = ? ORDER BY checkpoint_id DESC LIMIT 1",
                     (str(config["configurable"]["thread_id"]), checkpoint_ns),
                 )
-            # if a checkpoint is found, return it
+            # 체크포인트가 발견되면 반환
             if value := await cur.fetchone():
                 (
                     thread_id,
@@ -363,7 +359,7 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
                             "checkpoint_id": checkpoint_id,
                         }
                     }
-                # find any pending writes
+                # 대기 중인 쓰기 찾기
                 await cur.execute(
                     "SELECT task_id, channel, type, value FROM writes WHERE thread_id = ? AND checkpoint_ns = ? AND checkpoint_id = ? ORDER BY task_id, idx",
                     (
@@ -372,7 +368,7 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
                         str(config["configurable"]["checkpoint_id"]),
                     ),
                 )
-                # deserialize the checkpoint and metadata
+                # 체크포인트와 메타데이터 역직렬화
                 return CheckpointTuple(
                     config,
                     self.serde.loads_typed((type, checkpoint)),
@@ -405,19 +401,19 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> AsyncIterator[CheckpointTuple]:
-        """List checkpoints from the database asynchronously.
+        """데이터베이스에서 체크포인트 목록을 비동기적으로 조회합니다.
 
-        This method retrieves a list of checkpoint tuples from the SQLite database based
-        on the provided config. The checkpoints are ordered by checkpoint ID in descending order (newest first).
+        이 메서드는 제공된 config를 기반으로 SQLite 데이터베이스에서 체크포인트 튜플 목록을 검색합니다.
+        체크포인트는 체크포인트 ID를 기준으로 내림차순(최신 우선)으로 정렬됩니다.
 
         Args:
-            config: Base configuration for filtering checkpoints.
-            filter: Additional filtering criteria for metadata.
-            before: If provided, only checkpoints before the specified checkpoint ID are returned.
-            limit: Maximum number of checkpoints to return.
+            config: 체크포인트를 필터링하기 위한 기본 구성입니다.
+            filter: 메타데이터에 대한 추가 필터링 기준입니다.
+            before: 제공된 경우 지정된 체크포인트 ID 이전의 체크포인트만 반환됩니다.
+            limit: 반환할 최대 체크포인트 수입니다.
 
         Yields:
-            An asynchronous iterator of matching checkpoint tuples.
+            일치하는 체크포인트 튜플의 비동기 이터레이터입니다.
         """
         await self.setup()
         where, params = search_where(config, filter, before)
@@ -482,19 +478,19 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
         metadata: CheckpointMetadata,
         new_versions: ChannelVersions,
     ) -> RunnableConfig:
-        """Save a checkpoint to the database asynchronously.
+        """체크포인트를 데이터베이스에 비동기적으로 저장합니다.
 
-        This method saves a checkpoint to the SQLite database. The checkpoint is associated
-        with the provided config and its parent config (if any).
+        이 메서드는 체크포인트를 SQLite 데이터베이스에 저장합니다. 체크포인트는 제공된
+        config 및 해당 부모 config(있는 경우)와 연결됩니다.
 
         Args:
-            config: The config to associate with the checkpoint.
-            checkpoint: The checkpoint to save.
-            metadata: Additional metadata to save with the checkpoint.
-            new_versions: New channel versions as of this write.
+            config: 체크포인트와 연결할 config입니다.
+            checkpoint: 저장할 체크포인트입니다.
+            metadata: 체크포인트와 함께 저장할 추가 메타데이터입니다.
+            new_versions: 이 쓰기 시점의 새 채널 버전입니다.
 
         Returns:
-            RunnableConfig: Updated configuration after storing the checkpoint.
+            RunnableConfig: 체크포인트 저장 후 업데이트된 구성입니다.
         """
         await self.setup()
         thread_id = config["configurable"]["thread_id"]
@@ -534,15 +530,15 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
         task_id: str,
         task_path: str = "",
     ) -> None:
-        """Store intermediate writes linked to a checkpoint asynchronously.
+        """체크포인트에 연결된 중간 쓰기를 비동기적으로 저장합니다.
 
-        This method saves intermediate writes associated with a checkpoint to the database.
+        이 메서드는 체크포인트와 연결된 중간 쓰기를 데이터베이스에 저장합니다.
 
         Args:
-            config: Configuration of the related checkpoint.
-            writes: List of writes to store, each as (channel, value) pair.
-            task_id: Identifier for the task creating the writes.
-            task_path: Path of the task creating the writes.
+            config: 관련 체크포인트의 구성입니다.
+            writes: 저장할 쓰기 목록이며, 각각 (channel, value) 쌍입니다.
+            task_id: 쓰기를 생성하는 작업의 식별자입니다.
+            task_path: 쓰기를 생성하는 작업의 경로입니다.
         """
         query = (
             "INSERT OR REPLACE INTO writes (thread_id, checkpoint_ns, checkpoint_id, task_id, idx, channel, type, value) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
@@ -569,10 +565,10 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
             await self.conn.commit()
 
     async def adelete_thread(self, thread_id: str) -> None:
-        """Delete all checkpoints and writes associated with a thread ID.
+        """스레드 ID와 연결된 모든 체크포인트 및 쓰기를 삭제합니다.
 
         Args:
-            thread_id: The thread ID to delete.
+            thread_id: 삭제할 스레드 ID입니다.
 
         Returns:
             None
@@ -589,15 +585,15 @@ class AsyncSqliteSaver(BaseCheckpointSaver[str]):
             await self.conn.commit()
 
     def get_next_version(self, current: str | None, channel: None) -> str:
-        """Generate the next version ID for a channel.
+        """채널에 대한 다음 버전 ID를 생성합니다.
 
-        This method creates a new version identifier for a channel based on its current version.
+        이 메서드는 현재 버전을 기반으로 채널에 대한 새 버전 식별자를 생성합니다.
 
         Args:
-            current (Optional[str]): The current version identifier of the channel.
+            current (Optional[str]): 채널의 현재 버전 식별자입니다.
 
         Returns:
-            str: The next version identifier, which is guaranteed to be monotonically increasing.
+            str: 단조 증가하도록 보장된 다음 버전 식별자입니다.
         """
         if current is None:
             current_v = 0

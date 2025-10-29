@@ -1,13 +1,13 @@
-# Call tools
+# 도구 호출
 
-[Tools](../concepts/tools.md) encapsulate a callable function and its input schema. These can be passed to compatible chat models, allowing the model to decide whether to invoke a tool and determine the appropriate arguments.
+[도구](../concepts/tools.md)는 호출 가능한 함수와 입력 스키마를 캡슐화합니다. 이를 호환되는 채팅 모델에 전달하여 모델이 도구를 호출할지 여부를 결정하고 적절한 인수를 결정할 수 있습니다.
 
-You can [define your own tools](#define-a-tool) or use [prebuilt tools](#prebuilt-tools)
+[자체 도구를 정의](#define-a-tool)하거나 [사전 빌드된 도구](#prebuilt-tools)를 사용할 수 있습니다.
 
-## Define a tool
+## 도구 정의
 
 :::python
-Define a basic tool with the [@tool](https://python.langchain.com/api_reference/core/tools/langchain_core.tools.convert.tool.html) decorator:
+[@tool](https://python.langchain.com/api_reference/core/tools/langchain_core.tools.convert.tool.html) 데코레이터로 기본 도구를 정의합니다:
 
 ```python
 from langchain_core.tools import tool
@@ -22,7 +22,7 @@ def multiply(a: int, b: int) -> int:
 :::
 
 :::js
-Define a basic tool with the [tool](https://js.langchain.com/docs/api/core/tools/classes/tool.html) function:
+[tool](https://js.langchain.com/docs/api/core/tools/classes/tool.html) 함수로 기본 도구를 정의합니다:
 
 ```typescript
 import { tool } from "@langchain/core/tools";
@@ -46,9 +46,9 @@ const multiply = tool(
 
 :::
 
-## Run a tool
+## 도구 실행
 
-Tools conform to the [Runnable interface](https://python.langchain.com/docs/concepts/runnables/), which means you can run a tool using the `invoke` method:
+도구는 [Runnable 인터페이스](https://python.langchain.com/docs/concepts/runnables/)를 준수합니다. 즉, `invoke` 메서드를 사용하여 도구를 실행할 수 있습니다:
 
 :::python
 
@@ -66,7 +66,7 @@ await multiply.invoke({ a: 6, b: 7 }); // returns 42
 
 :::
 
-If the tool is invoked with `type="tool_call"`, it will return a [ToolMessage](https://python.langchain.com/docs/concepts/messages/#toolmessage):
+`type="tool_call"`로 도구를 호출하면 [ToolMessage](https://python.langchain.com/docs/concepts/messages/#toolmessage)를 반환합니다:
 
 :::python
 
@@ -111,10 +111,10 @@ ToolMessage {
 
 :::
 
-## Use in an agent
+## 에이전트에서 사용
 
 :::python
-To create a tool-calling agent, you can use the prebuilt @[create_react_agent][create_react_agent]:
+도구 호출 에이전트를 생성하려면 사전 빌드된 @[create_react_agent][create_react_agent]를 사용할 수 있습니다:
 
 ```python
 from langchain_core.tools import tool
@@ -248,15 +248,15 @@ print(output["messages"][-1].text())
 
 :::
 
-## Use in a workflow
+## 워크플로에서 사용
 
-If you are writing a custom workflow, you will need to:
+커스텀 워크플로를 작성하는 경우 다음을 수행해야 합니다:
 
-1. register the tools with the chat model
-2. call the tool if the model decides to use it
+1. 채팅 모델에 도구를 등록합니다
+2. 모델이 도구 사용을 결정하면 도구를 호출합니다
 
 :::python
-Use `model.bind_tools()` to register the tools with the model.
+모델에 도구를 등록하려면 `model.bind_tools()`를 사용합니다.
 
 ```python
 from langchain.chat_models import init_chat_model
@@ -888,14 +888,14 @@ await toolNode.invoke({ messages: [...] });
     ```
     :::
 
-## Tool customization
+## 도구 커스터마이제이션
 
-For more control over tool behavior, use the `@tool` decorator.
+도구 동작을 더 세밀하게 제어하려면 `@tool` 데코레이터를 사용합니다.
 
-### Parameter descriptions
+### 매개변수 설명
 
 :::python
-Auto-generate descriptions from docstrings:
+독스트링에서 설명을 자동 생성합니다:
 
 ```python
 # highlight-next-line
@@ -1004,20 +1004,20 @@ const multiply = tool(
 
 :::
 
-## Context management
+## 컨텍스트 관리
 
-Tools within LangGraph sometimes require context data, such as runtime-only arguments (e.g., user IDs or session details), that should not be controlled by the model. LangGraph provides three methods for managing such context:
+LangGraph 내의 도구는 때때로 사용자 ID나 세션 세부 정보와 같이 모델이 제어해서는 안 되는 런타임 전용 인수와 같은 컨텍스트 데이터가 필요합니다. LangGraph는 이러한 컨텍스트를 관리하는 세 가지 방법을 제공합니다:
 
-| Type                                    | Usage Scenario                           | Mutable | Lifetime                 |
+| 타입                                    | 사용 시나리오                           | 변경 가능 | 수명                 |
 | --------------------------------------- | ---------------------------------------- | ------- | ------------------------ |
-| [Configuration](#configuration)         | Static, immutable runtime data           | ❌      | Single invocation        |
-| [Short-term memory](#short-term-memory) | Dynamic, changing data during invocation | ✅      | Single invocation        |
-| [Long-term memory](#long-term-memory)   | Persistent, cross-session data           | ✅      | Across multiple sessions |
+| [구성](#configuration)         | 정적, 불변 런타임 데이터           | ❌      | 단일 호출        |
+| [단기 메모리](#short-term-memory) | 호출 중 동적으로 변경되는 데이터 | ✅      | 단일 호출        |
+| [장기 메모리](#long-term-memory)   | 영구적인 세션 간 데이터           | ✅      | 여러 세션에 걸쳐 |
 
-### Configuration
+### 구성
 
 :::python
-Use configuration when you have **immutable** runtime data that tools require, such as user identifiers. You pass these arguments via [`RunnableConfig`](https://python.langchain.com/docs/concepts/runnables/#runnableconfig) at invocation and access them in the tool:
+사용자 식별자와 같이 도구에 필요한 **불변** 런타임 데이터가 있는 경우 구성을 사용합니다. 호출 시 [`RunnableConfig`](https://python.langchain.com/docs/concepts/runnables/#runnableconfig)를 통해 이러한 인수를 전달하고 도구에서 액세스합니다:
 
 ```python
 from langchain_core.tools import tool
@@ -1678,14 +1678,14 @@ const saveUserInfo = tool(
     6. The `user_id` is passed in the config. This is used to identify the user whose information is being updated.
     :::
 
-## Advanced tool features
+## 고급 도구 기능
 
-### Immediate return
+### 즉시 반환
 
 :::python
-Use `return_direct=True` to immediately return a tool's result without executing additional logic.
+추가 로직을 실행하지 않고 도구의 결과를 즉시 반환하려면 `return_direct=True`를 사용합니다.
 
-This is useful for tools that should not trigger further processing or tool calls, allowing you to return results directly to the user.
+이는 추가 처리나 도구 호출을 트리거하지 않아야 하는 도구에 유용하며, 사용자에게 결과를 직접 반환할 수 있습니다.
 
 ```python
 # highlight-next-line
@@ -2312,12 +2312,12 @@ To address this, you can dynamically adjust the tools available to a model by re
 
 See [`langgraph-bigtool`](https://github.com/langchain-ai/langgraph-bigtool) prebuilt library for a ready-to-use implementation.
 
-## Prebuilt tools
+## 사전 빌드된 도구
 
-### LLM provider tools
+### LLM 제공자 도구
 
 :::python
-You can use prebuilt tools from model providers by passing a dictionary with tool specs to the `tools` parameter of `create_react_agent`. For example, to use the `web_search_preview` tool from OpenAI:
+도구 사양이 포함된 딕셔너리를 `create_react_agent`의 `tools` 매개변수에 전달하여 모델 제공자의 사전 빌드된 도구를 사용할 수 있습니다. 예를 들어 OpenAI의 `web_search_preview` 도구를 사용하려면:
 
 ```python
 from langgraph.prebuilt import create_react_agent
@@ -2331,11 +2331,11 @@ response = agent.invoke(
 )
 ```
 
-Please consult the documentation for the specific model you are using to see which tools are available and how to use them.
+사용 가능한 도구와 사용 방법을 확인하려면 사용 중인 특정 모델의 문서를 참조하세요.
 :::
 
 :::js
-You can use prebuilt tools from model providers by passing a dictionary with tool specs to the `tools` parameter of `createReactAgent`. For example, to use the `web_search_preview` tool from OpenAI:
+도구 사양이 포함된 딕셔너리를 `createReactAgent`의 `tools` 매개변수에 전달하여 모델 제공자의 사전 빌드된 도구를 사용할 수 있습니다. 예를 들어 OpenAI의 `web_search_preview` 도구를 사용하려면:
 
 ```typescript
 import { createReactAgent } from "@langchain/langgraph/prebuilt";

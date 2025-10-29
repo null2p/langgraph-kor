@@ -1,19 +1,19 @@
-"""Create a sequential no-op graph consisting of a few hundred nodes."""
+"""수백 개의 노드로 구성된 순차적인 no-op 그래프를 생성합니다."""
 
 from langgraph._internal._runnable import RunnableCallable
 from langgraph.graph import MessagesState, StateGraph
 
 
 def create_sequential(number_nodes: int) -> StateGraph:
-    """Create a sequential no-op graph consisting of a few hundred nodes."""
+    """수백 개의 노드로 구성된 순차적인 no-op 그래프를 생성합니다."""
     builder = StateGraph(MessagesState)
 
     def noop(state: MessagesState) -> None:
-        """No-op function."""
+        """No-op 함수입니다."""
         pass
 
     async def anoop(state: MessagesState) -> None:
-        """No-op function."""
+        """No-op 함수입니다."""
         pass
 
     prev_node = "__start__"
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     import uvloop
 
     graph = create_sequential(3000).compile()
-    input = {"messages": []}  # Empty list of messages
+    input = {"messages": []}  # 빈 메시지 리스트
     config = {"recursion_limit": 20000000000}
 
     async def run():

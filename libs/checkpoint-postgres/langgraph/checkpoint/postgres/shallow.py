@@ -33,8 +33,8 @@ from langgraph.checkpoint.postgres import _ainternal, _internal
 from langgraph.checkpoint.postgres.base import BasePostgresSaver
 
 """
-To add a new migration, add a new string to the MIGRATIONS list.
-The position of the migration in the list is the version number.
+새 마이그레이션을 추가하려면 MIGRATIONS 리스트에 새 문자열을 추가하세요.
+리스트에서 마이그레이션의 위치가 버전 번호입니다.
 """
 MIGRATIONS = [
     """CREATE TABLE IF NOT EXISTS checkpoint_migrations (
@@ -167,11 +167,11 @@ def _dump_blobs(
 
 
 class ShallowPostgresSaver(BasePostgresSaver):
-    """A checkpoint saver that uses Postgres to store checkpoints.
+    """Postgres를 사용하여 체크포인트를 저장하는 체크포인트 세이버입니다.
 
-    This checkpointer ONLY stores the most recent checkpoint and does NOT retain any history.
-    It is meant to be a light-weight drop-in replacement for the PostgresSaver that
-    supports most of the LangGraph persistence functionality with the exception of time travel.
+    이 체크포인터는 가장 최근의 체크포인트만 저장하고 히스토리를 보관하지 않습니다.
+    타임 트래블을 제외한 대부분의 LangGraph 영속성 기능을 지원하는 PostgresSaver의
+    경량 대체품으로 의도되었습니다.
     """
 
     SELECT_SQL = SELECT_SQL
@@ -198,7 +198,7 @@ class ShallowPostgresSaver(BasePostgresSaver):
         super().__init__(serde=serde)
         if isinstance(conn, ConnectionPool) and pipe is not None:
             raise ValueError(
-                "Pipeline should be used only with a single Connection, not ConnectionPool."
+                "파이프라인은 ConnectionPool이 아닌 단일 Connection에서만 사용해야 합니다."
             )
 
         self.conn = conn
@@ -211,14 +211,14 @@ class ShallowPostgresSaver(BasePostgresSaver):
     def from_conn_string(
         cls, conn_string: str, *, pipeline: bool = False
     ) -> Iterator["ShallowPostgresSaver"]:
-        """Create a new ShallowPostgresSaver instance from a connection string.
+        """연결 문자열에서 새 ShallowPostgresSaver 인스턴스를 생성합니다.
 
         Args:
-            conn_string: The Postgres connection info string.
-            pipeline: whether to use Pipeline
+            conn_string: Postgres 연결 정보 문자열입니다.
+            pipeline: Pipeline을 사용할지 여부
 
         Returns:
-            ShallowPostgresSaver: A new ShallowPostgresSaver instance.
+            ShallowPostgresSaver: 새로운 ShallowPostgresSaver 인스턴스입니다.
         """
         with Connection.connect(
             conn_string, autocommit=True, prepare_threshold=0, row_factory=dict_row
@@ -230,11 +230,11 @@ class ShallowPostgresSaver(BasePostgresSaver):
                 yield cls(conn)
 
     def setup(self) -> None:
-        """Set up the checkpoint database asynchronously.
+        """체크포인트 데이터베이스를 비동기적으로 설정합니다.
 
-        This method creates the necessary tables in the Postgres database if they don't
-        already exist and runs database migrations. It MUST be called directly by the user
-        the first time checkpointer is used.
+        이 메서드는 Postgres 데이터베이스에 필요한 테이블이 아직 존재하지 않으면 생성하고
+        데이터베이스 마이그레이션을 실행합니다. 체크포인터를 처음 사용할 때 사용자가 직접
+        호출해야 합니다.
         """
         with self._cursor() as cur:
             cur.execute(self.MIGRATIONS[0])
@@ -264,11 +264,11 @@ class ShallowPostgresSaver(BasePostgresSaver):
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> Iterator[CheckpointTuple]:
-        """List checkpoints from the database.
+        """데이터베이스에서 체크포인트를 나열합니다.
 
-        This method retrieves a list of checkpoint tuples from the Postgres database based
-        on the provided config. For ShallowPostgresSaver, this method returns a list with
-        ONLY the most recent checkpoint.
+        이 메서드는 제공된 config를 기반으로 Postgres 데이터베이스에서 체크포인트 튜플 리스트를 검색합니다.
+        ShallowPostgresSaver의 경우 이 메서드는
+        가장 최근 체크포인트만 포함하는 리스트를 반환합니다.
         """
         where, args = self._search_where(config, filter, before)
         query = self.SELECT_SQL + where
@@ -301,16 +301,16 @@ class ShallowPostgresSaver(BasePostgresSaver):
                 )
 
     def get_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
-        """Get a checkpoint tuple from the database.
+        """데이터베이스에서 체크포인트 튜플을 가져옵니다.
 
-        This method retrieves a checkpoint tuple from the Postgres database based on the
-        provided config (matching the thread ID in the config).
+        이 메서드는 제공된 config(config의 스레드 ID와 일치)를 기반으로
+        Postgres 데이터베이스에서 체크포인트 튜플을 검색합니다.
 
         Args:
-            config: The config to use for retrieving the checkpoint.
+            config: 체크포인트 검색에 사용할 config입니다.
 
         Returns:
-            The retrieved checkpoint tuple, or None if no matching checkpoint was found.
+            검색된 체크포인트 튜플, 또는 일치하는 체크포인트를 찾지 못한 경우 None입니다.
 
         Examples:
 
@@ -376,20 +376,20 @@ class ShallowPostgresSaver(BasePostgresSaver):
         metadata: CheckpointMetadata,
         new_versions: ChannelVersions,
     ) -> RunnableConfig:
-        """Save a checkpoint to the database.
+        """체크포인트를 데이터베이스에 저장합니다.
 
-        This method saves a checkpoint to the Postgres database. The checkpoint is associated
-        with the provided config. For ShallowPostgresSaver, this method saves ONLY the most recent
-        checkpoint and overwrites a previous checkpoint, if it exists.
+        이 메서드는 Postgres 데이터베이스에 체크포인트를 저장합니다. 체크포인트는
+        제공된 config와 연결됩니다. ShallowPostgresSaver의 경우 이 메서드는 가장 최근
+        체크포인트만 저장하고 이전 체크포인트가 있으면 덮어씁니다.
 
         Args:
-            config: The config to associate with the checkpoint.
-            checkpoint: The checkpoint to save.
-            metadata: Additional metadata to save with the checkpoint.
-            new_versions: New channel versions as of this write.
+            config: 체크포인트와 연결할 config입니다.
+            checkpoint: 저장할 체크포인트입니다.
+            metadata: 체크포인트와 함께 저장할 추가 메타데이터입니다.
+            new_versions: 이 쓰기 기준 새 채널 버전입니다.
 
         Returns:
-            RunnableConfig: Updated configuration after storing the checkpoint.
+            RunnableConfig: 체크포인트 저장 후 업데이트된 구성입니다.
 
         Examples:
 
@@ -454,14 +454,14 @@ class ShallowPostgresSaver(BasePostgresSaver):
         task_id: str,
         task_path: str = "",
     ) -> None:
-        """Store intermediate writes linked to a checkpoint.
+        """체크포인트에 연결된 중간 쓰기를 저장합니다.
 
-        This method saves intermediate writes associated with a checkpoint to the Postgres database.
+        이 메서드는 체크포인트와 연결된 중간 쓰기를 Postgres 데이터베이스에 저장합니다.
 
         Args:
-            config: Configuration of the related checkpoint.
-            writes: List of writes to store.
-            task_id: Identifier for the task creating the writes.
+            config: 관련 체크포인트의 구성입니다.
+            writes: 저장할 쓰기 리스트입니다.
+            task_id: 쓰기를 생성하는 작업의 식별자입니다.
         """
         query = (
             self.UPSERT_CHECKPOINT_WRITES_SQL
@@ -483,18 +483,18 @@ class ShallowPostgresSaver(BasePostgresSaver):
 
     @contextmanager
     def _cursor(self, *, pipeline: bool = False) -> Iterator[Cursor[DictRow]]:
-        """Create a database cursor as a context manager.
+        """컨텍스트 관리자로 데이터베이스 커서를 생성합니다.
 
         Args:
-            pipeline: whether to use pipeline for the DB operations inside the context manager.
-                Will be applied regardless of whether the ShallowPostgresSaver instance was initialized with a pipeline.
-                If pipeline mode is not supported, will fall back to using transaction context manager.
+            pipeline: 컨텍스트 관리자 내부의 DB 작업에 파이프라인을 사용할지 여부입니다.
+                ShallowPostgresSaver 인스턴스가 파이프라인으로 초기화되었는지 여부와 관계없이 적용됩니다.
+                파이프라인 모드가 지원되지 않으면 트랜잭션 컨텍스트 관리자를 사용하도록 대체됩니다.
         """
         with _internal.get_connection(self.conn) as conn:
             if self.pipe:
-                # a connection in pipeline mode can be used concurrently
-                # in multiple threads/coroutines, but only one cursor can be
-                # used at a time
+                # 파이프라인 모드의 연결은 여러 스레드/코루틴에서 동시에 사용할 수 있지만
+                # 한 번에 하나의 커서만 사용할 수 있음
+                
                 try:
                     with conn.cursor(binary=True, row_factory=dict_row) as cur:
                         yield cur
@@ -502,8 +502,8 @@ class ShallowPostgresSaver(BasePostgresSaver):
                     if pipeline:
                         self.pipe.sync()
             elif pipeline:
-                # a connection not in pipeline mode can only be used by one
-                # thread/coroutine at a time, so we acquire a lock
+                # 파이프라인 모드가 아닌 연결은 한 번에 하나의 스레드/코루틴에서만
+                # 사용할 수 있으므로 락을 획득함
                 if self.supports_pipeline:
                     with (
                         self.lock,
@@ -512,7 +512,7 @@ class ShallowPostgresSaver(BasePostgresSaver):
                     ):
                         yield cur
                 else:
-                    # Use connection's transaction context manager when pipeline mode not supported
+                    # 파이프라인 모드가 지원되지 않을 때 연결의 트랜잭션 컨텍스트 관리자를 사용합니다
                     with (
                         self.lock,
                         conn.transaction(),
@@ -525,11 +525,11 @@ class ShallowPostgresSaver(BasePostgresSaver):
 
 
 class AsyncShallowPostgresSaver(BasePostgresSaver):
-    """A checkpoint saver that uses Postgres to store checkpoints asynchronously.
+    """Postgres를 사용하여 체크포인트를 비동기적으로 저장하는 체크포인트 세이버입니다.
 
-    This checkpointer ONLY stores the most recent checkpoint and does NOT retain any history.
-    It is meant to be a light-weight drop-in replacement for the AsyncPostgresSaver that
-    supports most of the LangGraph persistence functionality with the exception of time travel.
+    이 체크포인터는 가장 최근의 체크포인트만 저장하고 히스토리를 보관하지 않습니다.
+    타임 트래블을 제외한 대부분의 LangGraph 영속성 기능을 지원하는 AsyncPostgresSaver의
+    경량 대체품으로 의도되었습니다.
     """
 
     SELECT_SQL = SELECT_SQL
@@ -555,7 +555,7 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
         super().__init__(serde=serde)
         if isinstance(conn, AsyncConnectionPool) and pipe is not None:
             raise ValueError(
-                "Pipeline should be used only with a single AsyncConnection, not AsyncConnectionPool."
+                "파이프라인은 AsyncConnectionPool이 아닌 단일 AsyncConnection에서만 사용해야 합니다."
             )
 
         self.conn = conn
@@ -573,14 +573,14 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
         pipeline: bool = False,
         serde: SerializerProtocol | None = None,
     ) -> AsyncIterator["AsyncShallowPostgresSaver"]:
-        """Create a new AsyncShallowPostgresSaver instance from a connection string.
+        """연결 문자열에서 새 AsyncShallowPostgresSaver 인스턴스를 생성합니다.
 
         Args:
-            conn_string: The Postgres connection info string.
-            pipeline: whether to use AsyncPipeline
+            conn_string: Postgres 연결 정보 문자열입니다.
+            pipeline: AsyncPipeline을 사용할지 여부
 
         Returns:
-            AsyncShallowPostgresSaver: A new AsyncShallowPostgresSaver instance.
+            AsyncShallowPostgresSaver: 새로운 AsyncShallowPostgresSaver 인스턴스입니다.
         """
         async with await AsyncConnection.connect(
             conn_string, autocommit=True, prepare_threshold=0, row_factory=dict_row
@@ -592,11 +592,11 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
                 yield cls(conn=conn, serde=serde)
 
     async def setup(self) -> None:
-        """Set up the checkpoint database asynchronously.
+        """체크포인트 데이터베이스를 비동기적으로 설정합니다.
 
-        This method creates the necessary tables in the Postgres database if they don't
-        already exist and runs database migrations. It MUST be called directly by the user
-        the first time checkpointer is used.
+        이 메서드는 Postgres 데이터베이스에 필요한 테이블이 아직 존재하지 않으면 생성하고
+        데이터베이스 마이그레이션을 실행합니다. 체크포인터를 처음 사용할 때 사용자가 직접
+        호출해야 합니다.
         """
         async with self._cursor() as cur:
             await cur.execute(self.MIGRATIONS[0])
@@ -626,11 +626,11 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> AsyncIterator[CheckpointTuple]:
-        """List checkpoints from the database asynchronously.
+        """데이터베이스에서 체크포인트를 비동기적으로 나열합니다.
 
-        This method retrieves a list of checkpoint tuples from the Postgres database based
-        on the provided config. For ShallowPostgresSaver, this method returns a list with
-        ONLY the most recent checkpoint.
+        이 메서드는 제공된 config를 기반으로 Postgres 데이터베이스에서 체크포인트 튜플 리스트를 검색합니다.
+        ShallowPostgresSaver의 경우 이 메서드는
+        가장 최근 체크포인트만 포함하는 리스트를 반환합니다.
         """
         where, args = self._search_where(config, filter, before)
         query = self.SELECT_SQL + where
@@ -665,16 +665,16 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
                 )
 
     async def aget_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
-        """Get a checkpoint tuple from the database asynchronously.
+        """데이터베이스에서 체크포인트 튜플을 비동기적으로 가져옵니다.
 
-        This method retrieves a checkpoint tuple from the Postgres database based on the
-        provided config (matching the thread ID in the config).
+        이 메서드는 제공된 config(config의 스레드 ID와 일치)를 기반으로
+        Postgres 데이터베이스에서 체크포인트 튜플을 검색합니다.
 
         Args:
-            config: The config to use for retrieving the checkpoint.
+            config: 체크포인트 검색에 사용할 config입니다.
 
         Returns:
-            The retrieved checkpoint tuple, or None if no matching checkpoint was found.
+            검색된 체크포인트 튜플, 또는 일치하는 체크포인트를 찾지 못한 경우 None입니다.
         """
         thread_id = config["configurable"]["thread_id"]
         checkpoint_ns = config["configurable"].get("checkpoint_ns", "")
@@ -723,18 +723,18 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
     ) -> RunnableConfig:
         """Save a checkpoint to the database asynchronously.
 
-        This method saves a checkpoint to the Postgres database. The checkpoint is associated
+        이 메서드는 Postgres 데이터베이스에 체크포인트를 저장합니다. 체크포인트는
         with the provided config. For AsyncShallowPostgresSaver, this method saves ONLY the most recent
-        checkpoint and overwrites a previous checkpoint, if it exists.
+        체크포인트만 저장하고 이전 체크포인트가 있으면 덮어씁니다.
 
         Args:
-            config: The config to associate with the checkpoint.
-            checkpoint: The checkpoint to save.
-            metadata: Additional metadata to save with the checkpoint.
-            new_versions: New channel versions as of this write.
+            config: 체크포인트와 연결할 config입니다.
+            checkpoint: 저장할 체크포인트입니다.
+            metadata: 체크포인트와 함께 저장할 추가 메타데이터입니다.
+            new_versions: 이 쓰기 기준 새 채널 버전입니다.
 
         Returns:
-            RunnableConfig: Updated configuration after storing the checkpoint.
+            RunnableConfig: 체크포인트 저장 후 업데이트된 구성입니다.
         """
         configurable = config["configurable"].copy()
         thread_id = configurable.pop("thread_id")
@@ -793,9 +793,9 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
         This method saves intermediate writes associated with a checkpoint to the database.
 
         Args:
-            config: Configuration of the related checkpoint.
+            config: 관련 체크포인트의 구성입니다.
             writes: List of writes to store, each as (channel, value) pair.
-            task_id: Identifier for the task creating the writes.
+            task_id: 쓰기를 생성하는 작업의 식별자입니다.
         """
         query = (
             self.UPSERT_CHECKPOINT_WRITES_SQL
@@ -818,18 +818,18 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
     async def _cursor(
         self, *, pipeline: bool = False
     ) -> AsyncIterator[AsyncCursor[DictRow]]:
-        """Create a database cursor as a context manager.
+        """컨텍스트 관리자로 데이터베이스 커서를 생성합니다.
 
         Args:
-            pipeline: whether to use pipeline for the DB operations inside the context manager.
+            pipeline: 컨텍스트 관리자 내부의 DB 작업에 파이프라인을 사용할지 여부입니다.
                 Will be applied regardless of whether the AsyncShallowPostgresSaver instance was initialized with a pipeline.
-                If pipeline mode is not supported, will fall back to using transaction context manager.
+                파이프라인 모드가 지원되지 않으면 트랜잭션 컨텍스트 관리자를 사용하도록 대체됩니다.
         """
         async with _ainternal.get_connection(self.conn) as conn:
             if self.pipe:
-                # a connection in pipeline mode can be used concurrently
-                # in multiple threads/coroutines, but only one cursor can be
-                # used at a time
+                # 파이프라인 모드의 연결은 여러 스레드/코루틴에서 동시에 사용할 수 있지만
+                # 한 번에 하나의 커서만 사용할 수 있음
+                
                 try:
                     async with conn.cursor(binary=True, row_factory=dict_row) as cur:
                         yield cur
@@ -837,8 +837,8 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
                     if pipeline:
                         await self.pipe.sync()
             elif pipeline:
-                # a connection not in pipeline mode can only be used by one
-                # thread/coroutine at a time, so we acquire a lock
+                # 파이프라인 모드가 아닌 연결은 한 번에 하나의 스레드/코루틴에서만
+                # 사용할 수 있으므로 락을 획득함
                 if self.supports_pipeline:
                     async with (
                         self.lock,
@@ -847,7 +847,7 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
                     ):
                         yield cur
                 else:
-                    # Use connection's transaction context manager when pipeline mode not supported
+                    # 파이프라인 모드가 지원되지 않을 때 연결의 트랜잭션 컨텍스트 관리자를 사용합니다
                     async with (
                         self.lock,
                         conn.transaction(),
@@ -869,11 +869,11 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> Iterator[CheckpointTuple]:
-        """List checkpoints from the database.
+        """데이터베이스에서 체크포인트를 나열합니다.
 
-        This method retrieves a list of checkpoint tuples from the Postgres database based
-        on the provided config. For ShallowPostgresSaver, this method returns a list with
-        ONLY the most recent checkpoint.
+        이 메서드는 제공된 config를 기반으로 Postgres 데이터베이스에서 체크포인트 튜플 리스트를 검색합니다.
+        ShallowPostgresSaver의 경우 이 메서드는
+        가장 최근 체크포인트만 포함하는 리스트를 반환합니다.
         """
         aiter_ = self.alist(config, filter=filter, before=before, limit=limit)
         while True:
@@ -886,16 +886,16 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
                 break
 
     def get_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
-        """Get a checkpoint tuple from the database.
+        """데이터베이스에서 체크포인트 튜플을 가져옵니다.
 
-        This method retrieves a checkpoint tuple from the Postgres database based on the
-        provided config (matching the thread ID in the config).
+        이 메서드는 제공된 config(config의 스레드 ID와 일치)를 기반으로
+        Postgres 데이터베이스에서 체크포인트 튜플을 검색합니다.
 
         Args:
-            config: The config to use for retrieving the checkpoint.
+            config: 체크포인트 검색에 사용할 config입니다.
 
         Returns:
-            The retrieved checkpoint tuple, or None if no matching checkpoint was found.
+            검색된 체크포인트 튜플, 또는 일치하는 체크포인트를 찾지 못한 경우 None입니다.
         """
         try:
             # check if we are in the main thread, only bg threads can block
@@ -920,20 +920,20 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
         metadata: CheckpointMetadata,
         new_versions: ChannelVersions,
     ) -> RunnableConfig:
-        """Save a checkpoint to the database.
+        """체크포인트를 데이터베이스에 저장합니다.
 
-        This method saves a checkpoint to the Postgres database. The checkpoint is associated
+        이 메서드는 Postgres 데이터베이스에 체크포인트를 저장합니다. 체크포인트는
         with the provided config. For AsyncShallowPostgresSaver, this method saves ONLY the most recent
-        checkpoint and overwrites a previous checkpoint, if it exists.
+        체크포인트만 저장하고 이전 체크포인트가 있으면 덮어씁니다.
 
         Args:
-            config: The config to associate with the checkpoint.
-            checkpoint: The checkpoint to save.
-            metadata: Additional metadata to save with the checkpoint.
-            new_versions: New channel versions as of this write.
+            config: 체크포인트와 연결할 config입니다.
+            checkpoint: 저장할 체크포인트입니다.
+            metadata: 체크포인트와 함께 저장할 추가 메타데이터입니다.
+            new_versions: 이 쓰기 기준 새 채널 버전입니다.
 
         Returns:
-            RunnableConfig: Updated configuration after storing the checkpoint.
+            RunnableConfig: 체크포인트 저장 후 업데이트된 구성입니다.
         """
         return asyncio.run_coroutine_threadsafe(
             self.aput(config, checkpoint, metadata, new_versions), self.loop
@@ -946,14 +946,14 @@ class AsyncShallowPostgresSaver(BasePostgresSaver):
         task_id: str,
         task_path: str = "",
     ) -> None:
-        """Store intermediate writes linked to a checkpoint.
+        """체크포인트에 연결된 중간 쓰기를 저장합니다.
 
         This method saves intermediate writes associated with a checkpoint to the database.
 
         Args:
-            config: Configuration of the related checkpoint.
+            config: 관련 체크포인트의 구성입니다.
             writes: List of writes to store, each as (channel, value) pair.
-            task_id: Identifier for the task creating the writes.
+            task_id: 쓰기를 생성하는 작업의 식별자입니다.
             task_path: Path of the task creating the writes.
         """
         return asyncio.run_coroutine_threadsafe(

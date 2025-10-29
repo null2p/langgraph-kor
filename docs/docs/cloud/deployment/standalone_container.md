@@ -1,37 +1,37 @@
-# How to Deploy a Standalone Container
+# Standalone Container 배포 방법
 
-Before deploying, review the [conceptual guide for the Standalone Container](../../concepts/langgraph_standalone_container.md) deployment option.
+배포하기 전에 [Standalone Container](../../concepts/langgraph_standalone_container.md) 배포 옵션에 대한 개념 가이드를 검토하세요.
 
 ## Prerequisites
 
-1. Use the [LangGraph CLI](../../concepts/langgraph_cli.md) to [test your application locally](../../tutorials/langgraph-platform/local-server.md).
-1. Use the [LangGraph CLI](../../concepts/langgraph_cli.md) to build a Docker image (i.e. `langgraph build`).
-1. The following environment variables are needed for a standalone container deployment.
-    1. `REDIS_URI`: Connection details to a Redis instance. Redis will be used as a pub-sub broker to enable streaming real time output from background runs. The value of `REDIS_URI` must be a valid [Redis connection URI](https://redis-py.readthedocs.io/en/stable/connections.html#redis.Redis.from_url).
+1. [LangGraph CLI](../../concepts/langgraph_cli.md)를 사용하여 [애플리케이션을 로컬에서 테스트](../../tutorials/langgraph-platform/local-server.md)합니다.
+1. [LangGraph CLI](../../concepts/langgraph_cli.md)를 사용하여 Docker 이미지를 빌드합니다 (예: `langgraph build`).
+1. standalone container 배포에는 다음 환경 변수가 필요합니다.
+    1. `REDIS_URI`: Redis 인스턴스에 대한 연결 세부 정보. Redis는 백그라운드 실행에서 실시간 출력을 스트리밍할 수 있도록 pub-sub 브로커로 사용됩니다. `REDIS_URI` 값은 유효한 [Redis 연결 URI](https://redis-py.readthedocs.io/en/stable/connections.html#redis.Redis.from_url)여야 합니다.
 
         !!! Note "Shared Redis Instance"
-            Multiple self-hosted deployments can share the same Redis instance. For example, for `Deployment A`, `REDIS_URI` can be set to `redis://<hostname_1>:<port>/1` and for `Deployment B`, `REDIS_URI` can be set to `redis://<hostname_1>:<port>/2`.
+            여러 self-hosted 배포가 동일한 Redis 인스턴스를 공유할 수 있습니다. 예를 들어, `Deployment A`의 경우 `REDIS_URI`를 `redis://<hostname_1>:<port>/1`로 설정하고 `Deployment B`의 경우 `REDIS_URI`를 `redis://<hostname_1>:<port>/2`로 설정할 수 있습니다.
 
-            `1` and `2` are different database numbers within the same instance, but `<hostname_1>` is shared. **The same database number cannot be used for separate deployments**.
+            `1`과 `2`는 동일한 인스턴스 내의 서로 다른 데이터베이스 번호이지만 `<hostname_1>`은 공유됩니다. **동일한 데이터베이스 번호를 별도의 배포에 사용할 수 없습니다**.
 
-    1. `DATABASE_URI`: Postgres connection details. Postgres will be used to store assistants, threads, runs, persist thread state and long term memory, and to manage the state of the background task queue with 'exactly once' semantics. The value of `DATABASE_URI` must be a valid [Postgres connection URI](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS).
+    1. `DATABASE_URI`: Postgres 연결 세부 정보. Postgres는 assistants, threads, runs를 저장하고, thread state 및 장기 메모리를 유지하며, '정확히 한 번' 시맨틱으로 백그라운드 작업 큐의 상태를 관리하는 데 사용됩니다. `DATABASE_URI` 값은 유효한 [Postgres 연결 URI](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS)여야 합니다.
 
         !!! Note "Shared Postgres Instance"
-            Multiple self-hosted deployments can share the same Postgres instance. For example, for `Deployment A`, `DATABASE_URI` can be set to `postgres://<user>:<password>@/<database_name_1>?host=<hostname_1>` and for `Deployment B`, `DATABASE_URI` can be set to `postgres://<user>:<password>@/<database_name_2>?host=<hostname_1>`.
+            여러 self-hosted 배포가 동일한 Postgres 인스턴스를 공유할 수 있습니다. 예를 들어, `Deployment A`의 경우 `DATABASE_URI`를 `postgres://<user>:<password>@/<database_name_1>?host=<hostname_1>`로 설정하고 `Deployment B`의 경우 `DATABASE_URI`를 `postgres://<user>:<password>@/<database_name_2>?host=<hostname_1>`로 설정할 수 있습니다.
 
-            `<database_name_1>` and `database_name_2` are different databases within the same instance, but `<hostname_1>` is shared. **The same database cannot be used for separate deployments**.
+            `<database_name_1>`과 `database_name_2`는 동일한 인스턴스 내의 서로 다른 데이터베이스이지만 `<hostname_1>`은 공유됩니다. **동일한 데이터베이스를 별도의 배포에 사용할 수 없습니다**.
 
-    1. `LANGGRAPH_CLOUD_LICENSE_KEY`: (if using [Enterprise](../../concepts/langgraph_data_plane.md#licensing)) LangGraph Platform license key. This will be used to authenticate ONCE at server start up.
-    1. `LANGSMITH_ENDPOINT`: To send traces to a [self-hosted LangSmith](https://docs.smith.langchain.com/self_hosting) instance, set `LANGSMITH_ENDPOINT` to the hostname of the self-hosted LangSmith instance.
-1. Egress to `https://beacon.langchain.com` from your network. This is required for license verification and usage reporting if not running in air-gapped mode. See the [Egress documentation](../../cloud/deployment/egress.md) for more details.
+    1. `LANGGRAPH_CLOUD_LICENSE_KEY`: ([Enterprise](../../concepts/langgraph_data_plane.md#licensing) 사용 시) LangGraph Platform 라이선스 키. 이는 서버 시작 시 한 번 인증하는 데 사용됩니다.
+    1. `LANGSMITH_ENDPOINT`: [self-hosted LangSmith](https://docs.smith.langchain.com/self_hosting) 인스턴스로 추적을 보내려면 `LANGSMITH_ENDPOINT`를 self-hosted LangSmith 인스턴스의 호스트 이름으로 설정합니다.
+1. 네트워크에서 `https://beacon.langchain.com`로의 Egress. 이는 air-gapped 모드에서 실행하지 않는 경우 라이선스 확인 및 사용량 보고에 필요합니다. 자세한 내용은 [Egress 문서](../../cloud/deployment/egress.md)를 참조하세요.
 
 ## Kubernetes (Helm)
 
-Use this [Helm chart](https://github.com/langchain-ai/helm/blob/main/charts/langgraph-cloud/README.md) to deploy a LangGraph Server to a Kubernetes cluster.
+이 [Helm chart](https://github.com/langchain-ai/helm/blob/main/charts/langgraph-cloud/README.md)를 사용하여 Kubernetes 클러스터에 LangGraph Server를 배포합니다.
 
 ## Docker
 
-Run the following `docker` command:
+다음 `docker` 명령을 실행합니다:
 ```shell
 docker run \
     --env-file .env \
@@ -44,13 +44,12 @@ docker run \
 
 !!! note
 
-    * You need to replace `my-image` with the name of the image you built in the prerequisite steps (from `langgraph build`)
-    and you should provide appropriate values for `REDIS_URI`, `DATABASE_URI`, and `LANGSMITH_API_KEY`.
-    * If your application requires additional environment variables, you can pass them in a similar way.
+    * 사전 요구사항 단계(`langgraph build`)에서 빌드한 이미지의 이름으로 `my-image`를 교체해야 하며, `REDIS_URI`, `DATABASE_URI`, `LANGSMITH_API_KEY`에 적절한 값을 제공해야 합니다.
+    * 애플리케이션에 추가 환경 변수가 필요한 경우 유사한 방식으로 전달할 수 있습니다.
 
 ## Docker Compose
 
-Docker Compose YAML file:
+Docker Compose YAML 파일:
 ```yml
 volumes:
     langgraph-data:
@@ -96,14 +95,14 @@ services:
             POSTGRES_URI: postgres://postgres:postgres@langgraph-postgres:5432/postgres?sslmode=disable
 ```
 
-You can run the command `docker compose up` with this Docker Compose file in the same folder.
+동일한 폴더에 이 Docker Compose 파일과 함께 `docker compose up` 명령을 실행할 수 있습니다.
 
-This will launch a LangGraph Server on port `8123` (if you want to change this, you can change this by changing the ports in the `langgraph-api` volume). You can test if the application is healthy by running:
+이렇게 하면 포트 `8123`에서 LangGraph Server가 시작됩니다 (이를 변경하려면 `langgraph-api` 볼륨의 포트를 변경하면 됩니다). 다음을 실행하여 애플리케이션이 정상인지 테스트할 수 있습니다:
 
 ```shell
 curl --request GET --url 0.0.0.0:8123/ok
 ```
-Assuming everything is running correctly, you should see a response like:
+모든 것이 올바르게 실행되고 있다면 다음과 같은 응답이 표시됩니다:
 
 ```shell
 {"ok":true}

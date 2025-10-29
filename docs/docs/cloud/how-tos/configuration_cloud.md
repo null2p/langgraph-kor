@@ -1,8 +1,8 @@
-# Manage assistants
+# 어시스턴트 관리
 
-In this guide we will show how to create, configure, and manage an [assistant](../../concepts/assistants.md).
+이 가이드에서는 [어시스턴트](../../concepts/assistants.md)를 생성, 구성 및 관리하는 방법을 보여줍니다.
 
-First, as a brief refresher on the concept of runtime context, consider the following simple `call_model` node and context schema. Observe that this node tries to read and use the `model_provider` as defined by the `Runtime` object's `context` property.
+먼저 런타임 컨텍스트 개념에 대한 간단한 복습으로 다음의 간단한 `call_model` 노드와 컨텍스트 스키마를 고려하세요. 이 노드는 `Runtime` 객체의 `context` 속성으로 정의된 `model_provider`를 읽고 사용하려고 시도하는 것을 확인하세요.
 
 === "Python"
 
@@ -44,16 +44,16 @@ First, as a brief refresher on the concept of runtime context, consider the foll
     ```
 
 :::python
-For more information on runtime context, [see here](../../concepts/low_level.md#runtime-context).
+런타임 컨텍스트에 대한 자세한 내용은 [여기](../../concepts/low_level.md#runtime-context)를 참조하세요.
 :::
 
-## Create an assistant
+## 어시스턴트 생성
 
 ### LangGraph SDK
 
-To create an assistant, use the [LangGraph SDK](../../concepts/sdk.md) `create` method. See the [Python](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/#langgraph_sdk.client.AssistantsClient.create) and [JS](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#create) SDK reference docs for more information.
+어시스턴트를 생성하려면 [LangGraph SDK](../../concepts/sdk.md)의 `create` 메서드를 사용하세요. 자세한 내용은 [Python](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/#langgraph_sdk.client.AssistantsClient.create) 및 [JS](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#create) SDK 레퍼런스 문서를 참조하세요.
 
-This example uses the same configuration schema as above, and creates an assistant with `model_name` set to `openai`.
+이 예제는 위와 동일한 구성 스키마를 사용하며, `model_name`을 `openai`로 설정한 어시스턴트를 생성합니다.
 
 === "Python"
 
@@ -93,7 +93,7 @@ This example uses the same configuration schema as above, and creates an assista
         --data '{"graph_id":"agent", "config":{"configurable":{"model_name":"openai"}}, "name": "Open AI Assistant"}'
     ```
 
-Output:
+출력:
 
     {
         "assistant_id": "62e209ca-9154-432a-b9e9-2d75c7a9219b",
@@ -111,19 +111,19 @@ Output:
 
 ### LangGraph Platform UI
 
-You can also create assistants from the LangGraph Platform UI.
+LangGraph Platform UI에서도 어시스턴트를 생성할 수 있습니다.
 
-Inside your deployment, select the "Assistants" tab. This will load a table of all of the assistants in your deployment, across all graphs.
+배포 내에서 "Assistants" 탭을 선택하세요. 모든 그래프에 걸쳐 배포의 모든 어시스턴트 테이블이 로드됩니다.
 
-To create a new assistant, select the "+ New assistant" button. This will open a form where you can specify the graph this assistant is for, as well as provide a name, description, and the desired configuration for the assistant based on the configuration schema for that graph.
+새 어시스턴트를 생성하려면 "+ New assistant" 버튼을 선택하세요. 이렇게 하면 이 어시스턴트가 사용할 그래프를 지정하고, 이름, 설명 및 해당 그래프의 구성 스키마를 기반으로 어시스턴트에 대한 원하는 구성을 제공할 수 있는 양식이 열립니다.
 
-To confirm, click "Create assistant". This will take you to [LangGraph Studio](../../concepts/langgraph_studio.md) where you can test the assistant. If you go back to the "Assistants" tab in the deployment, you will see the newly created assistant in the table.
+확인하려면 "Create assistant"를 클릭하세요. 그러면 어시스턴트를 테스트할 수 있는 [LangGraph Studio](../../concepts/langgraph_studio.md)로 이동합니다. 배포의 "Assistants" 탭으로 돌아가면 테이블에 새로 생성된 어시스턴트가 표시됩니다.
 
-## Use an assistant
+## 어시스턴트 사용
 
 ### LangGraph SDK
 
-We have now created an assistant called "Open AI Assistant" that has `model_name` defined as `openai`. We can now use this assistant with this configuration:
+이제 `model_name`이 `openai`로 정의된 "Open AI Assistant"라는 어시스턴트를 생성했습니다. 이제 이 구성으로 이 어시스턴트를 사용할 수 있습니다:
 
 === "Python"
 
@@ -211,7 +211,7 @@ We have now created an assistant called "Open AI Assistant" that has `model_name
     '
     ```
 
-Output:
+출력:
 
     ```
     Receiving event of type: metadata
@@ -225,19 +225,19 @@ Output:
 
 ### LangGraph Platform UI
 
-Inside your deployment, select the "Assistants" tab. For the assistant you would like to use, click the "Studio" button. This will open LangGraph Studio with the selected assistant. When you submit an input (either in Graph or Chat mode), the selected assistant and its configuration will be used.
+배포 내에서 "Assistants" 탭을 선택하세요. 사용하려는 어시스턴트의 "Studio" 버튼을 클릭하세요. 그러면 선택한 어시스턴트와 함께 LangGraph Studio가 열립니다. (Graph 또는 Chat 모드에서) 입력을 제출하면 선택한 어시스턴트와 해당 구성이 사용됩니다.
 
-## Create a new version for your assistant
+## 어시스턴트의 새 버전 생성
 
 ### LangGraph SDK
 
-To edit the assistant, use the `update` method. This will create a new version of the assistant with the provided edits. See the [Python](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/#langgraph_sdk.client.AssistantsClient.update) and [JS](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#update) SDK reference docs for more information.
+어시스턴트를 편집하려면 `update` 메서드를 사용하세요. 제공된 편집 내용으로 어시스턴트의 새 버전이 생성됩니다. 자세한 내용은 [Python](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/#langgraph_sdk.client.AssistantsClient.update) 및 [JS](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#update) SDK 레퍼런스 문서를 참조하세요.
 
-!!! note "Note"
+!!! note "참고"
 
-    You must pass in the ENTIRE config (and metadata if you are using it). The update endpoint creates new versions completely from scratch and does not rely on previous versions.
+    전체 config(및 사용 중인 경우 metadata)를 전달해야 합니다. update 엔드포인트는 이전 버전에 의존하지 않고 처음부터 완전히 새로운 버전을 생성합니다.
 
-For example, to update your assistant's system prompt:
+예를 들어, 어시스턴트의 시스템 프롬프트를 업데이트하려면:
 
 === "Python"
 
@@ -279,25 +279,25 @@ For example, to update your assistant's system prompt:
     }'
     ```
 
-This will create a new version of the assistant with the updated parameters and set this as the active version of your assistant. If you now run your graph and pass in this assistant id, it will use this latest version.
+이렇게 하면 업데이트된 파라미터로 어시스턴트의 새 버전이 생성되고 이것이 어시스턴트의 활성 버전으로 설정됩니다. 이제 그래프를 실행하고 이 어시스턴트 id를 전달하면 이 최신 버전을 사용합니다.
 
 ### LangGraph Platform UI
 
-You can also edit assistants from the LangGraph Platform UI.
+LangGraph Platform UI에서도 어시스턴트를 편집할 수 있습니다.
 
-Inside your deployment, select the "Assistants" tab. This will load a table of all of the assistants in your deployment, across all graphs.
+배포 내에서 "Assistants" 탭을 선택하세요. 모든 그래프에 걸쳐 배포의 모든 어시스턴트 테이블이 로드됩니다.
 
-To edit an existing assistant, select the "Edit" button for the specified assistant. This will open a form where you can edit the assistant's name, description, and configuration.
+기존 어시스턴트를 편집하려면 지정된 어시스턴트의 "Edit" 버튼을 선택하세요. 그러면 어시스턴트의 이름, 설명 및 구성을 편집할 수 있는 양식이 열립니다.
 
-Additionally, if using LangGraph Studio, you can edit the assistants and create new versions via the "Manage Assistants" button.
+또한 LangGraph Studio를 사용하는 경우 "Manage Assistants" 버튼을 통해 어시스턴트를 편집하고 새 버전을 만들 수 있습니다.
 
-## Use a previous assistant version
+## 이전 어시스턴트 버전 사용
 
 ### LangGraph SDK
 
-You can also change the active version of your assistant. To do so, use the `setLatest` method.
+어시스턴트의 활성 버전을 변경할 수도 있습니다. 그렇게 하려면 `setLatest` 메서드를 사용하세요.
 
-In the example above, to rollback to the first version of the assistant:
+위의 예제에서 어시스턴트의 첫 번째 버전으로 롤백하려면:
 
 === "Python"
 
@@ -322,11 +322,11 @@ In the example above, to rollback to the first version of the assistant:
     }'
     ```
 
-If you now run your graph and pass in this assistant id, it will use the first version of the assistant.
+이제 그래프를 실행하고 이 어시스턴트 id를 전달하면 어시스턴트의 첫 번째 버전을 사용합니다.
 
 ### LangGraph Platform UI
 
-If using LangGraph Studio, to set the active version of your assistant, click the "Manage Assistants" button and locate the assistant you would like to use. Select the assistant and the version, and then click the "Active" toggle. This will update the assistant to make the selected version active.
+LangGraph Studio를 사용하는 경우 어시스턴트의 활성 버전을 설정하려면 "Manage Assistants" 버튼을 클릭하고 사용하려는 어시스턴트를 찾으세요. 어시스턴트와 버전을 선택한 다음 "Active" 토글을 클릭하세요. 그러면 선택한 버전이 활성화되도록 어시스턴트가 업데이트됩니다.
 
-!!! warning "Deleting Assistants"
-Deleting as assistant will delete ALL of its versions. There is currently no way to delete a single version, but by pointing your assistant to the correct version you can skip any versions that you don't wish to use.
+!!! warning "어시스턴트 삭제"
+어시스턴트를 삭제하면 모든 버전이 삭제됩니다. 현재 단일 버전을 삭제할 수 있는 방법은 없지만, 어시스턴트를 올바른 버전으로 지정하면 사용하지 않으려는 버전을 건너뛸 수 있습니다.

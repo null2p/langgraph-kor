@@ -1,4 +1,4 @@
-"""Adapted from httpx_sse to split lines on \n, \r, \r\n per the SSE spec."""
+"""SSE 사양에 따라 \n, \r, \r\n으로 줄을 분할하기 위해 httpx_sse에서 수정되었습니다."""
 
 from __future__ import annotations
 
@@ -14,10 +14,10 @@ BytesLike = bytes | bytearray | memoryview
 
 class BytesLineDecoder:
     """
-    Handles incrementally reading lines from text.
+    텍스트에서 줄을 증분적으로 읽기를 처리합니다.
 
-    Has the same behaviour as the stdllib bytes splitlines,
-    but handling the input iteratively.
+    stdllib bytes splitlines과 동일한 동작을 하지만,
+    입력을 반복적으로 처리합니다.
     """
 
     def __init__(self) -> None:
@@ -25,10 +25,10 @@ class BytesLineDecoder:
         self.trailing_cr: bool = False
 
     def decode(self, text: bytes) -> list[BytesLike]:
-        # See https://docs.python.org/3/glossary.html#term-universal-newlines
+        # https://docs.python.org/3/glossary.html#term-universal-newlines 참조
         NEWLINE_CHARS = b"\n\r"
 
-        # We always push a trailing `\r` into the next decode iteration.
+        # 후행 `\r`을 항상 다음 디코드 반복으로 밀어넣습니다.
         if self.trailing_cr:
             text = b"\r" + text
             self.trailing_cr = False
@@ -37,28 +37,27 @@ class BytesLineDecoder:
             text = text[:-1]
 
         if not text:
-            # NOTE: the edge case input of empty text doesn't occur in practice,
-            # because other httpx internals filter out this value
+            # 참고: 빈 텍스트 입력의 엣지 케이스는 실제로 발생하지 않습니다.
+            # 다른 httpx 내부에서 이 값을 필터링하기 때문입니다.
             return []  # pragma: no cover
 
         trailing_newline = text[-1] in NEWLINE_CHARS
         lines = text.splitlines()
 
         if len(lines) == 1 and not trailing_newline:
-            # No new lines, buffer the input and continue.
+            # 새 줄이 없으면 입력을 버퍼링하고 계속합니다.
             self.buffer.extend(lines[0])
             return []
 
         if self.buffer:
-            # Include any existing buffer in the first portion of the
-            # splitlines result.
+            # splitlines 결과의 첫 번째 부분에 기존 버퍼를 포함합니다.
             self.buffer.extend(lines[0])
             lines = [self.buffer] + lines[1:]
             self.buffer = bytearray()
 
         if not trailing_newline:
-            # If the last segment of splitlines is not newline terminated,
-            # then drop it from our output and start a new buffer.
+            # splitlines의 마지막 세그먼트가 개행으로 종료되지 않은 경우,
+            # 출력에서 제거하고 새 버퍼를 시작합니다.
             self.buffer.extend(lines.pop())
 
         return lines
@@ -82,12 +81,12 @@ class SSEDecoder:
 
     @property
     def last_event_id(self) -> str | None:
-        """Return the last event identifier that was seen."""
+        """마지막으로 본 이벤트 식별자를 반환합니다."""
 
         return self._last_event_id or None
 
     def decode(self, line: bytes) -> StreamPart | None:
-        # See: https://html.spec.whatwg.org/multipage/server-sent-events.html#event-stream-interpretation  # noqa: E501
+        # 참조: https://html.spec.whatwg.org/multipage/server-sent-events.html#event-stream-interpretation  # noqa: E501
 
         if not line:
             if (
@@ -103,7 +102,7 @@ class SSEDecoder:
                 data=orjson.loads(self._data) if self._data else None,  # type: ignore[invalid-argument-type]
             )
 
-            # NOTE: as per the SSE spec, do not reset last_event_id.
+            # 참고: SSE 사양에 따라 last_event_id를 재설정하지 않습니다.
             self._event = ""
             self._data = bytearray()
             self._retry = None
@@ -133,7 +132,7 @@ class SSEDecoder:
             except (TypeError, ValueError):
                 pass
         else:
-            pass  # Field is ignored.
+            pass  # 필드는 무시됩니다.
 
         return None
 

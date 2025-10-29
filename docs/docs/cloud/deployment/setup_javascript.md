@@ -1,8 +1,8 @@
-# How to Set Up a LangGraph.js Application
+# LangGraph.js 애플리케이션 설정 방법
 
-A [LangGraph.js](https://langchain-ai.github.io/langgraphjs/) application must be configured with a [LangGraph configuration file](../reference/cli.md#configuration-file) in order to be deployed to LangGraph Platform (or to be self-hosted). This how-to guide discusses the basic steps to setup a LangGraph.js application for deployment using `package.json` to specify project dependencies.
+[LangGraph.js](https://langchain-ai.github.io/langgraphjs/) 애플리케이션을 LangGraph Platform에 배포하거나 셀프 호스팅하려면 [LangGraph 구성 파일](../reference/cli.md#configuration-file)로 구성해야 합니다. 이 가이드는 `package.json`을 사용하여 프로젝트 의존성을 지정하고 배포를 위한 LangGraph.js 애플리케이션을 설정하는 기본 단계를 다룹니다.
 
-This walkthrough is based on [this repository](https://github.com/langchain-ai/langgraphjs-studio-starter), which you can play around with to learn more about how to setup your LangGraph application for deployment.
+이 워크스루는 [이 리포지토리](https://github.com/langchain-ai/langgraphjs-studio-starter)를 기반으로 하며, LangGraph 애플리케이션을 배포용으로 설정하는 방법을 자세히 알아보기 위해 사용해볼 수 있습니다.
 
 The final repository structure will look something like this:
 
@@ -19,11 +19,11 @@ my-app/
 └── langgraph.json # configuration file for LangGraph
 ```
 
-After each step, an example file directory is provided to demonstrate how code can be organized.
+각 단계 후에는 코드를 어떻게 구성할 수 있는지 보여주는 예제 파일 디렉토리가 제공됩니다.
 
-## Specify Dependencies
+## 의존성 지정
 
-Dependencies can be specified in a `package.json`. If none of these files is created, then dependencies can be specified later in the [LangGraph configuration file](#create-langgraph-api-config).
+의존성은 `package.json`에 지정할 수 있습니다. 이러한 파일이 생성되지 않은 경우 나중에 [LangGraph 구성 파일](#create-langgraph-api-config)에서 의존성을 지정할 수 있습니다.
 
 Example `package.json` file:
 
@@ -40,7 +40,7 @@ Example `package.json` file:
 }
 ```
 
-When deploying your app, the dependencies will be installed using the package manager of your choice, provided they adhere to the compatible version ranges listed below:
+앱을 배포할 때, 의존성은 선택한 패키지 관리자를 사용하여 설치되며, 아래 나열된 호환 가능한 버전 범위를 준수해야 합니다:
 
 ```
 "@langchain/core": "^0.3.42",
@@ -55,9 +55,9 @@ my-app/
 └── package.json # package dependencies
 ```
 
-## Specify Environment Variables
+## 환경 변수 지정
 
-Environment variables can optionally be specified in a file (e.g. `.env`). See the [Environment Variables reference](../reference/env_var.md) to configure additional variables for a deployment.
+환경 변수는 선택적으로 파일(예: `.env`)에 지정할 수 있습니다. 배포를 위한 추가 변수 구성은 [환경 변수 레퍼런스](../reference/env_var.md)를 참조하세요.
 
 Example `.env` file:
 
@@ -76,9 +76,9 @@ my-app/
 └── .env # environment variables
 ```
 
-## Define Graphs
+## 그래프 정의
 
-Implement your graphs! Graphs can be defined in a single file or multiple files. Make note of the variable names of each compiled graph to be included in the LangGraph application. The variable names will be used later when creating the [LangGraph configuration file](../reference/cli.md#configuration-file).
+그래프를 구현하세요! 그래프는 단일 파일 또는 여러 파일로 정의할 수 있습니다. LangGraph 애플리케이션에 포함될 각 컴파일된 그래프의 변수 이름을 기록해두세요. 변수 이름은 나중에 [LangGraph 구성 파일](../reference/cli.md#configuration-file)을 생성할 때 사용됩니다.
 
 Here is an example `agent.ts`:
 
@@ -170,9 +170,9 @@ my-app/
 └── langgraph.json # configuration file for LangGraph
 ```
 
-## Create LangGraph API Config
+## LangGraph API 구성 생성
 
-Create a [LangGraph configuration file](../reference/cli.md#configuration-file) called `langgraph.json`. See the [LangGraph configuration file reference](../reference/cli.md#configuration-file) for detailed explanations of each key in the JSON object of the configuration file.
+`langgraph.json`이라는 [LangGraph 구성 파일](../reference/cli.md#configuration-file)을 생성합니다. 구성 파일의 JSON 객체에서 각 키에 대한 자세한 설명은 [LangGraph 구성 파일 레퍼런스](../reference/cli.md#configuration-file)를 참조하세요.
 
 Example `langgraph.json` file:
 
@@ -188,12 +188,12 @@ Example `langgraph.json` file:
 }
 ```
 
-Note that the variable name of the `CompiledGraph` appears at the end of the value of each subkey in the top-level `graphs` key (i.e. `:<variable_name>`).
+`CompiledGraph`의 변수 이름이 최상위 `graphs` 키의 각 하위 키 값 끝에 나타납니다(즉, `:<variable_name>`).
 
-!!! info "Configuration Location"
+!!! info "구성 위치"
 
-    The LangGraph configuration file must be placed in a directory that is at the same level or higher than the TypeScript files that contain compiled graphs and associated dependencies.
+    LangGraph 구성 파일은 컴파일된 그래프와 관련 의존성을 포함하는 TypeScript 파일과 같은 레벨 또는 더 높은 레벨의 디렉토리에 배치되어야 합니다.
 
-## Next
+## 다음 단계
 
-After you setup your project and place it in a GitHub repository, it's time to [deploy your app](./cloud.md).
+프로젝트를 설정하고 GitHub 리포지토리에 배치한 후에는 [앱을 배포](./cloud.md)할 차례입니다.

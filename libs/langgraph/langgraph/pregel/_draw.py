@@ -52,15 +52,15 @@ def draw_graph(
     subgraphs: dict[str, Graph],
     limit: int = 250,
 ) -> Graph:
-    """Get the graph for this Pregel instance.
+    """이 Pregel 인스턴스의 그래프를 가져옵니다.
 
     Args:
-        config: The configuration to use for the graph.
-        subgraphs: The subgraphs to include in the graph.
-        checkpointer: The checkpointer to use for the graph.
+        config: 그래프에 사용할 설정입니다.
+        subgraphs: 그래프에 포함할 서브그래프입니다.
+        checkpointer: 그래프에 사용할 체크포인터입니다.
 
     Returns:
-        The graph for this Pregel instance.
+        이 Pregel 인스턴스의 그래프입니다.
     """
     # (src, dest, is_conditional, label)
     edges: set[Edge] = set()

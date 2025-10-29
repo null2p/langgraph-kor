@@ -1,8 +1,8 @@
-# Human-in-the-loop using Server API
+# Server API를 사용한 Human-in-the-loop
 
-To review, edit, and approve tool calls in an agent or workflow, use LangGraph's [human-in-the-loop](../../concepts/human_in_the_loop.md) features.
+에이전트 또는 워크플로에서 도구 호출을 검토, 편집 및 승인하려면 LangGraph의 [human-in-the-loop](../../concepts/human_in_the_loop.md) 기능을 사용하세요.
 
-## Dynamic interrupts
+## 동적 인터럽트
 
 === "Python"
 
@@ -45,9 +45,9 @@ To review, edit, and approve tool calls in an agent or workflow, use LangGraph's
     # > {'some_text': 'Edited text'}
     ```
 
-    1. The graph is invoked with some initial state.
-    2. When the graph hits the interrupt, it returns an interrupt object with the payload and metadata.
-    3. The graph is resumed with a `Command(resume=...)`, injecting the human's input and continuing execution.
+    1. 그래프가 초기 상태와 함께 호출됩니다.
+    2. 그래프가 인터럽트에 도달하면 페이로드 및 메타데이터와 함께 인터럽트 객체를 반환합니다.
+    3. `Command(resume=...)`로 그래프를 재개하여 사용자의 입력을 주입하고 실행을 계속합니다.
 
 === "JavaScript"
 
@@ -89,13 +89,13 @@ To review, edit, and approve tool calls in an agent or workflow, use LangGraph's
     // > {'some_text': 'Edited text'}
     ```
 
-    1. The graph is invoked with some initial state.
-    2. When the graph hits the interrupt, it returns an interrupt object with the payload and metadata.
-    3. The graph is resumed with a `{ resume: ... }` command object, injecting the human's input and continuing execution.
+    1. 그래프가 초기 상태와 함께 호출됩니다.
+    2. 그래프가 인터럽트에 도달하면 페이로드 및 메타데이터와 함께 인터럽트 객체를 반환합니다.
+    3. `{ resume: ... }` 명령 객체로 그래프를 재개하여 사용자의 입력을 주입하고 실행을 계속합니다.
 
 === "cURL"
 
-    Create a thread:
+    스레드 생성:
 
     ```bash
     curl --request POST \
@@ -104,7 +104,7 @@ To review, edit, and approve tool calls in an agent or workflow, use LangGraph's
     --data '{}'
     ```
 
-    Run the graph until the interrupt is hit.:
+    인터럽트가 발생할 때까지 그래프 실행:
 
     ```bash
     curl --request POST \
@@ -116,7 +116,7 @@ To review, edit, and approve tool calls in an agent or workflow, use LangGraph's
     }"
     ```
 
-    Resume the graph:
+    그래프 재개:
 
     ```bash
     curl --request POST \
@@ -130,10 +130,10 @@ To review, edit, and approve tool calls in an agent or workflow, use LangGraph's
      }"
     ```
 
-??? example "Extended example: using `interrupt`"
+??? example "`interrupt` 사용 확장 예제"
 
-    This is an example graph you can run in the LangGraph API server.
-    See [LangGraph Platform quickstart](../quick_start.md) for more details.
+    다음은 LangGraph API 서버에서 실행할 수 있는 예제 그래프입니다.
+    자세한 내용은 [LangGraph Platform 빠른 시작](../quick_start.md)을 참조하세요.
 
     ```python
     from typing import TypedDict
@@ -168,12 +168,11 @@ To review, edit, and approve tool calls in an agent or workflow, use LangGraph's
     graph = graph_builder.compile()
     ```
 
-    1. `interrupt(...)` pauses execution at `human_node`, surfacing the given payload to a human.
-    2. Any JSON serializable value can be passed to the `interrupt` function. Here, a dict containing the text to revise.
-    3. Once resumed, the return value of `interrupt(...)` is the human-provided input, which is used to update the state.
+    1. `interrupt(...)`는 `human_node`에서 실행을 일시 중지하고 주어진 페이로드를 사용자에게 노출합니다.
+    2. JSON 직렬화 가능한 모든 값을 `interrupt` 함수에 전달할 수 있습니다. 여기서는 수정할 텍스트를 포함하는 딕셔너리입니다.
+    3. 재개되면 `interrupt(...)`의 반환 값은 사용자가 제공한 입력이며, 이는 상태를 업데이트하는 데 사용됩니다.
 
-    Once you have a running LangGraph API server, you can interact with it using
-    [LangGraph SDK](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/)
+    LangGraph API 서버가 실행 중이면 [LangGraph SDK](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/)를 사용하여 상호 작용할 수 있습니다.
 
     === "Python"
 
@@ -216,9 +215,9 @@ To review, edit, and approve tool calls in an agent or workflow, use LangGraph's
         # > {'some_text': 'Edited text'}
         ```
 
-        1. The graph is invoked with some initial state.
-        2. When the graph hits the interrupt, it returns an interrupt object with the payload and metadata.
-        3. The graph is resumed with a `Command(resume=...)`, injecting the human's input and continuing execution.
+        1. 그래프가 초기 상태와 함께 호출됩니다.
+        2. 그래프가 인터럽트에 도달하면 페이로드 및 메타데이터와 함께 인터럽트 객체를 반환합니다.
+        3. `Command(resume=...)`로 그래프를 재개하여 사용자의 입력을 주입하고 실행을 계속합니다.
 
     === "JavaScript"
 
@@ -260,13 +259,13 @@ To review, edit, and approve tool calls in an agent or workflow, use LangGraph's
         // > {'some_text': 'Edited text'}
         ```
 
-        1. The graph is invoked with some initial state.
-        2. When the graph hits the interrupt, it returns an interrupt object with the payload and metadata.
-        3. The graph is resumed with a `{ resume: ... }` command object, injecting the human's input and continuing execution.
+        1. 그래프가 초기 상태와 함께 호출됩니다.
+        2. 그래프가 인터럽트에 도달하면 페이로드 및 메타데이터와 함께 인터럽트 객체를 반환합니다.
+        3. `{ resume: ... }` 명령 객체로 그래프를 재개하여 사용자의 입력을 주입하고 실행을 계속합니다.
 
     === "cURL"
 
-        Create a thread:
+        스레드 생성:
 
         ```bash
         curl --request POST \
@@ -275,7 +274,7 @@ To review, edit, and approve tool calls in an agent or workflow, use LangGraph's
         --data '{}'
         ```
 
-        Run the graph until the interrupt is hit:
+        인터럽트가 발생할 때까지 그래프 실행:
 
         ```bash
         curl --request POST \
@@ -287,7 +286,7 @@ To review, edit, and approve tool calls in an agent or workflow, use LangGraph's
         }"
         ```
 
-        Resume the graph:
+        그래프 재개:
 
         ```bash
         curl --request POST \
@@ -301,15 +300,15 @@ To review, edit, and approve tool calls in an agent or workflow, use LangGraph's
         }"
         ```
 
-## Static interrupts
+## 정적 인터럽트
 
-Static interrupts (also known as static breakpoints) are triggered either before or after a node executes. 
+정적 인터럽트(정적 브레이크포인트라고도 함)는 노드 실행 전후에 트리거됩니다.
 
 !!! warning
 
-    Static interrupts are **not** recommended for human-in-the-loop workflows. They are best used for debugging and testing.
+    정적 인터럽트는 human-in-the-loop 워크플로우에는 **권장되지 않습니다**. 디버깅 및 테스트에 가장 적합합니다.
 
-You can set static interrupts by specifying `interrupt_before` and `interrupt_after` at compile time:
+컴파일 시 `interrupt_before` 및 `interrupt_after`를 지정하여 정적 인터럽트를 설정할 수 있습니다:
 
 ```python
 # highlight-next-line
@@ -321,11 +320,11 @@ graph = graph_builder.compile( # (1)!
 )
 ```
 
-1. The breakpoints are set during `compile` time.
-2. `interrupt_before` specifies the nodes where execution should pause before the node is executed.
-3. `interrupt_after` specifies the nodes where execution should pause after the node is executed.
+1. 브레이크포인트는 `compile` 시점에 설정됩니다.
+2. `interrupt_before`는 노드가 실행되기 전에 실행을 일시 중지해야 하는 노드를 지정합니다.
+3. `interrupt_after`는 노드가 실행된 후에 실행을 일시 중지해야 하는 노드를 지정합니다.
 
-Alternatively, you can set static interrupts at run time:
+또는 실행 시점에 정적 인터럽트를 설정할 수도 있습니다:
 
 === "Python"
 
@@ -342,9 +341,9 @@ Alternatively, you can set static interrupts at run time:
     )
     ```
 
-    1. `client.runs.wait` is called with the `interrupt_before` and `interrupt_after` parameters. This is a run-time configuration and can be changed for every invocation.
-    2. `interrupt_before` specifies the nodes where execution should pause before the node is executed.
-    3. `interrupt_after` specifies the nodes where execution should pause after the node is executed.
+    1. `client.runs.wait`는 `interrupt_before` 및 `interrupt_after` 파라미터와 함께 호출됩니다. 이는 실행 시점 구성이며 매 호출마다 변경할 수 있습니다.
+    2. `interrupt_before`는 노드가 실행되기 전에 실행을 일시 중지해야 하는 노드를 지정합니다.
+    3. `interrupt_after`는 노드가 실행된 후에 실행을 일시 중지해야 하는 노드를 지정합니다.
 
 === "JavaScript"
 
@@ -363,9 +362,9 @@ Alternatively, you can set static interrupts at run time:
     )
     ```
 
-    1. `client.runs.wait` is called with the `interruptBefore` and `interruptAfter` parameters. This is a run-time configuration and can be changed for every invocation.
-    2. `interruptBefore` specifies the nodes where execution should pause before the node is executed.
-    3. `interruptAfter` specifies the nodes where execution should pause after the node is executed.
+    1. `client.runs.wait`는 `interruptBefore` 및 `interruptAfter` 파라미터와 함께 호출됩니다. 이는 실행 시점 구성이며 매 호출마다 변경할 수 있습니다.
+    2. `interruptBefore`는 노드가 실행되기 전에 실행을 일시 중지해야 하는 노드를 지정합니다.
+    3. `interruptAfter`는 노드가 실행된 후에 실행을 일시 중지해야 하는 노드를 지정합니다.
 
 === "cURL"
 
@@ -381,7 +380,7 @@ Alternatively, you can set static interrupts at run time:
     }"
     ```
 
-The following example shows how to add static interrupts:
+다음 예제는 정적 인터럽트를 추가하는 방법을 보여줍니다:
 
 === "Python"
 
@@ -411,8 +410,8 @@ The following example shows how to add static interrupts:
     )
     ```
 
-    1. The graph is run until the first breakpoint is hit.
-    2. The graph is resumed by passing in `None` for the input. This will run the graph until the next breakpoint is hit.
+    1. 그래프는 첫 번째 브레이크포인트에 도달할 때까지 실행됩니다.
+    2. 입력으로 `None`을 전달하여 그래프를 재개합니다. 이렇게 하면 다음 브레이크포인트에 도달할 때까지 그래프가 실행됩니다.
 
 === "JavaScript"
 
@@ -442,12 +441,12 @@ The following example shows how to add static interrupts:
     );
     ```
 
-    1. The graph is run until the first breakpoint is hit.
-    2. The graph is resumed by passing in `null` for the input. This will run the graph until the next breakpoint is hit.
+    1. 그래프는 첫 번째 브레이크포인트에 도달할 때까지 실행됩니다.
+    2. 입력으로 `null`을 전달하여 그래프를 재개합니다. 이렇게 하면 다음 브레이크포인트에 도달할 때까지 그래프가 실행됩니다.
 
 === "cURL"
 
-    Create a thread:
+    스레드 생성:
 
     ```bash
     curl --request POST \
@@ -456,7 +455,7 @@ The following example shows how to add static interrupts:
     --data '{}'
     ```
 
-    Run the graph until the breakpoint:
+    브레이크포인트까지 그래프 실행:
 
     ```bash
     curl --request POST \
@@ -468,7 +467,7 @@ The following example shows how to add static interrupts:
     }"
     ```
 
-    Resume the graph:
+    그래프 재개:
 
     ```bash
     curl --request POST \
@@ -480,7 +479,7 @@ The following example shows how to add static interrupts:
     ```
 
 
-## Learn more
+## 더 알아보기
 
-- [Human-in-the-loop conceptual guide](../../concepts/human_in_the_loop.md): learn more about LangGraph human-in-the-loop features. 
-- [Common patterns](../../how-tos/human_in_the_loop/add-human-in-the-loop.md#common-patterns): learn how to implement patterns like approving/rejecting actions, requesting user input, tool call review, and validating human input.
+- [Human-in-the-loop 개념 가이드](../../concepts/human_in_the_loop.md): LangGraph의 human-in-the-loop 기능에 대해 자세히 알아보세요.
+- [일반적인 패턴](../../how-tos/human_in_the_loop/add-human-in-the-loop.md#common-patterns): 작업 승인/거부, 사용자 입력 요청, 도구 호출 검토, 사용자 입력 검증과 같은 패턴을 구현하는 방법을 알아보세요.

@@ -1,24 +1,24 @@
-# Build a SQL agent
+# SQL 에이전트 구축
 
-In this tutorial, we will walk through how to build an agent that can answer questions about a SQL database.
+이 튜토리얼에서는 SQL 데이터베이스에 대한 질문에 답할 수 있는 에이전트를 구축하는 방법을 안내합니다.
 
-At a high level, the agent will:
+높은 수준에서 에이전트는 다음을 수행합니다:
 
-1. Fetch the available tables from the database
-2. Decide which tables are relevant to the question
-3. Fetch the schemas for the relevant tables
-4. Generate a query based on the question and information from the schemas
-5. Double-check the query for common mistakes using an LLM
-6. Execute the query and return the results
-7. Correct mistakes surfaced by the database engine until the query is successful
-8. Formulate a response based on the results
+1. 데이터베이스에서 사용 가능한 테이블 가져오기
+2. 질문과 관련된 테이블 결정하기
+3. 관련 테이블의 스키마 가져오기
+4. 질문과 스키마 정보를 기반으로 쿼리 생성하기
+5. LLM을 사용하여 일반적인 실수가 있는지 쿼리 재확인하기
+6. 쿼리를 실행하고 결과 반환하기
+7. 쿼리가 성공할 때까지 데이터베이스 엔진에서 발견된 오류 수정하기
+8. 결과를 기반으로 응답 작성하기
 
-!!! warning "Security note"
-    Building Q&A systems of SQL databases requires executing model-generated SQL queries. There are inherent risks in doing this. Make sure that your database connection permissions are always scoped as narrowly as possible for your agent's needs. This will mitigate though not eliminate the risks of building a model-driven system.
+!!! warning "보안 참고사항"
+    SQL 데이터베이스의 Q&A 시스템을 구축하려면 모델이 생성한 SQL 쿼리를 실행해야 합니다. 이에는 내재적인 위험이 있습니다. 데이터베이스 연결 권한이 항상 에이전트의 필요에 맞게 가능한 한 좁게 범위가 지정되어 있는지 확인하세요. 이렇게 하면 모델 기반 시스템 구축의 위험을 완화할 수 있지만 제거할 수는 없습니다.
 
-## 1. Setup
+## 1. 설정
 
-Let's first install some dependencies. This tutorial uses SQL database and tool abstractions from [langchain-community](https://python.langchain.com/docs/concepts/architecture/#langchain-community). We will also require a LangChain [chat model](https://python.langchain.com/docs/concepts/chat_models/).
+먼저 몇 가지 의존성을 설치해봅시다. 이 튜토리얼은 [langchain-community](https://python.langchain.com/docs/concepts/architecture/#langchain-community)의 SQL 데이터베이스 및 도구 추상화를 사용합니다. 또한 LangChain [채팅 모델](https://python.langchain.com/docs/concepts/chat_models/)도 필요합니다.
 
 ```python
 %%capture --no-stderr
@@ -26,11 +26,11 @@ Let's first install some dependencies. This tutorial uses SQL database and tool 
 ```
 
 !!! tip
-    Sign up for LangSmith to quickly spot issues and improve the performance of your LangGraph projects. [LangSmith](https://docs.smith.langchain.com) lets you use trace data to debug, test, and monitor your LLM apps built with LangGraph.
+    LangSmith에 가입하여 LangGraph 프로젝트의 문제를 신속하게 발견하고 성능을 개선하세요. [LangSmith](https://docs.smith.langchain.com)를 사용하면 추적 데이터를 활용하여 LangGraph로 구축한 LLM 앱을 디버그, 테스트 및 모니터링할 수 있습니다.
 
-### Select a LLM
+### LLM 선택
 
-First we [initialize our LLM](https://python.langchain.com/docs/how_to/chat_models_universal_init/). Any model supporting [tool-calling](https://python.langchain.com/docs/integrations/chat/#featured-providers) should work. We use OpenAI below.
+먼저 [LLM을 초기화](https://python.langchain.com/docs/how_to/chat_models_universal_init/)합니다. [도구 호출](https://python.langchain.com/docs/integrations/chat/#featured-providers)을 지원하는 모든 모델이 작동해야 합니다. 아래에서는 OpenAI를 사용합니다.
 
 ```python
 from langchain.chat_models import init_chat_model
@@ -38,12 +38,12 @@ from langchain.chat_models import init_chat_model
 llm = init_chat_model("openai:gpt-4.1")
 ```
 
-### Configure the database
+### 데이터베이스 구성
 
-We will be creating a SQLite database for this tutorial. SQLite is a lightweight database that is easy to set up and use. We will be loading the `chinook` database, which is a sample database that represents a digital media store.
-Find more information about the database [here](https://www.sqlitetutorial.net/sqlite-sample-database/).
+이 튜토리얼을 위해 SQLite 데이터베이스를 생성합니다. SQLite는 설정하고 사용하기 쉬운 경량 데이터베이스입니다. 디지털 미디어 스토어를 나타내는 샘플 데이터베이스인 `chinook` 데이터베이스를 로드합니다.
+데이터베이스에 대한 자세한 정보는 [여기](https://www.sqlitetutorial.net/sqlite-sample-database/)에서 확인할 수 있습니다.
 
-For convenience, we have hosted the database (`Chinook.db`) on a public GCS bucket.
+편의를 위해 공개 GCS 버킷에 데이터베이스(`Chinook.db`)를 호스팅했습니다.
 
 ```python
 import requests
@@ -53,16 +53,16 @@ url = "https://storage.googleapis.com/benchmarks-artifacts/chinook/Chinook.db"
 response = requests.get(url)
 
 if response.status_code == 200:
-    # Open a local file in binary write mode
+    # 바이너리 쓰기 모드로 로컬 파일 열기
     with open("Chinook.db", "wb") as file:
-        # Write the content of the response (the file) to the local file
+        # 응답의 내용(파일)을 로컬 파일에 작성
         file.write(response.content)
     print("File downloaded and saved as Chinook.db")
 else:
     print(f"Failed to download the file. Status code: {response.status_code}")
 ```
 
-We will use a handy SQL database wrapper available in the `langchain_community` package to interact with the database. The wrapper provides a simple interface to execute SQL queries and fetch results:
+데이터베이스와 상호작용하기 위해 `langchain_community` 패키지에서 사용할 수 있는 편리한 SQL 데이터베이스 래퍼를 사용합니다. 이 래퍼는 SQL 쿼리를 실행하고 결과를 가져오는 간단한 인터페이스를 제공합니다:
 
 ```python
 from langchain_community.utilities import SQLDatabase
@@ -74,16 +74,16 @@ print(f"Available tables: {db.get_usable_table_names()}")
 print(f'Sample output: {db.run("SELECT * FROM Artist LIMIT 5;")}')
 ```
 
-**Output:**
+**출력:**
 ```
 Dialect: sqlite
 Available tables: ['Album', 'Artist', 'Customer', 'Employee', 'Genre', 'Invoice', 'InvoiceLine', 'MediaType', 'Playlist', 'PlaylistTrack', 'Track']
 Sample output: [(1, 'AC/DC'), (2, 'Accept'), (3, 'Aerosmith'), (4, 'Alanis Morissette'), (5, 'Alice In Chains')]
 ```
 
-### Tools for database interactions
+### 데이터베이스 상호작용을 위한 도구
 
-`langchain-community` implements some built-in tools for interacting with our `SQLDatabase`, including tools for listing tables, reading table schemas, and checking and running queries:
+`langchain-community`는 우리의 `SQLDatabase`와 상호작용하기 위한 몇 가지 내장 도구를 구현하고 있으며, 테이블 나열, 테이블 스키마 읽기, 쿼리 확인 및 실행을 위한 도구가 포함됩니다:
 
 ```python
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
@@ -96,46 +96,44 @@ for tool in tools:
     print(f"{tool.name}: {tool.description}\n")
 ```
 
-**Output:**
+**출력:**
 ```
-sql_db_query: Input to this tool is a detailed and correct SQL query, output is a result from the database. If the query is not correct, an error message will be returned. If an error is returned, rewrite the query, check the query, and try again. If you encounter an issue with Unknown column 'xxxx' in 'field list', use sql_db_schema to query the correct table fields.
+sql_db_query: 이 도구의 입력은 상세하고 올바른 SQL 쿼리이며, 출력은 데이터베이스의 결과입니다. 쿼리가 올바르지 않으면 오류 메시지가 반환됩니다. 오류가 반환되면 쿼리를 다시 작성하고 확인한 후 다시 시도하세요. 'field list'에 알 수 없는 컬럼 'xxxx'가 있는 문제가 발생하면 sql_db_schema를 사용하여 올바른 테이블 필드를 쿼리하세요.
 
-sql_db_schema: Input to this tool is a comma-separated list of tables, output is the schema and sample rows for those tables. Be sure that the tables actually exist by calling sql_db_list_tables first! Example Input: table1, table2, table3
+sql_db_schema: 이 도구의 입력은 쉼표로 구분된 테이블 목록이며, 출력은 해당 테이블의 스키마와 샘플 행입니다. 먼저 sql_db_list_tables를 호출하여 테이블이 실제로 존재하는지 확인하세요! 예제 입력: table1, table2, table3
 
-sql_db_list_tables: Input is an empty string, output is a comma-separated list of tables in the database.
+sql_db_list_tables: 입력은 빈 문자열이며, 출력은 데이터베이스의 테이블을 쉼표로 구분한 목록입니다.
 
-sql_db_query_checker: Use this tool to double check if your query is correct before executing it. Always use this tool before executing a query with sql_db_query!
+sql_db_query_checker: 쿼리를 실행하기 전에 쿼리가 올바른지 다시 확인하려면 이 도구를 사용하세요. sql_db_query로 쿼리를 실행하기 전에 항상 이 도구를 사용하세요!
 
 ```
 
-## 2. Using a prebuilt agent
+## 2. 사전 구축된 에이전트 사용
 
-Given these tools, we can initialize a pre-built agent in a single line. To customize our agents behavior, we write a descriptive system prompt.
+이러한 도구들이 주어지면 한 줄로 사전 구축된 에이전트를 초기화할 수 있습니다. 에이전트의 동작을 커스터마이즈하기 위해 설명적인 시스템 프롬프트를 작성합니다.
 
 ```python
 from langgraph.prebuilt import create_react_agent
 
 system_prompt = """
-You are an agent designed to interact with a SQL database.
-Given an input question, create a syntactically correct {dialect} query to run,
-then look at the results of the query and return the answer. Unless the user
-specifies a specific number of examples they wish to obtain, always limit your
-query to at most {top_k} results.
+당신은 SQL 데이터베이스와 상호작용하도록 설계된 에이전트입니다.
+입력 질문이 주어지면 실행할 구문적으로 올바른 {dialect} 쿼리를 생성한 다음,
+쿼리 결과를 보고 답변을 반환하세요. 사용자가 얻고자 하는 특정 예제 수를
+지정하지 않는 한 항상 쿼리를 최대 {top_k}개 결과로 제한하세요.
 
-You can order the results by a relevant column to return the most interesting
-examples in the database. Never query for all the columns from a specific table,
-only ask for the relevant columns given the question.
+관련 컬럼을 기준으로 결과를 정렬하여 데이터베이스에서 가장 흥미로운
+예제를 반환할 수 있습니다. 특정 테이블의 모든 컬럼을 쿼리하지 말고
+질문에 따라 관련 컬럼만 요청하세요.
 
-You MUST double check your query before executing it. If you get an error while
-executing a query, rewrite the query and try again.
+쿼리를 실행하기 전에 반드시 쿼리를 다시 확인해야 합니다. 쿼리를 실행하는 중에
+오류가 발생하면 쿼리를 다시 작성하고 다시 시도하세요.
 
-DO NOT make any DML statements (INSERT, UPDATE, DELETE, DROP etc.) to the
-database.
+데이터베이스에 DML 문(INSERT, UPDATE, DELETE, DROP 등)을 절대 작성하지 마세요.
 
-To start you should ALWAYS look at the tables in the database to see what you
-can query. Do NOT skip this step.
+시작하려면 항상 먼저 데이터베이스의 테이블을 확인하여 쿼리할 수 있는 것이
+무엇인지 확인해야 합니다. 이 단계를 건너뛰지 마세요.
 
-Then you should query the schema of the most relevant tables.
+그런 다음 가장 관련성이 높은 테이블의 스키마를 쿼리해야 합니다.
 """.format(
     dialect=db.dialect,
     top_k=5,
@@ -149,9 +147,9 @@ agent = create_react_agent(
 ```
 
 !!! note
-    This system prompt includes a number of instructions, such as always running specific tools before or after others. In the [next section](#3-customizing-the-agent), we will enforce these behaviors through the graph's structure, providing us a greater degree of control and allowing us to simplify the prompt.
+    이 시스템 프롬프트는 특정 도구를 항상 다른 도구보다 먼저 또는 나중에 실행하는 것과 같은 여러 지침을 포함합니다. [다음 섹션](#3-customizing-the-agent)에서는 그래프의 구조를 통해 이러한 동작을 강제하여 더 큰 제어 수준을 제공하고 프롬프트를 단순화할 수 있습니다.
 
-Let's run this agent on a sample query and observe its behavior:
+샘플 쿼리에 대해 이 에이전트를 실행하고 동작을 관찰해봅시다:
 
 ```python
 question = "Which genre on average has the longest tracks?"
@@ -163,7 +161,7 @@ for step in agent.stream(
     step["messages"][-1].pretty_print()
 ```
 
-**Output:**
+**출력:**
 ```
 ================================ Human Message =================================
 
@@ -264,28 +262,28 @@ Name: sql_db_query
 [('Sci Fi & Fantasy', 2911783.0384615385)]
 ================================== Ai Message ==================================
 
-The genre with the longest average track length is "Sci Fi & Fantasy," with an average duration of about 2,911,783 milliseconds (approximately 48.5 minutes) per track.
+평균 트랙 길이가 가장 긴 장르는 "Sci Fi & Fantasy"이며, 트랙당 평균 약 2,911,783밀리초(약 48.5분)입니다.
 ```
 
-This worked well enough: the agent correctly listed the tables, obtained the schemas, wrote a query, checked the query, and ran it to inform its final response.
+충분히 잘 작동했습니다: 에이전트가 테이블을 올바르게 나열하고, 스키마를 얻고, 쿼리를 작성하고, 쿼리를 확인하고, 최종 응답을 위해 실행했습니다.
 
 !!! tip
-    You can inspect all aspects of the above run, including steps taken, tools invoked, what prompts were seen by the LLM, and more in the [LangSmith trace](https://smith.langchain.com/public/bd594960-73e3-474b-b6f2-db039d7c713a/r).
+    수행한 단계, 호출된 도구, LLM이 본 프롬프트 등을 포함하여 위 실행의 모든 측면을 [LangSmith 추적](https://smith.langchain.com/public/bd594960-73e3-474b-b6f2-db039d7c713a/r)에서 검사할 수 있습니다.
 
-## 3. Customizing the agent
+## 3. 에이전트 커스터마이징
 
-The prebuilt agent lets us get started quickly, but at each step the agent has access to the full set of tools. Above, we relied on the system prompt to constrain its behavior— for example, we instructed the agent to always start with the "list tables" tool, and to always run a query-checker tool before executing the query.
+사전 구축된 에이전트를 사용하면 빠르게 시작할 수 있지만, 각 단계에서 에이전트는 전체 도구 세트에 액세스할 수 있습니다. 위에서는 시스템 프롬프트를 사용하여 동작을 제한했습니다. 예를 들어, 항상 "list tables" 도구로 시작하고 쿼리를 실행하기 전에 항상 query-checker 도구를 실행하도록 에이전트에 지시했습니다.
 
-We can enforce a higher degree of control in LangGraph by customizing the agent. Below, we implement a simple ReAct-agent setup, with dedicated nodes for specific tool-calls. We will use the same [state](../../concepts/low_level.md#state) as the pre-built agent.
+에이전트를 커스터마이징하여 LangGraph에서 더 높은 수준의 제어를 강제할 수 있습니다. 아래에서는 특정 도구 호출을 위한 전용 노드가 있는 간단한 ReAct-에이전트 설정을 구현합니다. 사전 구축된 에이전트와 동일한 [상태](../../concepts/low_level.md#state)를 사용합니다.
 
-We construct dedicated nodes for the following steps:
+다음 단계를 위한 전용 노드를 구성합니다:
 
-- Listing DB tables
-- Calling the "get schema" tool
-- Generating a query
-- Checking the query
+- DB 테이블 나열
+- "get schema" 도구 호출
+- 쿼리 생성
+- 쿼리 확인
 
-Putting these steps in dedicated nodes lets us (1) force tool-calls when needed, and (2) customize the prompts associated with each step.
+이러한 단계를 전용 노드에 배치하면 (1) 필요할 때 도구 호출을 강제하고 (2) 각 단계와 관련된 프롬프트를 커스터마이즈할 수 있습니다.
 
 ```python
 from typing import Literal
@@ -302,7 +300,7 @@ run_query_tool = next(tool for tool in tools if tool.name == "sql_db_query")
 run_query_node = ToolNode([run_query_tool], name="run_query")
 
 
-# Example: create a predetermined tool call
+# 예제: 미리 결정된 도구 호출 생성
 def list_tables(state: MessagesState):
     tool_call = {
         "name": "sql_db_list_tables",
@@ -319,10 +317,10 @@ def list_tables(state: MessagesState):
     return {"messages": [tool_call_message, tool_message, response]}
 
 
-# Example: force a model to create a tool call
+# 예제: 모델이 도구 호출을 생성하도록 강제
 def call_get_schema(state: MessagesState):
-    # Note that LangChain enforces that all models accept `tool_choice="any"`
-    # as well as `tool_choice=<string name of tool>`.
+    # LangChain은 모든 모델이 `tool_choice="any"`와
+    # `tool_choice=<도구 이름 문자열>`을 받아들이도록 강제합니다.
     llm_with_tools = llm.bind_tools([get_schema_tool], tool_choice="any")
     response = llm_with_tools.invoke(state["messages"])
 
@@ -330,17 +328,16 @@ def call_get_schema(state: MessagesState):
 
 
 generate_query_system_prompt = """
-You are an agent designed to interact with a SQL database.
-Given an input question, create a syntactically correct {dialect} query to run,
-then look at the results of the query and return the answer. Unless the user
-specifies a specific number of examples they wish to obtain, always limit your
-query to at most {top_k} results.
+당신은 SQL 데이터베이스와 상호작용하도록 설계된 에이전트입니다.
+입력 질문이 주어지면 실행할 구문적으로 올바른 {dialect} 쿼리를 생성한 다음,
+쿼리 결과를 보고 답변을 반환하세요. 사용자가 얻고자 하는 특정 예제 수를
+지정하지 않는 한 항상 쿼리를 최대 {top_k}개 결과로 제한하세요.
 
-You can order the results by a relevant column to return the most interesting
-examples in the database. Never query for all the columns from a specific table,
-only ask for the relevant columns given the question.
+관련 컬럼을 기준으로 결과를 정렬하여 데이터베이스에서 가장 흥미로운
+예제를 반환할 수 있습니다. 특정 테이블의 모든 컬럼을 쿼리하지 말고
+질문에 따라 관련 컬럼만 요청하세요.
 
-DO NOT make any DML statements (INSERT, UPDATE, DELETE, DROP etc.) to the database.
+데이터베이스에 DML 문(INSERT, UPDATE, DELETE, DROP 등)을 절대 작성하지 마세요.
 """.format(
     dialect=db.dialect,
     top_k=5,
@@ -352,8 +349,8 @@ def generate_query(state: MessagesState):
         "role": "system",
         "content": generate_query_system_prompt,
     }
-    # We do not force a tool call here, to allow the model to
-    # respond naturally when it obtains the solution.
+    # 여기서는 도구 호출을 강제하지 않아 모델이 솔루션을 얻었을 때
+    # 자연스럽게 응답할 수 있도록 합니다.
     llm_with_tools = llm.bind_tools([run_query_tool])
     response = llm_with_tools.invoke([system_message] + state["messages"])
 
@@ -361,21 +358,21 @@ def generate_query(state: MessagesState):
 
 
 check_query_system_prompt = """
-You are a SQL expert with a strong attention to detail.
-Double check the {dialect} query for common mistakes, including:
-- Using NOT IN with NULL values
-- Using UNION when UNION ALL should have been used
-- Using BETWEEN for exclusive ranges
-- Data type mismatch in predicates
-- Properly quoting identifiers
-- Using the correct number of arguments for functions
-- Casting to the correct data type
-- Using the proper columns for joins
+당신은 세부 사항에 주의를 기울이는 SQL 전문가입니다.
+다음을 포함한 일반적인 실수가 있는지 {dialect} 쿼리를 다시 확인하세요:
+- NULL 값과 함께 NOT IN 사용
+- UNION ALL을 사용해야 하는데 UNION 사용
+- 배타적 범위에 BETWEEN 사용
+- 술어의 데이터 타입 불일치
+- 식별자를 적절하게 인용
+- 함수에 올바른 수의 인수 사용
+- 올바른 데이터 타입으로 캐스팅
+- 조인에 적절한 컬럼 사용
 
-If there are any of the above mistakes, rewrite the query. If there are no mistakes,
-just reproduce the original query.
+위의 실수가 있으면 쿼리를 다시 작성하세요. 실수가 없으면
+원래 쿼리를 그대로 재현하세요.
 
-You will call the appropriate tool to execute the query after running this check.
+이 확인을 실행한 후 적절한 도구를 호출하여 쿼리를 실행합니다.
 """.format(dialect=db.dialect)
 
 
@@ -385,7 +382,7 @@ def check_query(state: MessagesState):
         "content": check_query_system_prompt,
     }
 
-    # Generate an artificial user message to check
+    # 확인할 인공 사용자 메시지 생성
     tool_call = state["messages"][-1].tool_calls[0]
     user_message = {"role": "user", "content": tool_call["args"]["query"]}
     llm_with_tools = llm.bind_tools([run_query_tool], tool_choice="any")
@@ -395,7 +392,7 @@ def check_query(state: MessagesState):
     return {"messages": [response]}
 ```
 
-Finally, we assemble these steps into a workflow using the Graph API. We define a [conditional edge](../../concepts/low_level.md#conditional-edges) at the query generation step that will route to the query checker if a query is generated, or end if there are no tool calls present, such that the LLM has delivered a response to the query.
+마지막으로 Graph API를 사용하여 이러한 단계를 워크플로로 조립합니다. 쿼리가 생성되면 쿼리 검사기로 라우팅하고 도구 호출이 없으면 종료하도록 쿼리 생성 단계에서 [조건부 엣지](../../concepts/low_level.md#conditional-edges)를 정의합니다. 이는 LLM이 쿼리에 대한 응답을 전달했음을 의미합니다.
 
 ```python
 def should_continue(state: MessagesState) -> Literal[END, "check_query"]:
@@ -429,7 +426,7 @@ builder.add_edge("run_query", "generate_query")
 agent = builder.compile()
 ```
 
-We visualize the application below:
+아래에 애플리케이션을 시각화합니다:
 
 ```python
 from IPython.display import Image, display
@@ -440,9 +437,9 @@ display(Image(agent.get_graph().draw_mermaid_png()))
 
 ![Graph](./output.png)
 
-**Note:** When you run this code, it will generate and display a visual representation of the SQL agent graph showing the flow between the different nodes (list_tables → call_get_schema → get_schema → generate_query → check_query → run_query).
+**참고:** 이 코드를 실행하면 서로 다른 노드 간의 흐름(list_tables → call_get_schema → get_schema → generate_query → check_query → run_query)을 보여주는 SQL 에이전트 그래프의 시각적 표현이 생성되고 표시됩니다.
 
-We can now invoke the graph exactly as before:
+이제 이전과 똑같이 그래프를 호출할 수 있습니다:
 
 ```python
 question = "Which genre on average has the longest tracks?"
@@ -454,7 +451,7 @@ for step in agent.stream(
     step["messages"][-1].pretty_print()
 ```
 
-**Output:**
+**출력:**
 ```
 ================================ Human Message =================================
 
@@ -538,12 +535,12 @@ Name: sql_db_query
 [('Sci Fi & Fantasy', 2911783.0384615385)]
 ================================== Ai Message ==================================
 
-The genre with the longest tracks on average is "Sci Fi & Fantasy," with an average track length of approximately 2,911,783 milliseconds.
+평균 트랙 길이가 가장 긴 장르는 "Sci Fi & Fantasy"이며, 평균 트랙 길이는 약 2,911,783밀리초입니다.
 ```
 
 !!! tip
-    See [LangSmith trace](https://smith.langchain.com/public/94b8c9ac-12f7-4692-8706-836a1f30f1ea/r) for the above run.
+    위 실행에 대한 [LangSmith 추적](https://smith.langchain.com/public/94b8c9ac-12f7-4692-8706-836a1f30f1ea/r)을 참조하세요.
 
-## Next steps
+## 다음 단계
 
-Check out [this guide](https://docs.smith.langchain.com/evaluation/how_to_guides/langgraph) for evaluating LangGraph applications, including SQL agents like this one, using LangSmith. 
+LangSmith를 사용하여 이와 같은 SQL 에이전트를 포함한 LangGraph 애플리케이션을 평가하려면 [이 가이드](https://docs.smith.langchain.com/evaluation/how_to_guides/langgraph)를 확인하세요. 

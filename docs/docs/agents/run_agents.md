@@ -9,22 +9,22 @@ hide:
 
 # Running agents
 
-Agents support both synchronous and asynchronous execution using either `.invoke()` / `await .ainvoke()` for full responses, or `.stream()` / `.astream()` for **incremental** [streaming](../how-tos/streaming.md) output. This section explains how to provide input, interpret output, enable streaming, and control execution limits.
+에이전트는 `.invoke()` / `await .ainvoke()`를 사용한 전체 응답이나 `.stream()` / `.astream()`을 사용한 **점진적** [스트리밍](../how-tos/streaming.md) 출력 모두에 대해 동기 및 비동기 실행을 지원합니다. 이 섹션에서는 입력을 제공하고, 출력을 해석하고, 스트리밍을 활성화하고, 실행 제한을 제어하는 방법을 설명합니다.
 
 ## Basic usage
 
-Agents can be executed in two primary modes:
+에이전트는 두 가지 주요 모드로 실행할 수 있습니다:
 
 :::python
 
-- **Synchronous** using `.invoke()` or `.stream()`
-- **Asynchronous** using `await .ainvoke()` or `async for` with `.astream()`
+- **동기(Synchronous)** `.invoke()` 또는 `.stream()` 사용
+- **비동기(Asynchronous)** `await .ainvoke()` 또는 `.astream()`과 함께 `async for` 사용
   :::
 
 :::js
 
-- **Synchronous** using `.invoke()` or `.stream()`
-- **Asynchronous** using `await .invoke()` or `for await` with `.stream()`
+- **동기(Synchronous)** `.invoke()` 또는 `.stream()` 사용
+- **비동기(Asynchronous)** `await .invoke()` 또는 `.stream()`과 함께 `for await` 사용
   :::
 
 :::python
@@ -69,91 +69,89 @@ const response = await agent.invoke({
 
 ## Inputs and outputs
 
-Agents use a language model that expects a list of `messages` as an input. Therefore, agent inputs and outputs are stored as a list of `messages` under the `messages` key in the agent [state](../concepts/low_level.md#working-with-messages-in-graph-state).
+에이전트는 `messages` 리스트를 입력으로 예상하는 언어 모델을 사용합니다. 따라서 에이전트의 입력과 출력은 에이전트 [state](../concepts/low_level.md#working-with-messages-in-graph-state)의 `messages` 키 아래에 `messages` 리스트로 저장됩니다.
 
 ## Input format
 
-Agent input must be a dictionary with a `messages` key. Supported formats are:
+에이전트 입력은 `messages` 키를 가진 딕셔너리여야 합니다. 지원되는 형식은 다음과 같습니다:
 
 :::python
-| Format | Example |
+| 형식 | 예시 |
 |--------------------|-------------------------------------------------------------------------------------------------------------------------------|
-| String | `{"messages": "Hello"}` — Interpreted as a [HumanMessage](https://python.langchain.com/docs/concepts/messages/#humanmessage) |
+| String | `{"messages": "Hello"}` — [HumanMessage](https://python.langchain.com/docs/concepts/messages/#humanmessage)로 해석됨 |
 | Message dictionary | `{"messages": {"role": "user", "content": "Hello"}}` |
 | List of messages | `{"messages": [{"role": "user", "content": "Hello"}]}` |
-| With custom state | `{"messages": [{"role": "user", "content": "Hello"}], "user_name": "Alice"}` — If using a custom `state_schema` |
+| With custom state | `{"messages": [{"role": "user", "content": "Hello"}], "user_name": "Alice"}` — 커스텀 `state_schema`를 사용하는 경우 |
 :::
 
 :::js
-| Format | Example |
+| 형식 | 예시 |
 |--------------------|-------------------------------------------------------------------------------------------------------------------------------|
-| String | `{"messages": "Hello"}` — Interpreted as a [HumanMessage](https://js.langchain.com/docs/concepts/messages/#humanmessage) |
+| String | `{"messages": "Hello"}` — [HumanMessage](https://js.langchain.com/docs/concepts/messages/#humanmessage)로 해석됨 |
 | Message dictionary | `{"messages": {"role": "user", "content": "Hello"}}` |
 | List of messages | `{"messages": [{"role": "user", "content": "Hello"}]}` |
-| With custom state | `{"messages": [{"role": "user", "content": "Hello"}], "user_name": "Alice"}` — If using a custom state definition |
+| With custom state | `{"messages": [{"role": "user", "content": "Hello"}], "user_name": "Alice"}` — 커스텀 state 정의를 사용하는 경우 |
 :::
 
 :::python
-Messages are automatically converted into LangChain's internal message format. You can read
-more about [LangChain messages](https://python.langchain.com/docs/concepts/messages/#langchain-messages) in the LangChain documentation.
+메시지는 자동으로 LangChain의 내부 메시지 형식으로 변환됩니다. [LangChain messages](https://python.langchain.com/docs/concepts/messages/#langchain-messages)에 대한 자세한 내용은 LangChain 문서를 참조하세요.
 :::
 
 :::js
-Messages are automatically converted into LangChain's internal message format. You can read
-more about [LangChain messages](https://js.langchain.com/docs/concepts/messages/#langchain-messages) in the LangChain documentation.
+메시지는 자동으로 LangChain의 내부 메시지 형식으로 변환됩니다. [LangChain messages](https://js.langchain.com/docs/concepts/messages/#langchain-messages)에 대한 자세한 내용은 LangChain 문서를 참조하세요.
 :::
 
 !!! tip "Using custom agent state"
 
     :::python
-    You can provide additional fields defined in your agent's state schema directly in the input dictionary. This allows dynamic behavior based on runtime data or prior tool outputs.
-    See the [context guide](./context.md) for full details.
+    에이전트의 state 스키마에 정의된 추가 필드를 입력 딕셔너리에 직접 제공할 수 있습니다. 이를 통해 런타임 데이터나 이전 도구 출력을 기반으로 동적 동작이 가능합니다.
+    자세한 내용은 [context guide](./context.md)를 참조하세요.
     :::
 
     :::js
-    You can provide additional fields defined in your agent's state directly in the state definition. This allows dynamic behavior based on runtime data or prior tool outputs.
-    See the [context guide](./context.md) for full details.
+    에이전트의 state에 정의된 추가 필드를 state 정의에 직접 제공할 수 있습니다. 이를 통해 런타임 데이터나 이전 도구 출력을 기반으로 동적 동작이 가능합니다.
+    자세한 내용은 [context guide](./context.md)를 참조하세요.
     :::
 
 !!! note
 
     :::python
-    A string input for `messages` is converted to a [HumanMessage](https://python.langchain.com/docs/concepts/messages/#humanmessage). This behavior differs from the `prompt` parameter in `create_react_agent`, which is interpreted as a [SystemMessage](https://python.langchain.com/docs/concepts/messages/#systemmessage) when passed as a string.
+    `messages`에 대한 문자열 입력은 [HumanMessage](https://python.langchain.com/docs/concepts/messages/#humanmessage)로 변환됩니다. 이는 문자열로 전달될 때 [SystemMessage](https://python.langchain.com/docs/concepts/messages/#systemmessage)로 해석되는 `create_react_agent`의 `prompt` 매개변수와 다릅니다.
     :::
 
     :::js
-    A string input for `messages` is converted to a [HumanMessage](https://js.langchain.com/docs/concepts/messages/#humanmessage). This behavior differs from the `prompt` parameter in `createReactAgent`, which is interpreted as a [SystemMessage](https://js.langchain.com/docs/concepts/messages/#systemmessage) when passed as a string.
+    `messages`에 대한 문자열 입력은 [HumanMessage](https://js.langchain.com/docs/concepts/messages/#humanmessage)로 변환됩니다. 이는 문자열로 전달될 때 [SystemMessage](https://js.langchain.com/docs/concepts/messages/#systemmessage)로 해석되는 `createReactAgent`의 `prompt` 매개변수와 다릅니다.
     :::
 
 ## Output format
 
 :::python
-Agent output is a dictionary containing:
+에이전트 출력은 다음을 포함하는 딕셔너리입니다:
 
-- `messages`: A list of all messages exchanged during execution (user input, assistant replies, tool invocations).
-- Optionally, `structured_response` if [structured output](./agents.md#6-configure-structured-output) is configured.
-- If using a custom `state_schema`, additional keys corresponding to your defined fields may also be present in the output. These can hold updated state values from tool execution or prompt logic.
+- `messages`: 실행 중 교환된 모든 메시지 리스트 (사용자 입력, assistant 응답, 도구 호출).
+- 선택적으로, [structured output](./agents.md#6-configure-structured-output)이 구성된 경우 `structured_response`.
+- 커스텀 `state_schema`를 사용하는 경우, 정의된 필드에 해당하는 추가 키도 출력에 존재할 수 있습니다. 이들은 도구 실행이나 프롬프트 로직에서 업데이트된 state 값을 보유할 수 있습니다.
 :::
 
 :::js
-Agent output is a dictionary containing:
+에이전트 출력은 다음을 포함하는 딕셔너리입니다:
 
-- `messages`: A list of all messages exchanged during execution (user input, assistant replies, tool invocations).
-- Optionally, `structuredResponse` if [structured output](./agents.md#6-configure-structured-output) is configured.
-- If using a custom state definition, additional keys corresponding to your defined fields may also be present in the output. These can hold updated state values from tool execution or prompt logic.
+- `messages`: 실행 중 교환된 모든 메시지 리스트 (사용자 입력, assistant 응답, 도구 호출).
+- 선택적으로, [structured output](./agents.md#6-configure-structured-output)이 구성된 경우 `structuredResponse`.
+- 커스텀 state 정의를 사용하는 경우, 정의된 필드에 해당하는 추가 키도 출력에 존재할 수 있습니다. 이들은 도구 실행이나 프롬프트 로직에서 업데이트된 state 값을 보유할 수 있습니다.
 :::
 
-See the [context guide](./context.md) for more details on working with custom state schemas and accessing context.
+커스텀 state 스키마 작업 및 context 액세스에 대한 자세한 내용은 [context guide](./context.md)를 참조하세요.
 
 ## Streaming output
 
-Agents support streaming responses for more responsive applications. This includes:
+에이전트는 보다 반응성 높은 애플리케이션을 위해 스트리밍 응답을 지원합니다. 여기에는 다음이 포함됩니다:
 
-- **Progress updates** after each step
-- **LLM tokens** as they're generated
-- **Custom tool messages** during execution
+- 각 단계 후의 **진행 상황 업데이트**
+- 생성되는 **LLM 토큰**
+- 실행 중의 **커스텀 도구 메시지**
 
-Streaming is available in both sync and async modes:
+스트리밍은 동기 및 비동기 모드 모두에서 사용할 수 있습니다:
 
 :::python
 === "Sync streaming"
@@ -193,16 +191,16 @@ for await (const chunk of agent.stream(
 
 !!! tip
 
-    For full details, see the [streaming guide](../how-tos/streaming.md).
+    자세한 내용은 [streaming guide](../how-tos/streaming.md)를 참조하세요.
 
 ## Max iterations
 
 :::python
-To control agent execution and avoid infinite loops, set a recursion limit. This defines the maximum number of steps the agent can take before raising a `GraphRecursionError`. You can configure `recursion_limit` at runtime or when defining agent via `.with_config()`:
+에이전트 실행을 제어하고 무한 루프를 방지하려면 재귀 제한을 설정합니다. 이는 `GraphRecursionError`가 발생하기 전에 에이전트가 수행할 수 있는 최대 단계 수를 정의합니다. 런타임에 또는 `.with_config()`를 통해 에이전트를 정의할 때 `recursion_limit`을 구성할 수 있습니다:
 :::
 
 :::js
-To control agent execution and avoid infinite loops, set a recursion limit. This defines the maximum number of steps the agent can take before raising a `GraphRecursionError`. You can configure `recursionLimit` at runtime or when defining agent via `.withConfig()`:
+에이전트 실행을 제어하고 무한 루프를 방지하려면 재귀 제한을 설정합니다. 이는 `GraphRecursionError`가 발생하기 전에 에이전트가 수행할 수 있는 최대 단계 수를 정의합니다. 런타임에 또는 `.withConfig()`를 통해 에이전트를 정의할 때 `recursionLimit`을 구성할 수 있습니다:
 :::
 
 :::python

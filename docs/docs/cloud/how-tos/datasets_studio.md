@@ -1,12 +1,12 @@
-# Add node to dataset
+# 데이터셋에 노드 추가
 
-This guide shows how to add examples to [LangSmith datasets](https://docs.smith.langchain.com/evaluation/how_to_guides#dataset-management) from nodes in the thread log. This is useful to evaluate individual steps of the agent.
+이 가이드는 thread 로그의 노드에서 [LangSmith 데이터셋](https://docs.smith.langchain.com/evaluation/how_to_guides#dataset-management)에 예제를 추가하는 방법을 보여줍니다. 이는 에이전트의 개별 단계를 평가하는 데 유용합니다.
 
-1. Select a thread.
-2. Click on the `Add to Dataset` button.
-3. Select nodes whose input/output you want to add to a dataset.
-4. For each selected node, select the target dataset to create the example in. By default a dataset for the specific assistant and node will be selected. If this dataset does not yet exist, it will be created.
-5. Edit the example's input/output as needed before adding it to the dataset.
-6. Select "Add to dataset" at the bottom of the page to add all selected nodes to their respective datasets.
+1. thread를 선택합니다.
+2. `Add to Dataset` 버튼을 클릭합니다.
+3. 데이터셋에 추가할 입/출력을 가진 노드를 선택합니다.
+4. 선택한 각 노드에 대해 예제를 생성할 대상 데이터셋을 선택합니다. 기본적으로 특정 어시스턴트 및 노드에 대한 데이터셋이 선택됩니다. 이 데이터셋이 아직 존재하지 않으면 생성됩니다.
+5. 데이터셋에 추가하기 전에 필요에 따라 예제의 입/출력을 편집합니다.
+6. 페이지 하단의 "Add to dataset"를 선택하여 선택한 모든 노드를 각 데이터셋에 추가합니다.
 
-See [Evaluating intermediate steps](https://docs.smith.langchain.com/evaluation/how_to_guides/langgraph#evaluating-intermediate-steps) for more details on how to evaluate intermediate steps.
+중간 단계를 평가하는 방법에 대한 자세한 내용은 [중간 단계 평가](https://docs.smith.langchain.com/evaluation/how_to_guides/langgraph#evaluating-intermediate-steps)를 참조하세요.

@@ -15,7 +15,7 @@ class InMemoryCache(BaseCache[ValueT]):
         self._lock = threading.RLock()
 
     def get(self, keys: Sequence[FullKey]) -> dict[FullKey, ValueT]:
-        """Get the cached values for the given keys."""
+        """주어진 키에 대한 캐시된 값을 가져옵니다."""
         with self._lock:
             if not keys:
                 return {}
@@ -32,11 +32,11 @@ class InMemoryCache(BaseCache[ValueT]):
             return values
 
     async def aget(self, keys: Sequence[FullKey]) -> dict[FullKey, ValueT]:
-        """Asynchronously get the cached values for the given keys."""
+        """주어진 키에 대한 캐시된 값을 비동기적으로 가져옵니다."""
         return self.get(keys)
 
     def set(self, keys: Mapping[FullKey, tuple[ValueT, int | None]]) -> None:
-        """Set the cached values for the given keys."""
+        """주어진 키에 대한 캐시된 값을 설정합니다."""
         with self._lock:
             now = datetime.datetime.now(datetime.timezone.utc)
             for (ns, key), (value, ttl) in keys.items():
@@ -53,12 +53,12 @@ class InMemoryCache(BaseCache[ValueT]):
                 )
 
     async def aset(self, keys: Mapping[FullKey, tuple[ValueT, int | None]]) -> None:
-        """Asynchronously set the cached values for the given keys."""
+        """주어진 키에 대한 캐시된 값을 비동기적으로 설정합니다."""
         self.set(keys)
 
     def clear(self, namespaces: Sequence[Namespace] | None = None) -> None:
-        """Delete the cached values for the given namespaces.
-        If no namespaces are provided, clear all cached values."""
+        """주어진 네임스페이스에 대한 캐시된 값을 삭제합니다.
+        네임스페이스가 제공되지 않으면 모든 캐시된 값을 지웁니다."""
         with self._lock:
             if namespaces is None:
                 self._cache.clear()
@@ -68,6 +68,6 @@ class InMemoryCache(BaseCache[ValueT]):
                         del self._cache[ns]
 
     async def aclear(self, namespaces: Sequence[Namespace] | None = None) -> None:
-        """Asynchronously delete the cached values for the given namespaces.
-        If no namespaces are provided, clear all cached values."""
+        """주어진 네임스페이스에 대한 캐시된 값을 비동기적으로 삭제합니다.
+        네임스페이스가 제공되지 않으면 모든 캐시된 값을 지웁니다."""
         self.clear(namespaces)

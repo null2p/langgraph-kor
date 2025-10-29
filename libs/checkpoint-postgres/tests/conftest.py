@@ -21,7 +21,7 @@ async def conn() -> AsyncIterator[AsyncConnection[DictRow]]:
 
 @pytest.fixture(scope="function", autouse=True)
 async def clear_test_db(conn: AsyncConnection[DictRow]) -> None:
-    """Delete all tables before each test."""
+    """각 테스트 전에 모든 테이블을 삭제합니다."""
     try:
         await conn.execute("DELETE FROM checkpoints")
         await conn.execute("DELETE FROM checkpoint_blobs")

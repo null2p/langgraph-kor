@@ -1,6 +1,6 @@
-# 🦜🕸️ Case studies
+# 🦜🕸️ 케이스 스터디
 
-This list of companies using LangGraph and their success stories is compiled from public sources. If your company uses LangGraph, we'd love for you to share your story and add it to the list. You’re also welcome to contribute updates based on publicly available information from other companies, such as blog posts or press releases.
+LangGraph를 사용하는 회사들과 그들의 성공 사례 목록은 공개 출처에서 편집되었습니다. 귀사에서 LangGraph를 사용하고 계시다면 사례를 공유하고 이 목록에 추가해주시면 감사하겠습니다. 블로그 게시물이나 보도 자료 등 다른 회사의 공개 정보를 바탕으로 업데이트를 제공하는 것도 환영합니다.
 
 
 | Company | Industry | Use case | Reference |

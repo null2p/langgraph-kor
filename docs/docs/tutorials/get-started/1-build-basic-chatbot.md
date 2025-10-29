@@ -1,17 +1,16 @@
-# Build a basic chatbot
+# 기본 챗봇 만들기
 
-In this tutorial, you will build a basic chatbot. This chatbot is the basis for the following series of tutorials where you will progressively add more sophisticated capabilities, and be introduced to key LangGraph concepts along the way. Let's dive in! 🌟
+이 튜토리얼에서는 기본 챗봇을 구축합니다. 이 챗봇은 다음 일련의 튜토리얼의 기반이 되며, 점진적으로 더 정교한 기능을 추가하면서 LangGraph의 핵심 개념을 소개받게 됩니다. 시작해 봅시다! 🌟
 
-## Prerequisites
+## 사전 요구 사항
 
-Before you start this tutorial, ensure you have access to a LLM that supports
-tool-calling features, such as [OpenAI](https://platform.openai.com/api-keys),
-[Anthropic](https://console.anthropic.com/settings/keys), or
-[Google Gemini](https://ai.google.dev/gemini-api/docs/api-key).
+이 튜토리얼을 시작하기 전에 [OpenAI](https://platform.openai.com/api-keys),
+[Anthropic](https://console.anthropic.com/settings/keys), 또는
+[Google Gemini](https://ai.google.dev/gemini-api/docs/api-key)와 같은 도구 호출 기능을 지원하는 LLM에 대한 액세스 권한이 있는지 확인하세요.
 
-## 1. Install packages
+## 1. 패키지 설치
 
-Install the required packages:
+필요한 패키지를 설치합니다:
 
 :::python
 
@@ -50,13 +49,13 @@ pip install -U langgraph langsmith
 
 !!! tip
 
-    Sign up for LangSmith to quickly spot issues and improve the performance of your LangGraph projects. LangSmith lets you use trace data to debug, test, and monitor your LLM apps built with LangGraph. For more information on how to get started, see [LangSmith docs](https://docs.smith.langchain.com).
+    LangSmith에 가입하여 LangGraph 프로젝트의 문제를 빠르게 찾고 성능을 향상시키세요. LangSmith를 사용하면 추적 데이터를 사용하여 LangGraph로 구축한 LLM 앱을 디버그, 테스트 및 모니터링할 수 있습니다. 시작 방법에 대한 자세한 내용은 [LangSmith 문서](https://docs.smith.langchain.com)를 참조하세요.
 
-## 2. Create a `StateGraph`
+## 2. `StateGraph` 생성
 
-Now you can create a basic chatbot using LangGraph. This chatbot will respond directly to user messages.
+이제 LangGraph를 사용하여 기본 챗봇을 만들 수 있습니다. 이 챗봇은 사용자 메시지에 직접 응답합니다.
 
-Start by creating a `StateGraph`. A `StateGraph` object defines the structure of our chatbot as a "state machine". We'll add `nodes` to represent the llm and functions our chatbot can call and `edges` to specify how the bot should transition between these functions.
+먼저 `StateGraph`를 생성합니다. `StateGraph` 객체는 챗봇의 구조를 "상태 머신"으로 정의합니다. LLM과 챗봇이 호출할 수 있는 함수를 나타내는 `노드`를 추가하고, 봇이 이러한 함수 간에 전환하는 방법을 지정하는 `엣지`를 추가합니다.
 
 :::python
 
@@ -70,9 +69,9 @@ from langgraph.graph.message import add_messages
 
 
 class State(TypedDict):
-    # Messages have the type "list". The `add_messages` function
-    # in the annotation defines how this state key should be updated
-    # (in this case, it appends messages to the list, rather than overwriting them)
+    # Messages는 "list" 타입을 가집니다. 주석의 `add_messages` 함수는
+    # 이 상태 키를 업데이트하는 방법을 정의합니다
+    # (이 경우 메시지를 덮어쓰지 않고 목록에 추가합니다)
     messages: Annotated[list, add_messages]
 
 
@@ -94,22 +93,22 @@ const graph = new StateGraph(State).compile();
 
 :::
 
-Our graph can now handle two key tasks:
+이제 그래프는 두 가지 주요 작업을 처리할 수 있습니다:
 
-1. Each `node` can receive the current `State` as input and output an update to the state.
-2. Updates to `messages` will be appended to the existing list rather than overwriting it, thanks to the prebuilt reducer function.
+1. 각 `노드`는 현재 `State`를 입력으로 받고 상태에 대한 업데이트를 출력할 수 있습니다.
+2. `messages`에 대한 업데이트는 미리 빌드된 reducer 함수 덕분에 덮어쓰지 않고 기존 목록에 추가됩니다.
 
-!!! tip "Concept"
+!!! tip "개념"
 
-    When defining a graph, the first step is to define its `State`. The `State` includes the graph's schema and [reducer functions](https://langchain-ai.github.io/langgraph/concepts/low_level/#reducers) that handle state updates. In our example, `State` is a schema with one key: `messages`. The reducer function is used to append new messages to the list instead of overwriting it. Keys without a reducer annotation will overwrite previous values.
+    그래프를 정의할 때 첫 번째 단계는 `State`를 정의하는 것입니다. `State`에는 그래프의 스키마와 상태 업데이트를 처리하는 [reducer 함수](https://langchain-ai.github.io/langgraph/concepts/low_level/#reducers)가 포함됩니다. 예제에서 `State`는 `messages`라는 하나의 키를 가진 스키마입니다. reducer 함수는 메시지를 덮어쓰지 않고 목록에 추가하는 데 사용됩니다. reducer 주석이 없는 키는 이전 값을 덮어씁니다.
 
-    To learn more about state, reducers, and related concepts, see [LangGraph reference docs](https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.message.add_messages).
+    state, reducer 및 관련 개념에 대한 자세한 내용은 [LangGraph 레퍼런스 문서](https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.message.add_messages)를 참조하세요.
 
-## 3. Add a node
+## 3. 노드 추가
 
-Next, add a "`chatbot`" node. **Nodes** represent units of work and are typically regular functions.
+다음으로 "`chatbot`" 노드를 추가합니다. **노드**는 작업 단위를 나타내며 일반적으로 일반 함수입니다.
 
-Let's first select a chat model:
+먼저 채팅 모델을 선택합니다:
 
 :::python
 
@@ -139,7 +138,7 @@ const llm = new ChatOpenAI({
 
 :::
 
-We can now incorporate the chat model into a simple node:
+이제 채팅 모델을 간단한 노드에 통합할 수 있습니다:
 
 :::python
 
@@ -149,9 +148,8 @@ def chatbot(state: State):
     return {"messages": [llm.invoke(state["messages"])]}
 
 
-# The first argument is the unique node name
-# The second argument is the function or object that will be called whenever
-# the node is used.
+# 첫 번째 인수는 고유한 노드 이름입니다
+# 두 번째 인수는 노드가 사용될 때마다 호출될 함수 또는 객체입니다.
 graph_builder.add_node("chatbot", chatbot)
 ```
 
@@ -174,19 +172,19 @@ const graph = new StateGraph(State)
 
 :::
 
-**Notice** how the `chatbot` node function takes the current `State` as input and returns a dictionary containing an updated `messages` list under the key "messages". This is the basic pattern for all LangGraph node functions.
+`chatbot` 노드 함수가 현재 `State`를 입력으로 받고 "messages" 키 아래에 업데이트된 `messages` 목록을 포함하는 딕셔너리를 반환하는 방식에 **주목하세요**. 이것이 모든 LangGraph 노드 함수의 기본 패턴입니다.
 
 :::python
-The `add_messages` function in our `State` will append the LLM's response messages to whatever messages are already in the state.
+`State`의 `add_messages` 함수는 LLM의 응답 메시지를 상태에 이미 있는 메시지에 추가합니다.
 :::
 
 :::js
-The `addMessages` function used within `MessagesZodState` will append the LLM's response messages to whatever messages are already in the state.
+`MessagesZodState` 내에서 사용되는 `addMessages` 함수는 LLM의 응답 메시지를 상태에 이미 있는 메시지에 추가합니다.
 :::
 
-## 4. Add an `entry` point
+## 4. `entry` 포인트 추가
 
-Add an `entry` point to tell the graph **where to start its work** each time it is run:
+그래프가 실행될 때마다 **작업을 시작할 위치**를 알려주기 위해 `entry` 포인트를 추가합니다:
 
 :::python
 
@@ -214,9 +212,9 @@ const graph = new StateGraph(State)
 
 :::
 
-## 5. Add an `exit` point
+## 5. `exit` 포인트 추가
 
-Add an `exit` point to indicate **where the graph should finish execution**. This is helpful for more complex flows, but even in a simple graph like this, adding an end node improves clarity.
+**그래프가 실행을 종료해야 하는 위치**를 나타내기 위해 `exit` 포인트를 추가합니다. 이것은 더 복잡한 흐름에 유용하지만, 이와 같은 간단한 그래프에서도 종료 노드를 추가하면 명확성이 향상됩니다.
 
 :::python
 
@@ -245,12 +243,11 @@ const graph = new StateGraph(State)
 
 :::
 
-This tells the graph to terminate after running the chatbot node.
+이것은 챗봇 노드를 실행한 후 그래프를 종료하도록 지시합니다.
 
-## 6. Compile the graph
+## 6. 그래프 컴파일
 
-Before running the graph, we'll need to compile it. We can do so by calling `compile()`
-on the graph builder. This creates a `CompiledGraph` we can invoke on our state.
+그래프를 실행하기 전에 컴파일해야 합니다. 그래프 빌더에서 `compile()`을 호출하여 이를 수행할 수 있습니다. 이렇게 하면 상태에서 호출할 수 있는 `CompiledGraph`가 생성됩니다.
 
 :::python
 
@@ -279,10 +276,10 @@ const graph = new StateGraph(State)
 
 :::
 
-## 7. Visualize the graph (optional)
+## 7. 그래프 시각화 (선택 사항)
 
 :::python
-You can visualize the graph using the `get_graph` method and one of the "draw" methods, like `draw_ascii` or `draw_png`. The `draw` methods each require additional dependencies.
+`get_graph` 메서드와 `draw_ascii` 또는 `draw_png`와 같은 "draw" 메서드 중 하나를 사용하여 그래프를 시각화할 수 있습니다. 각 `draw` 메서드에는 추가 종속성이 필요합니다.
 
 ```python
 from IPython.display import Image, display
@@ -290,14 +287,14 @@ from IPython.display import Image, display
 try:
     display(Image(graph.get_graph().draw_mermaid_png()))
 except Exception:
-    # This requires some extra dependencies and is optional
+    # 이것은 추가 종속성이 필요하며 선택 사항입니다
     pass
 ```
 
 :::
 
 :::js
-You can visualize the graph using the `getGraph` method and render the graph with the `drawMermaidPng` method.
+`getGraph` 메서드를 사용하여 그래프를 시각화하고 `drawMermaidPng` 메서드로 그래프를 렌더링할 수 있습니다.
 
 ```typescript
 import * as fs from "node:fs/promises";
@@ -313,13 +310,13 @@ await fs.writeFile("basic-chatbot.png", imageBuffer);
 
 ![basic chatbot diagram](basic-chatbot.png)
 
-## 8. Run the chatbot
+## 8. 챗봇 실행
 
-Now run the chatbot!
+이제 챗봇을 실행하세요!
 
 !!! tip
 
-    You can exit the chat loop at any time by typing `quit`, `exit`, or `q`.
+    `quit`, `exit` 또는 `q`를 입력하여 언제든지 채팅 루프를 종료할 수 있습니다.
 
 :::python
 
@@ -338,7 +335,7 @@ while True:
             break
         stream_graph_updates(user_input)
     except:
-        # fallback if input() is not available
+        # input()을 사용할 수 없는 경우 대체
         user_input = "What do you know about LangGraph?"
         print("User: " + user_input)
         stream_graph_updates(user_input)
@@ -421,11 +418,11 @@ Goodbye!
 
 :::
 
-**Congratulations!** You've built your first chatbot using LangGraph. This bot can engage in basic conversation by taking user input and generating responses using an LLM. You can inspect a [LangSmith Trace](https://smith.langchain.com/public/7527e308-9502-4894-b347-f34385740d5a/r) for the call above.
+**축하합니다!** LangGraph를 사용하여 첫 번째 챗봇을 구축했습니다. 이 봇은 사용자 입력을 받아 LLM을 사용하여 응답을 생성함으로써 기본적인 대화를 진행할 수 있습니다. 위 호출에 대한 [LangSmith Trace](https://smith.langchain.com/public/7527e308-9502-4894-b347-f34385740d5a/r)를 확인할 수 있습니다.
 
 :::python
 
-Below is the full code for this tutorial:
+다음은 이 튜토리얼의 전체 코드입니다:
 
 ```python
 from typing import Annotated
@@ -451,9 +448,8 @@ def chatbot(state: State):
     return {"messages": [llm.invoke(state["messages"])]}
 
 
-# The first argument is the unique node name
-# The second argument is the function or object that will be called whenever
-# the node is used.
+# 첫 번째 인수는 고유한 노드 이름입니다
+# 두 번째 인수는 노드가 사용될 때마다 호출될 함수 또는 객체입니다.
 graph_builder.add_node("chatbot", chatbot)
 graph_builder.add_edge(START, "chatbot")
 graph_builder.add_edge("chatbot", END)
@@ -477,9 +473,8 @@ const llm = new ChatOpenAI({
 const State = z.object({ messages: MessagesZodState.shape.messages });
 
 const graph = new StateGraph(State);
-  // The first argument is the unique node name
-  // The second argument is the function or object that will be called whenever
-  // the node is used.
+  // 첫 번째 인수는 고유한 노드 이름입니다
+  // 두 번째 인수는 노드가 사용될 때마다 호출될 함수 또는 객체입니다.
   .addNode("chatbot", async (state) => {
     return { messages: [await llm.invoke(state.messages)] };
   });
@@ -490,6 +485,6 @@ const graph = new StateGraph(State);
 
 :::
 
-## Next steps
+## 다음 단계
 
-You may have noticed that the bot's knowledge is limited to what's in its training data. In the next part, we'll [add a web search tool](./2-add-tools.md) to expand the bot's knowledge and make it more capable.
+봇의 지식이 훈련 데이터에 있는 것으로 제한되어 있다는 것을 알아챘을 것입니다. 다음 부분에서는 봇의 지식을 확장하고 더 강력하게 만들기 위해 [웹 검색 도구를 추가](./2-add-tools.md)할 것입니다.

@@ -3,42 +3,42 @@ search:
   boost: 2
 ---
 
-# LangGraph Platform Plans
+# LangGraph Platform 플랜
 
 
-## Overview
-LangGraph Platform is a solution for deploying agentic applications in production.
-There are three different plans for using it.
+## 개요
+LangGraph Platform은 프로덕션 환경에서 에이전틱 애플리케이션을 배포하기 위한 솔루션입니다.
+사용하기 위한 세 가지 다른 플랜이 있습니다.
 
-- **Developer**: All [LangSmith](https://smith.langchain.com/) users have access to this plan. You can sign up for this plan simply by creating a LangSmith account. This gives you access to the [local deployment](./deployment_options.md#free-deployment) option.
-- **Plus**: All [LangSmith](https://smith.langchain.com/) users with a [Plus account](https://docs.smith.langchain.com/administration/pricing) have access to this plan. You can sign up for this plan simply by upgrading your LangSmith account to the Plus plan type. This gives you access to the [Cloud](./deployment_options.md#cloud-saas) deployment option.
-- **Enterprise**: This is separate from LangSmith plans. You can sign up for this plan by [contacting our sales team](https://www.langchain.com/contact-sales). This gives you access to all [deployment options](./deployment_options.md).
+- **Developer**: 모든 [LangSmith](https://smith.langchain.com/) 사용자가 이 플랜에 액세스할 수 있습니다. LangSmith 계정을 생성하기만 하면 이 플랜에 가입할 수 있습니다. 이를 통해 [로컬 배포](./deployment_options.md#free-deployment) 옵션에 액세스할 수 있습니다.
+- **Plus**: [Plus 계정](https://docs.smith.langchain.com/administration/pricing)이 있는 모든 [LangSmith](https://smith.langchain.com/) 사용자가 이 플랜에 액세스할 수 있습니다. LangSmith 계정을 Plus 플랜 유형으로 업그레이드하기만 하면 이 플랜에 가입할 수 있습니다. 이를 통해 [Cloud](./deployment_options.md#cloud-saas) 배포 옵션에 액세스할 수 있습니다.
+- **Enterprise**: 이것은 LangSmith 플랜과 별개입니다. [영업팀에 문의](https://www.langchain.com/contact-sales)하여 이 플랜에 가입할 수 있습니다. 이를 통해 모든 [배포 옵션](./deployment_options.md)에 액세스할 수 있습니다.
 
 
-## Plan Details
+## 플랜 세부사항
 
 |                                                                  | Developer                                   | Plus                                                  | Enterprise                                          |
 |------------------------------------------------------------------|---------------------------------------------|-------------------------------------------------------|-----------------------------------------------------|
-| Deployment Options                                               | Local                          | Cloud SaaS                                         | <ul><li>Cloud SaaS</li><li>Self-Hosted Data Plane</li><li>Self-Hosted Control Plane</li><li>Standalone Container</li></ul> |
-| Usage                                                            | Free | See [Pricing](https://www.langchain.com/langgraph-platform-pricing) | Custom                                              |
-| APIs for retrieving and updating state and conversational history | ✅                                           | ✅                                                     | ✅                                                   |
-| APIs for retrieving and updating long-term memory                | ✅                                           | ✅                                                     | ✅                                                   |
-| Horizontally scalable task queues and servers                    | ✅                                           | ✅                                                     | ✅                                                   |
-| Real-time streaming of outputs and intermediate steps            | ✅                                           | ✅                                                     | ✅                                                   |
-| Assistants API (configurable templates for LangGraph apps)       | ✅                                           | ✅                                                     | ✅                                                   |
-| Cron scheduling                                                  | --                                          | ✅                                                     | ✅                                                   |
-| LangGraph Studio for prototyping                                 | 	✅                                         | ✅                                                    | ✅                                                  |
-| Authentication & authorization to call the LangGraph APIs        | --                                          | Coming Soon!                                          | Coming Soon!                                        |
-| Smart caching to reduce traffic to LLM API                       | --                                          | Coming Soon!                                          | Coming Soon!                                        |
-| Publish/subscribe API for state                                  | --                                          | Coming Soon!                                          | Coming Soon!                                        |
-| Scheduling prioritization                                        | --                                          | Coming Soon!                                          | Coming Soon!                                        |
+| 배포 옵션                                               | Local                          | Cloud SaaS                                         | <ul><li>Cloud SaaS</li><li>Self-Hosted Data Plane</li><li>Self-Hosted Control Plane</li><li>Standalone Container</li></ul> |
+| 사용                                                            | 무료 | [가격 책정](https://www.langchain.com/langgraph-platform-pricing) 참조 | 커스텀                                              |
+| 상태 및 대화 히스토리 검색 및 업데이트를 위한 API | ✅                                           | ✅                                                     | ✅                                                   |
+| 장기 메모리 검색 및 업데이트를 위한 API                | ✅                                           | ✅                                                     | ✅                                                   |
+| 수평 확장 가능한 작업 큐 및 서버                    | ✅                                           | ✅                                                     | ✅                                                   |
+| 출력 및 중간 단계의 실시간 스트리밍            | ✅                                           | ✅                                                     | ✅                                                   |
+| Assistants API (LangGraph 앱을 위한 구성 가능한 템플릿)       | ✅                                           | ✅                                                     | ✅                                                   |
+| Cron 스케줄링                                                  | --                                          | ✅                                                     | ✅                                                   |
+| 프로토타이핑을 위한 LangGraph Studio                                 | 	✅                                         | ✅                                                    | ✅                                                  |
+| LangGraph API 호출을 위한 인증 및 권한 부여        | --                                          | 곧 출시!                                          | 곧 출시!                                        |
+| LLM API 트래픽 감소를 위한 스마트 캐싱                       | --                                          | 곧 출시!                                          | 곧 출시!                                        |
+| 상태를 위한 게시/구독 API                                  | --                                          | 곧 출시!                                          | 곧 출시!                                        |
+| 스케줄링 우선순위 지정                                        | --                                          | 곧 출시!                                          | 곧 출시!                                        |
 
-For pricing information, see [LangGraph Platform Pricing](https://www.langchain.com/langgraph-platform-pricing).
+가격 정보는 [LangGraph Platform 가격 책정](https://www.langchain.com/langgraph-platform-pricing)을 참조하세요.
 
-## Related
+## 관련 정보
 
-For more information, please see:
+자세한 내용은 다음을 참조하세요:
 
-* [Deployment Options conceptual guide](./deployment_options.md)
-* [LangGraph Platform Pricing](https://www.langchain.com/langgraph-platform-pricing)
-* [LangSmith Plans](https://docs.smith.langchain.com/administration/pricing)
+* [배포 옵션 개념 가이드](./deployment_options.md)
+* [LangGraph Platform 가격 책정](https://www.langchain.com/langgraph-platform-pricing)
+* [LangSmith 플랜](https://docs.smith.langchain.com/administration/pricing)

@@ -31,8 +31,8 @@ from langgraph.store.base import (
 )
 
 _AIO_ERROR_MSG = (
-    "The SqliteStore does not support async methods. "
-    "Consider using AsyncSqliteStore instead.\n"
+    "SqliteStore는 비동기 메서드를 지원하지 않습니다. "
+    "대신 AsyncSqliteStore를 사용하세요.\n"
     "from langgraph.store.sqlite.aio import AsyncSqliteStore\n"
 )
 
@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 MIGRATIONS = [
     """
 CREATE TABLE IF NOT EXISTS store (
-    -- 'prefix' represents the doc's 'namespace'
+    -- 'prefix'는 문서의 'namespace'를 나타냄
     prefix text NOT NULL,
     key text NOT NULL,
     value text NOT NULL,
@@ -51,21 +51,21 @@ CREATE TABLE IF NOT EXISTS store (
 );
 """,
     """
--- For faster lookups by prefix
+-- prefix로 더 빠른 조회를 위함
 CREATE INDEX IF NOT EXISTS store_prefix_idx ON store (prefix);
 """,
     """
--- Add expires_at column to store table
+-- store 테이블에 expires_at 컬럼 추가
 ALTER TABLE store
 ADD COLUMN expires_at TIMESTAMP;
 """,
     """
--- Add ttl_minutes column to store table
+-- store 테이블에 ttl_minutes 컬럼 추가
 ALTER TABLE store
 ADD COLUMN ttl_minutes REAL;
 """,
     """
--- Add index for efficient TTL sweeping
+-- 효율적인 TTL 정리를 위한 인덱스 추가
 CREATE INDEX IF NOT EXISTS idx_store_expires_at ON store (expires_at)
 WHERE expires_at IS NOT NULL;
 """,
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS store_vectors (
 
 
 class SqliteIndexConfig(IndexConfig):
-    """Configuration for vector embeddings in SQLite store."""
+    """SQLite 저장소의 벡터 임베딩에 대한 구성입니다."""
 
     pass
 
@@ -96,28 +96,28 @@ class SqliteIndexConfig(IndexConfig):
 def _namespace_to_text(
     namespace: tuple[str, ...], handle_wildcards: bool = False
 ) -> str:
-    """Convert namespace tuple to text string."""
+    """네임스페이스 튜플을 텍스트 문자열로 변환합니다."""
     if handle_wildcards:
         namespace = tuple("%" if val == "*" else val for val in namespace)
     return ".".join(namespace)
 
 
 def _decode_ns_text(namespace: str) -> tuple[str, ...]:
-    """Convert namespace string to tuple."""
+    """네임스페이스 문자열을 튜플로 변환합니다."""
     return tuple(namespace.split("."))
 
 
 def _validate_filter_key(key: str) -> None:
-    """Validate that a filter key is safe for use in SQL queries.
+    """필터 키가 SQL 쿼리에서 안전하게 사용될 수 있는지 검증합니다.
 
     Args:
-        key: The filter key to validate
+        key: 검증할 필터 키입니다.
 
     Raises:
-        ValueError: If the key contains invalid characters that could enable SQL injection
+        ValueError: SQL 인젝션을 가능하게 하는 잘못된 문자가 포함된 경우
     """
-    # Allow alphanumeric characters, underscores, dots, and hyphens
-    # This covers typical JSON property names while preventing SQL injection
+    # 알파벳 숫자, 밑줄, 점 및 하이픈 허용
+    # SQL 인젝션을 방지하면서 일반적인 JSON 속성 이름을 포함
     if not re.match(r"^[a-zA-Z0-9_.-]+$", key):
         raise ValueError(
             f"Invalid filter key: '{key}'. Filter keys must contain only alphanumeric characters, underscores, dots, and hyphens."
@@ -146,7 +146,7 @@ def _row_to_item(
     *,
     loader: Callable[[bytes | str | orjson.Fragment], dict[str, Any]] | None = None,
 ) -> Item:
-    """Convert a row from the database into an Item."""
+    """데이터베이스의 행을 Item으로 변환합니다."""
     val = row["value"]
     if not isinstance(val, dict):
         val = (loader or _json_loads)(val)
@@ -168,7 +168,7 @@ def _row_to_search_item(
     *,
     loader: Callable[[bytes | str | orjson.Fragment], dict[str, Any]] | None = None,
 ) -> SearchItem:
-    """Convert a row from the database into a SearchItem."""
+    """데이터베이스의 행을 SearchItem으로 변환합니다."""
     loader = loader or _json_loads
     val = row["value"]
     score = row.get("score")
@@ -198,15 +198,15 @@ def _group_ops(ops: Iterable[Op]) -> tuple[dict[type, list[tuple[int, Op]]], int
 
 
 class PreparedGetQuery(NamedTuple):
-    query: str  # Main query to execute
-    params: tuple  # Parameters for the main query
-    namespace: tuple[str, ...]  # Namespace info
-    items: list  # List of items this query is for
+    query: str  # 실행할 메인 쿼리
+    params: tuple  # 메인 쿼리의 매개변수
+    namespace: tuple[str, ...]  # 네임스페이스 정보
+    items: list  # 이 쿼리가 대상으로 하는 항목 목록
     kind: Literal["get", "refresh"]
 
 
 class BaseSqliteStore:
-    """Shared base class for SQLite stores."""
+    """SQLite 저장소의 공유 베이스 클래스입니다."""
 
     MIGRATIONS = MIGRATIONS
     VECTOR_MIGRATIONS = VECTOR_MIGRATIONS
@@ -218,11 +218,11 @@ class BaseSqliteStore:
         self, get_ops: Sequence[tuple[int, GetOp]]
     ) -> list[PreparedGetQuery]:
         """
-        Build queries to fetch (and optionally refresh the TTL of) multiple keys per namespace.
+        네임스페이스당 여러 키를 가져오고 (선택적으로 TTL을 새로 고치는) 쿼리를 빌드합니다.
 
-        Returns a list of PreparedGetQuery objects, which may include:
-        - Queries with kind='refresh' for TTL refresh operations
-        - Queries with kind='get' for data retrieval operations
+        다음을 포함할 수 있는 PreparedGetQuery 객체 목록을 반환합니다:
+        - TTL 새로 고침 작업을 위한 kind='refresh' 쿼리
+        - 데이터 검색 작업을 위한 kind='get' 쿼리
         """
         namespace_groups = defaultdict(list)
         refresh_ttls = defaultdict(list)
@@ -236,7 +236,7 @@ class BaseSqliteStore:
             this_refresh_ttls = refresh_ttls[namespace]
             refresh_ttl_any = any(this_refresh_ttls)
 
-            # Always add the main query to get the data
+            # 데이터를 가져오기 위한 메인 쿼리는 항상 추가
             select_query = f"""
                 SELECT key, value, created_at, updated_at, expires_at, ttl_minutes
                 FROM store
@@ -247,7 +247,7 @@ class BaseSqliteStore:
                 PreparedGetQuery(select_query, select_params, namespace, items, "get")
             )
 
-            # Add a TTL refresh query if needed
+            # 필요한 경우 TTL 새로 고침 쿼리 추가
             if (
                 refresh_ttl_any
                 and self.ttl_config
@@ -276,7 +276,7 @@ class BaseSqliteStore:
         list[tuple[str, Sequence]],
         tuple[str, Sequence[tuple[str, str, str, str]]] | None,
     ]:
-        # Last-write wins
+        # 마지막 쓰기가 우선
         dedupped_ops: dict[tuple[tuple[str, ...], str], PutOp] = {}
         for _, op in put_ops:
             dedupped_ops[(op.namespace, op.key)] = op
@@ -311,7 +311,7 @@ class BaseSqliteStore:
             embedding_request_params = []
             now = datetime.datetime.now(datetime.timezone.utc)
 
-            # First handle main store insertions
+            # 먼저 메인 저장소 삽입 처리
             for op in inserts:
                 if op.ttl is None:
                     expires_at = None
@@ -328,7 +328,7 @@ class BaseSqliteStore:
                     ]
                 )
 
-            # Then handle embeddings if configured
+            # 그 다음 구성된 경우 임베딩 처리
             if self.index_config:
                 for op in inserts:
                     if op.index is False:
@@ -377,16 +377,16 @@ class BaseSqliteStore:
         list[tuple[int, str]],  # idx, query_text pairs to embed
     ]:
         """
-        Build per-SearchOp SQL queries (with optional TTL refresh flag) plus embedding requests.
+        SearchOp별 SQL 쿼리(선택적 TTL 새로 고침 플래그 포함)와 임베딩 요청을 빌드합니다.
         Returns:
-        - queries: list of (SQL, param_list, needs_ttl_refresh_flag)
-        - embedding_requests: list of (original_index_in_search_ops, text_query)
+        - queries: (SQL, param_list, needs_ttl_refresh_flag)의 목록
+        - embedding_requests: (original_index_in_search_ops, text_query) 쌍의 목록
         """
         queries = []
         embedding_requests = []
 
         for idx, (_, op) in enumerate(search_ops):
-            # Build filter conditions first
+            # 먼저 필터 조건 빌드
             filter_params = []
             filter_conditions = []
             if op.filter:
@@ -401,7 +401,7 @@ class BaseSqliteStore:
                             filter_conditions.append(condition)
                             filter_params.extend(filter_params_)
                     else:
-                        # SQLite json_extract returns unquoted string values
+                        # SQLite json_extract는 따옴표 없는 문자열 값을 반환
                         if isinstance(value, str):
                             filter_conditions.append(
                                 "json_extract(value, '$."
@@ -415,7 +415,7 @@ class BaseSqliteStore:
                                 "json_extract(value, '$." + key + "') IS NULL"
                             )
                         elif isinstance(value, bool):
-                            # SQLite JSON stores booleans as integers
+                            # SQLite JSON은 boolean을 정수로 저장
                             filter_conditions.append(
                                 "json_extract(value, '$."
                                 + key
@@ -427,18 +427,18 @@ class BaseSqliteStore:
                                 "json_extract(value, '$." + key + "') = " + str(value)
                             )
                         else:
-                            # Complex objects (list, dict, …) – compare JSON text
+                            # 복잡한 객체(list, dict, ...) – JSON 텍스트 비교
                             filter_conditions.append(
                                 "json_extract(value, '$." + key + "') = ?"
                             )
-                            # orjson.dumps returns bytes → decode to str so SQLite sees TEXT
+                            # orjson.dumps는 bytes 반환 → SQLite가 TEXT로 인식하도록 str로 디코드
                             filter_params.append(orjson.dumps(value).decode())
 
-            # Vector search branch
+            # 벡터 검색 분기
             if op.query and self.index_config:
                 embedding_requests.append((idx, op.query))
 
-                # Choose the similarity function and score expression based on distance type
+                # 거리 타입에 따라 유사도 함수와 점수 표현식 선택
                 distance_type = self.index_config.get("distance_type", "cosine")
 
                 if distance_type == "cosine":
@@ -446,11 +446,11 @@ class BaseSqliteStore:
                 elif distance_type == "l2":
                     score_expr = "vec_distance_L2(sv.embedding, ?)"
                 elif distance_type == "inner_product":
-                    # For inner product, we want higher values to be better, so negate the result
-                    # since inner product similarity is higher when vectors are more similar
+                    # 내적의 경우, 높은 값이 더 좋도록 하기 위해 결과를 부정합니다
+                    # 내적 유사도는 벡터가 더 유사할수록 높기 때문입니다
                     score_expr = "-1 * vec_distance_L1(sv.embedding, ?)"
                 else:
-                    # Default to cosine similarity
+                    # 기본값은 코사인 유사도
                     score_expr = "1.0 - vec_distance_cosine(sv.embedding, ?)"
 
                 filter_str = (
@@ -468,7 +468,7 @@ class BaseSqliteStore:
                     else:
                         prefix_filter_str = ""
 
-                # We use a CTE to compute scores, with a SQLite-compatible approach for distinct results
+                # CTE를 사용하여 점수를 계산하고, 고유한 결과를 위해 SQLite 호환 방식 사용
                 base_query = f"""
                     WITH scored AS (
                         SELECT s.prefix, s.key, s.value, s.created_at, s.updated_at, s.expires_at, s.ttl_minutes,
@@ -499,7 +499,7 @@ class BaseSqliteStore:
                     op.limit,
                     op.offset,
                 ]
-            # Regular search branch (no vector search)
+            # 일반 검색 분기 (벡터 검색 없음)
             else:
                 base_query = """
                     SELECT prefix, key, value, created_at, updated_at, expires_at, ttl_minutes, NULL as score
@@ -516,18 +516,18 @@ class BaseSqliteStore:
                 base_query += " LIMIT ? OFFSET ?"
                 params.extend([op.limit, op.offset])
 
-                # Debug the query
+                # 쿼리 디버깅
                 logger.debug(f"Search query: {base_query}")
                 logger.debug(f"Search params: {params}")
 
-            # Determine if TTL refresh is needed
+            # TTL 새로 고침이 필요한지 확인
             needs_ttl_refresh = bool(
                 op.refresh_ttl
                 and self.ttl_config
                 and self.ttl_config.get("refresh_on_read", False)
             )
 
-            # The base_query is now the final_sql, and we pass the refresh flag
+            # base_query가 이제 final_sql이고, 새로 고침 플래그를 전달
             final_sql = base_query
             final_params = params
 
@@ -559,7 +559,7 @@ class BaseSqliteStore:
                         )
                     else:
                         logger.warning(
-                            "Unknown match_type in list_namespaces: %s", cond.match_type
+                            "list_namespaces에서 알 수 없는 match_type: %s", cond.match_type
                         )
 
             where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
@@ -633,10 +633,10 @@ class BaseSqliteStore:
         """Helper to generate filter conditions."""
         _validate_filter_key(key)
 
-        # We need to properly format values for SQLite JSON extraction comparison
+        # SQLite JSON 추출 비교를 위해 값을 올바르게 포맷해야 함
         if op == "$eq":
             if isinstance(value, str):
-                # Direct string comparison with proper quoting for unquoted json_extract result
+                # 따옴표 없는 json_extract 결과에 대한 올바른 따옴표 처리를 통한 직접 문자열 비교
                 return (
                     f"json_extract(value, '$.{key}') = '"
                     + value.replace("'", "''")
@@ -646,14 +646,14 @@ class BaseSqliteStore:
             elif value is None:
                 return f"json_extract(value, '$.{key}') IS NULL", []
             elif isinstance(value, bool):
-                # SQLite JSON stores booleans as integers
+                # SQLite JSON은 boolean을 정수로 저장
                 return f"json_extract(value, '$.{key}') = {1 if value else 0}", []
             elif isinstance(value, (int, float)):
                 return f"json_extract(value, '$.{key}') = {value}", []
             else:
                 return f"json_extract(value, '$.{key}') = ?", [orjson.dumps(value)]
         elif op == "$gt":
-            # For numeric values, SQLite needs to compare as numbers, not strings
+            # 숫자 값의 경우 SQLite는 문자열이 아닌 숫자로 비교해야 함
             if isinstance(value, (int, float)):
                 return f"CAST(json_extract(value, '$.{key}') AS REAL) > {value}", []
             elif isinstance(value, str):
@@ -722,36 +722,36 @@ class BaseSqliteStore:
 
 
 class SqliteStore(BaseSqliteStore, BaseStore):
-    """SQLite-backed store with optional vector search capabilities.
+    """선택적 벡터 검색 기능을 갖춘 SQLite 기반 저장소입니다.
 
     Examples:
-        Basic setup and usage:
+        기본 설정 및 사용법:
         ```python
         from langgraph.store.sqlite import SqliteStore
         import sqlite3
 
         conn = sqlite3.connect(":memory:")
         store = SqliteStore(conn)
-        store.setup()  # Run migrations. Done once
+        store.setup()  # 마이그레이션 실행. 한 번만 수행
 
-        # Store and retrieve data
+        # 데이터 저장 및 검색
         store.put(("users", "123"), "prefs", {"theme": "dark"})
         item = store.get(("users", "123"), "prefs")
         ```
 
-        Or using the convenient from_conn_string helper:
+        또는 편리한 from_conn_string 헬퍼 사용:
         ```python
         from langgraph.store.sqlite import SqliteStore
 
         with SqliteStore.from_conn_string(":memory:") as store:
             store.setup()
 
-            # Store and retrieve data
+            # 데이터 저장 및 검색
             store.put(("users", "123"), "prefs", {"theme": "dark"})
             item = store.get(("users", "123"), "prefs")
         ```
 
-        Vector search using LangChain embeddings:
+        LangChain 임베딩을 사용한 벡터 검색:
         ```python
         from langchain.embeddings import OpenAIEmbeddings
         from langgraph.store.sqlite import SqliteStore
@@ -761,27 +761,27 @@ class SqliteStore(BaseSqliteStore, BaseStore):
             index={
                 "dims": 1536,
                 "embed": OpenAIEmbeddings(),
-                "fields": ["text"]  # specify which fields to embed
+                "fields": ["text"]  # 임베딩할 필드 지정
             }
         ) as store:
-            store.setup()  # Run migrations
+            store.setup()  # 마이그레이션 실행
 
-            # Store documents
+            # 문서 저장
             store.put(("docs",), "doc1", {"text": "Python tutorial"})
             store.put(("docs",), "doc2", {"text": "TypeScript guide"})
-            store.put(("docs",), "doc3", {"text": "Other guide"}, index=False)  # don't index
+            store.put(("docs",), "doc3", {"text": "Other guide"}, index=False)  # 인덱싱하지 않음
 
-            # Search by similarity
+            # 유사도로 검색
             results = store.search(("docs",), query="programming guides", limit=2)
         ```
 
     Note:
-        Semantic search is disabled by default. You can enable it by providing an `index` configuration
-        when creating the store. Without this configuration, all `index` arguments passed to
-        `put` or `aput` will have no effect.
+        의미론적 검색은 기본적으로 비활성화되어 있습니다. 저장소를 만들 때 `index` 구성을
+        제공하여 활성화할 수 있습니다. 이 구성이 없으면 `put` 또는 `aput`에 전달된 모든
+        `index` 인수는 효과가 없습니다.
 
     Warning:
-        Make sure to call `setup()` before first use to create necessary tables and indexes.
+        필요한 테이블과 인덱스를 생성하기 위해 첫 사용 전에 반드시 `setup()`을 호출하세요.
     """
 
     MIGRATIONS = MIGRATIONS
@@ -815,11 +815,11 @@ class SqliteStore(BaseSqliteStore, BaseStore):
         self, get_ops: Sequence[tuple[int, GetOp]]
     ) -> list[PreparedGetQuery]:
         """
-        Build queries to fetch (and optionally refresh the TTL of) multiple keys per namespace.
+        네임스페이스당 여러 키를 가져오고 (선택적으로 TTL을 새로 고치는) 쿼리를 빌드합니다.
 
-        Returns a list of PreparedGetQuery objects, which may include:
-        - Queries with kind='refresh' for TTL refresh operations
-        - Queries with kind='get' for data retrieval operations
+        다음을 포함할 수 있는 PreparedGetQuery 객체 목록을 반환합니다:
+        - TTL 새로 고침 작업을 위한 kind='refresh' 쿼리
+        - 데이터 검색 작업을 위한 kind='get' 쿼리
         """
         namespace_groups = defaultdict(list)
         refresh_ttls = defaultdict(list)
@@ -833,7 +833,7 @@ class SqliteStore(BaseSqliteStore, BaseStore):
             this_refresh_ttls = refresh_ttls[namespace]
             refresh_ttl_any = any(this_refresh_ttls)
 
-            # Always add the main query to get the data
+            # 데이터를 가져오기 위한 메인 쿼리는 항상 추가
             select_query = f"""
                 SELECT key, value, created_at, updated_at, expires_at, ttl_minutes
                 FROM store
@@ -844,7 +844,7 @@ class SqliteStore(BaseSqliteStore, BaseStore):
                 PreparedGetQuery(select_query, select_params, namespace, items, "get")
             )
 
-            # Add a TTL refresh query if needed
+            # 필요한 경우 TTL 새로 고침 쿼리 추가
             if (
                 refresh_ttl_any
                 and self.ttl_config
@@ -871,10 +871,10 @@ class SqliteStore(BaseSqliteStore, BaseStore):
         """Helper to generate filter conditions."""
         _validate_filter_key(key)
 
-        # We need to properly format values for SQLite JSON extraction comparison
+        # SQLite JSON 추출 비교를 위해 값을 올바르게 포맷해야 함
         if op == "$eq":
             if isinstance(value, str):
-                # Direct string comparison with proper quoting for unquoted json_extract result
+                # 따옴표 없는 json_extract 결과에 대한 올바른 따옴표 처리를 통한 직접 문자열 비교
                 return (
                     f"json_extract(value, '$.{key}') = '"
                     + value.replace("'", "''")
@@ -884,14 +884,14 @@ class SqliteStore(BaseSqliteStore, BaseStore):
             elif value is None:
                 return f"json_extract(value, '$.{key}') IS NULL", []
             elif isinstance(value, bool):
-                # SQLite JSON stores booleans as integers
+                # SQLite JSON은 boolean을 정수로 저장
                 return f"json_extract(value, '$.{key}') = {1 if value else 0}", []
             elif isinstance(value, (int, float)):
                 return f"json_extract(value, '$.{key}') = {value}", []
             else:
                 return f"json_extract(value, '$.{key}') = ?", [orjson.dumps(value)]
         elif op == "$gt":
-            # For numeric values, SQLite needs to compare as numbers, not strings
+            # 숫자 값의 경우 SQLite는 문자열이 아닌 숫자로 비교해야 함
             if isinstance(value, (int, float)):
                 return f"CAST(json_extract(value, '$.{key}') AS REAL) > {value}", []
             elif isinstance(value, str):
@@ -967,15 +967,15 @@ class SqliteStore(BaseSqliteStore, BaseStore):
         index: SqliteIndexConfig | None = None,
         ttl: TTLConfig | None = None,
     ) -> Iterator[SqliteStore]:
-        """Create a new SqliteStore instance from a connection string.
+        """연결 문자열로부터 새로운 SqliteStore 인스턴스를 생성합니다.
 
         Args:
-            conn_string (str): The SQLite connection string.
-            index (Optional[SqliteIndexConfig]): The index configuration for the store.
-            ttl (Optional[TTLConfig]): The time-to-live configuration for the store.
+            conn_string (str): SQLite 연결 문자열입니다.
+            index (Optional[SqliteIndexConfig]): 저장소의 인덱스 구성입니다.
+            ttl (Optional[TTLConfig]): 저장소의 TTL(time-to-live) 구성입니다.
 
         Returns:
-            SqliteStore: A new SqliteStore instance.
+            SqliteStore: 새로운 SqliteStore 인스턴스입니다.
         """
         conn = sqlite3.connect(
             conn_string,
@@ -989,10 +989,10 @@ class SqliteStore(BaseSqliteStore, BaseStore):
 
     @contextmanager
     def _cursor(self, *, transaction: bool = True) -> Iterator[sqlite3.Cursor]:
-        """Create a database cursor as a context manager.
+        """컨텍스트 매니저로 데이터베이스 커서를 생성합니다.
 
         Args:
-            transaction (bool): whether to use transaction for the DB operations
+            transaction (bool): DB 작업에 트랜잭션을 사용할지 여부
         """
         if not self.is_setup:
             self.setup()
@@ -1009,16 +1009,16 @@ class SqliteStore(BaseSqliteStore, BaseStore):
                 cur.close()
 
     def setup(self) -> None:
-        """Set up the store database.
+        """저장소 데이터베이스를 설정합니다.
 
-        This method creates the necessary tables in the SQLite database if they don't
-        already exist and runs database migrations. It should be called before first use.
+        이 메서드는 SQLite 데이터베이스에 필요한 테이블이 없으면 생성하고
+        데이터베이스 마이그레이션을 실행합니다. 첫 사용 전에 호출해야 합니다.
         """
 
         with self.lock:
             if self.is_setup:
                 return
-            # Create migrations table if it doesn't exist
+            # 마이그레이션 테이블이 없으면 생성
             self.conn.executescript(
                 """
                 CREATE TABLE IF NOT EXISTS store_migrations (
@@ -1027,7 +1027,7 @@ class SqliteStore(BaseSqliteStore, BaseStore):
                 """
             )
 
-            # Check current migration version
+            # 현재 마이그레이션 버전 확인
             cur = self.conn.execute(
                 "SELECT v FROM store_migrations ORDER BY v DESC LIMIT 1"
             )
@@ -1037,14 +1037,14 @@ class SqliteStore(BaseSqliteStore, BaseStore):
             else:
                 version = row[0]
 
-            # Apply migrations
+            # 마이그레이션 적용
             for v, sql in enumerate(self.MIGRATIONS[version + 1 :], start=version + 1):
                 self.conn.executescript(sql)
                 self.conn.execute("INSERT INTO store_migrations (v) VALUES (?)", (v,))
 
-            # Apply vector migrations if index config is provided
+            # 인덱스 구성이 제공된 경우 벡터 마이그레이션 적용
             if self.index_config:
-                # Create vector migrations table if it doesn't exist
+                # 벡터 마이그레이션 테이블이 없으면 생성
                 self.conn.enable_load_extension(True)
                 sqlite_vec.load(self.conn)
                 self.conn.enable_load_extension(False)
@@ -1056,7 +1056,7 @@ class SqliteStore(BaseSqliteStore, BaseStore):
                     """
                 )
 
-                # Check current vector migration version
+                # 현재 벡터 마이그레이션 버전 확인
                 cur = self.conn.execute(
                     "SELECT v FROM vector_migrations ORDER BY v DESC LIMIT 1"
                 )
@@ -1066,7 +1066,7 @@ class SqliteStore(BaseSqliteStore, BaseStore):
                 else:
                     version = row[0]
 
-                # Apply vector migrations
+                # 벡터 마이그레이션 적용
                 for v, sql in enumerate(
                     self.VECTOR_MIGRATIONS[version + 1 :], start=version + 1
                 ):
@@ -1078,10 +1078,10 @@ class SqliteStore(BaseSqliteStore, BaseStore):
             self.is_setup = True
 
     def sweep_ttl(self) -> int:
-        """Delete expired store items based on TTL.
+        """TTL을 기반으로 만료된 저장소 항목을 삭제합니다.
 
         Returns:
-            int: The number of deleted items.
+            int: 삭제된 항목의 개수입니다.
         """
         with self._cursor() as cur:
             cur.execute(
@@ -1096,10 +1096,10 @@ class SqliteStore(BaseSqliteStore, BaseStore):
     def start_ttl_sweeper(
         self, sweep_interval_minutes: int | None = None
     ) -> concurrent.futures.Future[None]:
-        """Periodically delete expired store items based on TTL.
+        """TTL을 기반으로 주기적으로 만료된 저장소 항목을 삭제합니다.
 
         Returns:
-            Future that can be waited on or cancelled.
+            대기하거나 취소할 수 있는 Future입니다.
         """
         if not self.ttl_config:
             future: concurrent.futures.Future[None] = concurrent.futures.Future()
@@ -1107,8 +1107,8 @@ class SqliteStore(BaseSqliteStore, BaseStore):
             return future
 
         if self._ttl_sweeper_thread and self._ttl_sweeper_thread.is_alive():
-            logger.info("TTL sweeper thread is already running")
-            # Return a future that can be used to cancel the existing thread
+            logger.info("TTL 스위퍼 스레드가 이미 실행 중입니다")
+            # 기존 스레드를 취소하는 데 사용할 수 있는 future 반환
             future = concurrent.futures.Future()
             future.add_done_callback(
                 lambda f: self._ttl_stop_event.set() if f.cancelled() else None
@@ -1120,7 +1120,7 @@ class SqliteStore(BaseSqliteStore, BaseStore):
         interval = float(
             sweep_interval_minutes or self.ttl_config.get("sweep_interval_minutes") or 5
         )
-        logger.info(f"Starting store TTL sweeper with interval {interval} minutes")
+        logger.info(f"{interval}분 간격으로 저장소 TTL 스위퍼를 시작합니다")
 
         future = concurrent.futures.Future()
 
@@ -1133,10 +1133,10 @@ class SqliteStore(BaseSqliteStore, BaseStore):
                     try:
                         expired_items = self.sweep_ttl()
                         if expired_items > 0:
-                            logger.info(f"Store swept {expired_items} expired items")
+                            logger.info(f"저장소에서 {expired_items}개의 만료된 항목을 정리했습니다")
                     except Exception as exc:
                         logger.exception(
-                            "Store TTL sweep iteration failed", exc_info=exc
+                            "저장소 TTL 정리 반복 실패", exc_info=exc
                         )
                 future.set_result(None)
             except Exception as exc:
@@ -1152,20 +1152,20 @@ class SqliteStore(BaseSqliteStore, BaseStore):
         return future
 
     def stop_ttl_sweeper(self, timeout: float | None = None) -> bool:
-        """Stop the TTL sweeper thread if it's running.
+        """실행 중인 경우 TTL 스위퍼 스레드를 중지합니다.
 
         Args:
-            timeout: Maximum time to wait for the thread to stop, in seconds.
-                If `None`, wait indefinitely.
+            timeout: 스레드가 중지될 때까지 기다릴 최대 시간(초)입니다.
+                `None`이면 무한정 기다립니다.
 
         Returns:
-            bool: True if the thread was successfully stopped or wasn't running,
-                False if the timeout was reached before the thread stopped.
+            bool: 스레드가 성공적으로 중지되었거나 실행 중이 아니었으면 True,
+                스레드가 중지되기 전에 시간 초과에 도달하면 False입니다.
         """
         if not self._ttl_sweeper_thread or not self._ttl_sweeper_thread.is_alive():
             return True
 
-        logger.info("Stopping TTL sweeper thread")
+        logger.info("TTL 스위퍼 스레드를 중지하는 중입니다")
         self._ttl_stop_event.set()
 
         self._ttl_sweeper_thread.join(timeout)
@@ -1173,25 +1173,25 @@ class SqliteStore(BaseSqliteStore, BaseStore):
 
         if success:
             self._ttl_sweeper_thread = None
-            logger.info("TTL sweeper thread stopped")
+            logger.info("TTL 스위퍼 스레드가 중지되었습니다")
         else:
-            logger.warning("Timed out waiting for TTL sweeper thread to stop")
+            logger.warning("TTL 스위퍼 스레드가 중지될 때까지 기다리는 중 시간 초과되었습니다")
 
         return success
 
     def __del__(self) -> None:
-        """Ensure the TTL sweeper thread is stopped when the object is garbage collected."""
+        """객체가 가비지 수집될 때 TTL 스위퍼 스레드가 중지되도록 보장합니다."""
         if hasattr(self, "_ttl_stop_event") and hasattr(self, "_ttl_sweeper_thread"):
             self.stop_ttl_sweeper(timeout=0.1)
 
     def batch(self, ops: Iterable[Op]) -> list[Result]:
-        """Execute a batch of operations.
+        """작업 배치를 실행합니다.
 
         Args:
-            ops (Iterable[Op]): List of operations to execute
+            ops (Iterable[Op]): 실행할 작업 목록
 
         Returns:
-            list[Result]: Results of the operations
+            list[Result]: 작업의 결과
         """
         grouped_ops, num_ops = _group_ops(ops)
         results: list[Result] = [None] * num_ops
@@ -1231,14 +1231,14 @@ class SqliteStore(BaseSqliteStore, BaseStore):
         results: list[Result],
         cur: sqlite3.Cursor,
     ) -> None:
-        # Group all queries by namespace to execute all operations for each namespace together
+        # 각 네임스페이스의 모든 작업을 함께 실행하기 위해 네임스페이스별로 모든 쿼리 그룹화
         namespace_queries = defaultdict(list)
         for prepared_query in self._get_batch_GET_ops_queries(get_ops):
             namespace_queries[prepared_query.namespace].append(prepared_query)
 
-        # Process each namespace's operations
+        # 각 네임스페이스의 작업 처리
         for namespace, queries in namespace_queries.items():
-            # Execute TTL refresh queries first
+            # TTL 새로 고침 쿼리를 먼저 실행
             for query in queries:
                 if query.kind == "refresh":
                     try:
@@ -1248,7 +1248,7 @@ class SqliteStore(BaseSqliteStore, BaseStore):
                             f"Error executing TTL refresh: \n{query.query}\n{query.params}\n{e}"
                         ) from e
 
-            # Then execute GET queries and process results
+            # 그 다음 GET 쿼리를 실행하고 결과 처리
             for query in queries:
                 if query.kind == "get":
                     try:
@@ -1271,7 +1271,7 @@ class SqliteStore(BaseSqliteStore, BaseStore):
                         for row in rows
                     }
 
-                    # Process results for this query
+                    # 이 쿼리의 결과 처리
                     for idx, key in query.items:
                         row = key_to_row.get(key)
                         if row:
@@ -1289,20 +1289,20 @@ class SqliteStore(BaseSqliteStore, BaseStore):
         queries, embedding_request = self._prepare_batch_PUT_queries(put_ops)
         if embedding_request:
             if self.embeddings is None:
-                # Should not get here since the embedding config is required
-                # to return an embedding_request above
+                # 위에서 embedding_request를 반환하려면 임베딩 구성이 필요하므로
+                # 여기에 도달하면 안 됨
                 raise ValueError(
                     "Embedding configuration is required for vector operations "
                     f"(for semantic search). "
-                    f"Please provide an Embeddings when initializing the {self.__class__.__name__}."
+                    f"{self.__class__.__name__}를 초기화할 때 Embeddings를 제공하세요."
                 )
             query, txt_params = embedding_request
-            # Update the params to replace the raw text with the vectors
+            # 원시 텍스트를 벡터로 바꾸기 위해 매개변수 업데이트
             vectors = self.embeddings.embed_documents(
                 [param[-1] for param in txt_params]
             )
 
-            # Convert vectors to SQLite-friendly format
+            # 벡터를 SQLite 호환 형식으로 변환
             vector_params = []
             for (ns, k, pathname, _), vector in zip(txt_params, vectors, strict=False):
                 vector_params.extend(
@@ -1324,14 +1324,14 @@ class SqliteStore(BaseSqliteStore, BaseStore):
             search_ops
         )
 
-        # Setup similarity functions if they don't exist
+        # 유사도 함수가 없으면 설정
         if embedding_requests and self.embeddings:
-            # Generate embeddings for search queries
+            # 검색 쿼리에 대한 임베딩 생성
             embeddings = self.embeddings.embed_documents(
                 [query for _, query in embedding_requests]
             )
 
-            # Replace placeholders with actual embeddings
+            # 플레이스홀더를 실제 임베딩으로 교체
             for (embed_req_idx, _), embedding in zip(
                 embedding_requests, embeddings, strict=False
             ):
@@ -1342,7 +1342,7 @@ class SqliteStore(BaseSqliteStore, BaseStore):
                             _params_list[i] = sqlite_vec.serialize_float32(embedding)
                 else:
                     logger.warning(
-                        f"Embedding request index {embed_req_idx} out of bounds for prepared_queries."
+                        f"임베딩 요청 인덱스 {embed_req_idx}가 prepared_queries의 범위를 벗어났습니다."
                     )
 
         for (original_op_idx, _), (query, params, needs_refresh) in zip(
@@ -1373,10 +1373,10 @@ class SqliteStore(BaseSqliteStore, BaseStore):
                             cur.execute(update_query, update_params)
                         except Exception as e:
                             logger.error(
-                                f"Error during TTL refresh update for search: {e}"
+                                f"검색에 대한 TTL 새로 고침 업데이트 중 오류 발생: {e}"
                             )
 
-            if "score" in query:  # Vector search query
+            if "score" in query:  # 벡터 검색 쿼리
                 items = [
                     _row_to_search_item(
                         _decode_ns_text(row[0]),
@@ -1393,7 +1393,7 @@ class SqliteStore(BaseSqliteStore, BaseStore):
                     )
                     for row in rows
                 ]
-            else:  # Regular search query
+            else:  # 일반 검색 쿼리
                 items = [
                     _row_to_search_item(
                         _decode_ns_text(row[0]),
@@ -1424,20 +1424,20 @@ class SqliteStore(BaseSqliteStore, BaseStore):
             results[idx] = [_decode_ns_text(row[0]) for row in cur.fetchall()]
 
     async def abatch(self, ops: Iterable[Op]) -> list[Result]:
-        """Async batch operation - not supported in SqliteStore.
+        """비동기 배치 작업 - SqliteStore에서는 지원되지 않습니다.
 
-        Use AsyncSqliteStore for async operations.
+        비동기 작업의 경우 AsyncSqliteStore를 사용하세요.
         """
         raise NotImplementedError(_AIO_ERROR_MSG)
 
 
-# Helper functions
+# 헬퍼 함수
 
 
 def _ensure_index_config(
     index_config: SqliteIndexConfig,
 ) -> tuple[Any, SqliteIndexConfig]:
-    """Process and validate index configuration."""
+    """인덱스 구성을 처리하고 검증합니다."""
     index_config = index_config.copy()
     tokenized: list[tuple[str, Literal["$"] | list[str]]] = []
     tot = 0

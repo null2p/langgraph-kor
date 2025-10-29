@@ -1,47 +1,47 @@
 # LangGraph Checkpoint
 
-This library defines the base interface for LangGraph checkpointers. Checkpointers provide a persistence layer for LangGraph. They allow you to interact with and manage the graph's state. When you use a graph with a checkpointer, the checkpointer saves a _checkpoint_ of the graph state at every superstep, enabling several powerful capabilities like human-in-the-loop, "memory" between interactions and more.
+이 라이브러리는 LangGraph 체크포인터의 기본 인터페이스를 정의합니다. 체크포인터는 LangGraph에 지속성 계층을 제공합니다. 체크포인터를 사용하면 그래프의 상태와 상호작용하고 관리할 수 있습니다. 체크포인터와 함께 그래프를 사용하면 체크포인터가 매 슈퍼스텝마다 그래프 상태의 _체크포인트_를 저장하여 휴먼-인-더-루프, 상호작용 간 "메모리" 등과 같은 여러 강력한 기능을 활성화합니다.
 
-## Key concepts
+## 주요 개념
 
-### Checkpoint
+### 체크포인트
 
-Checkpoint is a snapshot of the graph state at a given point in time. Checkpoint tuple refers to an object containing checkpoint and the associated config, metadata and pending writes.
+체크포인트는 특정 시점의 그래프 상태 스냅샷입니다. 체크포인트 튜플은 체크포인트와 관련된 설정, 메타데이터 및 대기 중인 쓰기 작업을 포함하는 객체를 의미합니다.
 
-### Thread
+### 스레드
 
-Threads enable the checkpointing of multiple different runs, making them essential for multi-tenant chat applications and other scenarios where maintaining separate states is necessary. A thread is a unique ID assigned to a series of checkpoints saved by a checkpointer. When using a checkpointer, you must specify a `thread_id` and optionally `checkpoint_id` when running the graph.
+스레드는 여러 다른 실행의 체크포인팅을 가능하게 하며, 다중 테넌트 채팅 애플리케이션 및 별도의 상태 유지가 필요한 기타 시나리오에 필수적입니다. 스레드는 체크포인터가 저장하는 일련의 체크포인트에 할당된 고유 ID입니다. 체크포인터를 사용할 때 그래프를 실행할 때 `thread_id`와 선택적으로 `checkpoint_id`를 지정해야 합니다.
 
-- `thread_id` is simply the ID of a thread. This is always required.
-- `checkpoint_id` can optionally be passed. This identifier refers to a specific checkpoint within a thread. This can be used to kick off a run of a graph from some point halfway through a thread.
+- `thread_id`는 단순히 스레드의 ID입니다. 이것은 항상 필수입니다.
+- `checkpoint_id`는 선택적으로 전달할 수 있습니다. 이 식별자는 스레드 내의 특정 체크포인트를 참조합니다. 이것은 스레드 중간 지점부터 그래프 실행을 시작하는 데 사용할 수 있습니다.
 
-You must pass these when invoking the graph as part of the configurable part of the config, e.g.
+그래프를 호출할 때 설정의 구성 가능한 부분으로 이것들을 전달해야 합니다. 예:
 
 ```python
-{"configurable": {"thread_id": "1"}}  # valid config
-{"configurable": {"thread_id": "1", "checkpoint_id": "0c62ca34-ac19-445d-bbb0-5b4984975b2a"}}  # also valid config
+{"configurable": {"thread_id": "1"}}  # 유효한 설정
+{"configurable": {"thread_id": "1", "checkpoint_id": "0c62ca34-ac19-445d-bbb0-5b4984975b2a"}}  # 이것도 유효한 설정
 ```
 
 ### Serde
 
-`langgraph_checkpoint` also defines protocol for serialization/deserialization (serde) and provides an default implementation (`langgraph.checkpoint.serde.jsonplus.JsonPlusSerializer`) that handles a wide variety of types, including LangChain and LangGraph primitives, datetimes, enums and more.
+`langgraph_checkpoint`는 직렬화/역직렬화(serde) 프로토콜도 정의하며, LangChain 및 LangGraph 프리미티브, datetime, enum 등을 포함한 다양한 타입을 처리하는 기본 구현(`langgraph.checkpoint.serde.jsonplus.JsonPlusSerializer`)을 제공합니다.
 
-### Pending writes
+### 대기 중인 쓰기
 
-When a graph node fails mid-execution at a given superstep, LangGraph stores pending checkpoint writes from any other nodes that completed successfully at that superstep, so that whenever we resume graph execution from that superstep we don't re-run the successful nodes.
+주어진 슈퍼스텝에서 그래프 노드가 실행 중 실패하면 LangGraph는 해당 슈퍼스텝에서 성공적으로 완료된 다른 노드들의 대기 중인 체크포인트 쓰기를 저장하므로, 해당 슈퍼스텝에서 그래프 실행을 재개할 때 성공한 노드들을 다시 실행하지 않습니다.
 
-## Interface
+## 인터페이스
 
-Each checkpointer should conform to `langgraph.checkpoint.base.BaseCheckpointSaver` interface and must implement the following methods:
+각 체크포인터는 `langgraph.checkpoint.base.BaseCheckpointSaver` 인터페이스를 따라야 하며 다음 메서드를 구현해야 합니다:
 
-- `.put` - Store a checkpoint with its configuration and metadata.
-- `.put_writes` - Store intermediate writes linked to a checkpoint (i.e. pending writes).
-- `.get_tuple` - Fetch a checkpoint tuple using for a given configuration (`thread_id` and `checkpoint_id`).
-- `.list` - List checkpoints that match a given configuration and filter criteria.
+- `.put` - 체크포인트를 구성 및 메타데이터와 함께 저장합니다.
+- `.put_writes` - 체크포인트에 연결된 중간 쓰기 작업(즉, 대기 중인 쓰기)을 저장합니다.
+- `.get_tuple` - 주어진 구성(`thread_id` 및 `checkpoint_id`)에 대한 체크포인트 튜플을 가져옵니다.
+- `.list` - 주어진 구성 및 필터 기준과 일치하는 체크포인트를 나열합니다.
 
-If the checkpointer will be used with asynchronous graph execution (i.e. executing the graph via `.ainvoke`, `.astream`, `.abatch`), checkpointer must implement asynchronous versions of the above methods (`.aput`, `.aput_writes`, `.aget_tuple`, `.alist`).
+체크포인터가 비동기 그래프 실행(즉, `.ainvoke`, `.astream`, `.abatch`를 통한 그래프 실행)과 함께 사용될 경우, 체크포인터는 위 메서드의 비동기 버전(`.aput`, `.aput_writes`, `.aget_tuple`, `.alist`)을 구현해야 합니다.
 
-## Usage
+## 사용법
 
 ```python
 from langgraph.checkpoint.memory import InMemorySaver
@@ -75,12 +75,12 @@ checkpoint = {
     },
 }
 
-# store checkpoint
+# 체크포인트 저장
 checkpointer.put(write_config, checkpoint, {}, {})
 
-# load checkpoint
+# 체크포인트 로드
 checkpointer.get(read_config)
 
-# list checkpoints
+# 체크포인트 나열
 list(checkpointer.list(read_config))
 ```

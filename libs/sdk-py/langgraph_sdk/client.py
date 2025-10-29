@@ -1,10 +1,9 @@
-"""The LangGraph client implementations connect to the LangGraph API.
+"""LangGraph 클라이언트 구현은 LangGraph API에 연결합니다.
 
-This module provides both asynchronous ([get_client(url="http://localhost:2024"))](#get_client) or [LangGraphClient](#LangGraphClient))
-and synchronous ([get_sync_client(url="http://localhost:2024"))](#get_sync_client) or [SyncLanggraphClient](#SyncLanggraphClient))
-clients to interacting with the LangGraph API's core resources such as
-Assistants, Threads, Runs, and Cron jobs, as well as its persistent
-document Store.
+이 모듈은 비동기([get_client(url="http://localhost:2024"))](#get_client) 또는 [LangGraphClient](#LangGraphClient))와
+동기([get_sync_client(url="http://localhost:2024"))](#get_sync_client) 또는 [SyncLanggraphClient](#SyncLanggraphClient))
+클라이언트를 모두 제공하여 LangGraph API의 핵심 리소스인 Assistants, Threads, Runs 및 Cron 작업과
+영구 문서 Store와 상호작용합니다.
 """  # noqa: E501
 
 from __future__ import annotations
@@ -81,9 +80,9 @@ RESERVED_HEADERS = ("x-api-key",)
 
 
 def _get_api_key(api_key: str | None = None) -> str | None:
-    """Get the API key from the environment.
-    Precedence:
-        1. explicit argument
+    """환경에서 API 키를 가져옵니다.
+    우선순위:
+        1. 명시적 인수
         2. LANGGRAPH_API_KEY
         3. LANGSMITH_API_KEY
         4. LANGCHAIN_API_KEY
@@ -99,7 +98,7 @@ def _get_api_key(api_key: str | None = None) -> str | None:
 def _get_headers(
     api_key: str | None, custom_headers: Mapping[str, str] | None
 ) -> dict[str, str]:
-    """Combine api_key and custom user-provided headers."""
+    """api_key와 사용자 제공 커스텀 헤더를 결합합니다."""
     custom_headers = custom_headers or {}
     for header in RESERVED_HEADERS:
         if header in custom_headers:
@@ -136,7 +135,7 @@ _RUN_METADATA_PATTERN = re.compile(
 def _get_run_metadata_from_response(
     response: httpx.Response,
 ) -> RunCreateMetadata | None:
-    """Extract run metadata from the response headers."""
+    """응답 헤더에서 실행 메타데이터를 추출합니다."""
     if (content_location := response.headers.get("Content-Location")) and (
         match := _RUN_METADATA_PATTERN.search(content_location)
     ):
@@ -155,46 +154,45 @@ def get_client(
     headers: Mapping[str, str] | None = None,
     timeout: TimeoutTypes | None = None,
 ) -> LangGraphClient:
-    """Create and configure a LangGraphClient.
+    """LangGraphClient를 생성하고 구성합니다.
 
-    The client provides programmatic access to LangSmith Deployment. It supports
-    both remote servers and local in-process connections (when running inside a LangGraph server).
+    클라이언트는 LangSmith Deployment에 대한 프로그래밍 방식 접근을 제공합니다.
+    원격 서버와 로컬 인프로세스 연결 (LangGraph 서버 내부에서 실행할 때)을 모두 지원합니다.
 
     Args:
         url:
-            Base URL of the LangGraph API.
-            – If `None`, the client first attempts an in-process connection via ASGI transport.
-              If that fails, it falls back to `http://localhost:8123`.
+            LangGraph API의 기본 URL입니다.
+            – `None`인 경우, 클라이언트는 먼저 ASGI 전송을 통한 인프로세스 연결을 시도합니다.
+              실패하면 `http://localhost:8123`으로 폴백합니다.
         api_key:
-            API key for authentication. If omitted, the client reads from environment
-            variables in the following order:
-              1. Function argument
+            인증을 위한 API 키입니다. 생략하면 클라이언트는 다음 순서로 환경 변수에서 읽습니다:
+              1. 함수 인수
               2. `LANGGRAPH_API_KEY`
               3. `LANGSMITH_API_KEY`
               4. `LANGCHAIN_API_KEY`
         headers:
-            Additional HTTP headers to include in requests. Merged with authentication headers.
+            요청에 포함할 추가 HTTP 헤더입니다. 인증 헤더와 병합됩니다.
         timeout:
-            HTTP timeout configuration. May be:
-              – `httpx.Timeout` instance
-              – float (total seconds)
-              – tuple `(connect, read, write, pool)` in seconds
-            Defaults: connect=5, read=300, write=300, pool=5.
+            HTTP 타임아웃 구성입니다. 다음 중 하나일 수 있습니다:
+              – `httpx.Timeout` 인스턴스
+              – float (전체 초)
+              – 튜플 `(connect, read, write, pool)` 초 단위
+            기본값: connect=5, read=300, write=300, pool=5.
 
     Returns:
         LangGraphClient:
-            A top-level client exposing sub-clients for assistants, threads,
-            runs, and cron operations.
+            assistants, threads, runs 및 cron 작업을 위한 서브 클라이언트를 노출하는
+            최상위 클라이언트입니다.
 
-    ???+ example "Connect to a remote server:"
+    ???+ example "원격 서버에 연결:"
 
         ```python
         from langgraph_sdk import get_client
 
-        # get top-level LangGraphClient
+        # 최상위 LangGraphClient 가져오기
         client = get_client(url="http://localhost:8123")
 
-        # example usage: client.<model>.<method_name>()
+        # 사용 예: client.<model>.<method_name>()
         assistants = await client.assistants.get(assistant_id="some_uuid")
         ```
 
@@ -246,14 +244,14 @@ def get_client(
 
 
 class LangGraphClient:
-    """Top-level client for LangGraph API.
+    """LangGraph API를 위한 최상위 클라이언트입니다.
 
     Attributes:
-        assistants: Manages versioned configuration for your graphs.
-        threads: Handles (potentially) multi-turn interactions, such as conversational threads.
-        runs: Controls individual invocations of the graph.
-        crons: Manages scheduled operations.
-        store: Interfaces with persistent, shared data storage.
+        assistants: 그래프의 버전 관리 구성을 관리합니다.
+        threads: 대화형 스레드와 같은 (잠재적으로) 다중 턴 상호작용을 처리합니다.
+        runs: 그래프의 개별 호출을 제어합니다.
+        crons: 예약된 작업을 관리합니다.
+        store: 영구적이고 공유된 데이터 스토리지와 인터페이스합니다.
     """
 
     def __init__(self, client: httpx.AsyncClient) -> None:
@@ -265,7 +263,7 @@ class LangGraphClient:
         self.store = StoreClient(self.http)
 
     async def __aenter__(self) -> LangGraphClient:
-        """Enter the async context manager."""
+        """비동기 컨텍스트 매니저에 진입합니다."""
         return self
 
     async def __aexit__(
@@ -274,17 +272,17 @@ class LangGraphClient:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        """Exit the async context manager."""
+        """비동기 컨텍스트 매니저를 종료합니다."""
         await self.aclose()
 
     async def aclose(self) -> None:
-        """Close the underlying HTTP client."""
+        """하위 HTTP 클라이언트를 닫습니다."""
         if hasattr(self, "http"):
             await self.http.client.aclose()
 
 
 class HttpClient:
-    """Handle async requests to the LangGraph API.
+    """LangGraph API에 대한 비동기 요청을 처리합니다.
 
     Adds additional error messaging & content handling above the
     provided httpx client.
@@ -3507,12 +3505,12 @@ def get_sync_client(
 
 
 class SyncLangGraphClient:
-    """Synchronous client for interacting with the LangGraph API.
+    """LangGraph API와 상호작용하기 위한 동기 클라이언트입니다.
 
-    This class provides synchronous access to LangGraph API endpoints for managing
-    assistants, threads, runs, cron jobs, and data storage.
+    이 클래스는 assistants, threads, runs, cron 작업 및 데이터 스토리지를 관리하기 위한
+    LangGraph API 엔드포인트에 대한 동기 접근을 제공합니다.
 
-    ???+ example "Example"
+    ???+ example "예제"
 
         ```python
         client = get_sync_client(url="http://localhost:2024")
@@ -3529,7 +3527,7 @@ class SyncLangGraphClient:
         self.store = SyncStoreClient(self.http)
 
     def __enter__(self) -> SyncLangGraphClient:
-        """Enter the sync context manager."""
+        """동기 컨텍스트 매니저에 진입합니다."""
         return self
 
     def __exit__(
@@ -3538,24 +3536,23 @@ class SyncLangGraphClient:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        """Exit the sync context manager."""
+        """동기 컨텍스트 매니저를 종료합니다."""
         self.close()
 
     def close(self) -> None:
-        """Close the underlying HTTP client."""
+        """하위 HTTP 클라이언트를 닫습니다."""
         if hasattr(self, "http"):
             self.http.client.close()
 
 
 class SyncHttpClient:
-    """Handle synchronous requests to the LangGraph API.
+    """LangGraph API에 대한 동기 요청을 처리합니다.
 
-    Provides error messaging and content handling enhancements above the
-    underlying httpx client, mirroring the interface of [HttpClient](#HttpClient)
-    but for sync usage.
+    기본 httpx 클라이언트 위에 오류 메시징 및 콘텐츠 처리 개선 사항을 제공하며,
+    [HttpClient](#HttpClient)의 인터페이스를 미러링하지만 동기 사용을 위한 것입니다.
 
     Attributes:
-        client (httpx.Client): Underlying HTTPX sync client.
+        client (httpx.Client): 기본 HTTPX 동기 클라이언트입니다.
     """
 
     def __init__(self, client: httpx.Client) -> None:

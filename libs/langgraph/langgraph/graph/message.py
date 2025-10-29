@@ -63,31 +63,30 @@ def add_messages(
     *,
     format: Literal["langchain-openai"] | None = None,
 ) -> Messages:
-    """Merges two lists of messages, updating existing messages by ID.
+    """두 메시지 목록을 병합하여 ID로 기존 메시지를 업데이트합니다.
 
-    By default, this ensures the state is "append-only", unless the
-    new message has the same ID as an existing message.
+    기본적으로 새 메시지가 기존 메시지와 동일한 ID를 갖지 않는 한,
+    상태가 "추가 전용"이 되도록 합니다.
 
-    Args:
-        left: The base list of `Messages`.
-        right: The list of `Messages` (or single `Message`) to merge
-            into the base list.
-        format: The format to return messages in. If `None` then `Messages` will be
-            returned as is. If `langchain-openai` then `Messages` will be returned as
-            `BaseMessage` objects with their contents formatted to match OpenAI message
-            format, meaning contents can be string, `'text'` blocks, or `'image_url'` blocks
-            and tool responses are returned as their own `ToolMessage` objects.
+    인자:
+        left: `Messages`의 기본 목록입니다.
+        right: 기본 목록에 병합할 `Messages` 목록 (또는 단일 `Message`)입니다.
+        format: 메시지를 반환할 형식입니다. `None`이면 `Messages`가
+            그대로 반환됩니다. `langchain-openai`이면 `Messages`가
+            OpenAI 메시지 형식과 일치하도록 내용이 포맷된 `BaseMessage` 객체로 반환되며,
+            이는 내용이 문자열, `'text'` 블록 또는 `'image_url'` 블록일 수 있고
+            도구 응답이 자체 `ToolMessage` 객체로 반환된다는 의미입니다.
 
-            !!! important "Requirement"
+            !!! important "요구 사항"
 
-                Must have `langchain-core>=0.3.11` installed to use this feature.
+                이 기능을 사용하려면 `langchain-core>=0.3.11`이 설치되어 있어야 합니다.
 
-    Returns:
-        A new list of messages with the messages from `right` merged into `left`.
-        If a message in `right` has the same ID as a message in `left`, the
-            message from `right` will replace the message from `left`.
+    반환:
+        `right`의 메시지가 `left`에 병합된 새 메시지 목록입니다.
+        `right`의 메시지가 `left`의 메시지와 동일한 ID를 가지면,
+            `right`의 메시지가 `left`의 메시지를 대체합니다.
 
-    Example:
+    예제:
         ```python title="Basic usage"
         from langchain_core.messages import AIMessage, HumanMessage
 
@@ -181,12 +180,12 @@ def add_messages(
 
     """
     remove_all_idx = None
-    # coerce to list
+    # 리스트로 변환
     if not isinstance(left, list):
         left = [left]  # type: ignore[assignment]
     if not isinstance(right, list):
         right = [right]  # type: ignore[assignment]
-    # coerce to message
+    # 메시지로 변환
     left = [
         message_chunk_to_message(cast(BaseMessageChunk, m))
         for m in convert_to_messages(left)
@@ -195,7 +194,7 @@ def add_messages(
         message_chunk_to_message(cast(BaseMessageChunk, m))
         for m in convert_to_messages(right)
     ]
-    # assign missing ids
+    # 누락된 id 할당
     for m in left:
         if m.id is None:
             m.id = str(uuid.uuid4())
@@ -208,7 +207,7 @@ def add_messages(
     if remove_all_idx is not None:
         return right[remove_all_idx + 1 :]
 
-    # merge
+    # 병합
     merged = left.copy()
     merged_by_id = {m.id: i for i, m in enumerate(merged)}
     ids_to_remove = set()
@@ -245,14 +244,14 @@ def add_messages(
     category=None,
 )
 class MessageGraph(StateGraph):
-    """A StateGraph where every node receives a list of messages as input and returns one or more messages as output.
+    """모든 노드가 메시지 목록을 입력으로 받고 하나 이상의 메시지를 출력으로 반환하는 StateGraph입니다.
 
-    MessageGraph is a subclass of StateGraph whose entire state is a single, append-only* list of messages.
-    Each node in a MessageGraph takes a list of messages as input and returns zero or more
-    messages as output. The `add_messages` function is used to merge the output messages from each node
-    into the existing list of messages in the graph's state.
+    MessageGraph는 전체 상태가 단일 추가 전용* 메시지 목록인 StateGraph의 서브클래스입니다.
+    MessageGraph의 각 노드는 메시지 목록을 입력으로 받고 0개 이상의
+    메시지를 출력으로 반환합니다. `add_messages` 함수는 각 노드의 출력 메시지를
+    그래프 상태의 기존 메시지 목록에 병합하는 데 사용됩니다.
 
-    Examples:
+    예제:
         ```pycon
         >>> from langgraph.graph.message import MessageGraph
         ...
@@ -325,9 +324,9 @@ def push_message(
     *,
     state_key: str | None = "messages",
 ) -> AnyMessage:
-    """Write a message manually to the `messages` / `messages-tuple` stream mode.
+    """`messages` / `messages-tuple` 스트림 모드에 메시지를 수동으로 작성합니다.
 
-    Will automatically write to the channel specified in the `state_key` unless `state_key` is `None`.
+    `state_key`가 `None`이 아닌 경우 `state_key`에 지정된 채널에 자동으로 작성됩니다.
     """
 
     from langchain_core.callbacks.base import (

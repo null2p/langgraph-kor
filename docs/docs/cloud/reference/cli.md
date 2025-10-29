@@ -1,11 +1,11 @@
 # LangGraph CLI
 
-The LangGraph command line interface includes commands to build and run a LangGraph Platform API server locally in [Docker](https://www.docker.com/). For development and testing, you can use the CLI to deploy a local API server.
+LangGraph 명령줄 인터페이스는 [Docker](https://www.docker.com/)에서 로컬로 LangGraph Platform API 서버를 빌드하고 실행하는 명령을 포함합니다. 개발 및 테스트를 위해 CLI를 사용하여 로컬 API 서버를 배포할 수 있습니다.
 
-## Installation
+## 설치
 
-1.  Ensure that Docker is installed (e.g. `docker --version`).
-2.  Install the CLI package:
+1.  Docker가 설치되어 있는지 확인합니다 (예: `docker --version`).
+2.  CLI 패키지를 설치합니다:
 
     === "Python"
         ```bash
@@ -20,18 +20,18 @@ The LangGraph command line interface includes commands to build and run a LangGr
         npm install -g @langchain/langgraph-cli
         ```
 
-3.  Run the command `langgraph --help` or `npx @langchain/langgraph-cli --help` to confirm that the CLI is working correctly.
+3.  `langgraph --help` 또는 `npx @langchain/langgraph-cli --help` 명령을 실행하여 CLI가 올바르게 작동하는지 확인합니다.
 
 [](){#langgraph.json}
 
-## Configuration File {#configuration-file}
+## 구성 파일 {#configuration-file}
 
-The LangGraph CLI requires a JSON configuration file that follows this [schema](https://raw.githubusercontent.com/langchain-ai/langgraph/refs/heads/main/libs/cli/schemas/schema.json). It contains the following properties:
+LangGraph CLI는 이 [스키마](https://raw.githubusercontent.com/langchain-ai/langgraph/refs/heads/main/libs/cli/schemas/schema.json)를 따르는 JSON 구성 파일이 필요합니다. 다음 속성을 포함합니다:
 
 <div class="admonition tip">
-    <p class="admonition-title">Note</p>
+    <p class="admonition-title">참고</p>
     <p>
-        The LangGraph CLI defaults to using the configuration file <strong>langgraph.json</strong> in the current directory.
+        LangGraph CLI는 기본적으로 현재 디렉토리의 구성 파일 <strong>langgraph.json</strong>을 사용합니다.
     </p>
 </div>
 
@@ -259,222 +259,222 @@ The LangGraph CLI requires a JSON configuration file that follows this [schema](
     ```
 
 
-## Commands
+## 명령
 
-**Usage**
+**사용법**
 
 === "Python"
 
-    The base command for the LangGraph CLI is `langgraph`.
+    LangGraph CLI의 기본 명령은 `langgraph`입니다.
 
     ```
     langgraph [OPTIONS] COMMAND [ARGS]
     ```
 === "JS"
 
-    The base command for the LangGraph.js CLI is `langgraphjs`. 
+    LangGraph.js CLI의 기본 명령은 `langgraphjs`입니다.
 
     ```
     npx @langchain/langgraph-cli [OPTIONS] COMMAND [ARGS]
     ```
 
-    We recommend using `npx` to always use the latest version of the CLI.
+    항상 최신 버전의 CLI를 사용하려면 `npx`를 사용하는 것이 좋습니다.
 
 ### `dev`
 
 === "Python"
 
-    Run LangGraph API server in development mode with hot reloading and debugging capabilities. This lightweight server requires no Docker installation and is suitable for development and testing. State is persisted to a local directory.
+    핫 리로딩 및 디버깅 기능을 갖춘 개발 모드에서 LangGraph API 서버를 실행합니다. 이 경량 서버는 Docker 설치가 필요하지 않으며 개발 및 테스트에 적합합니다. 상태는 로컬 디렉토리에 유지됩니다.
 
     !!! note
 
-        Currently, the CLI only supports Python >= 3.11.
+        현재 CLI는 Python >= 3.11만 지원합니다.
 
-    **Installation**
+    **설치**
 
-    This command requires the "inmem" extra to be installed:
+    이 명령에는 "inmem" 추가 항목을 설치해야 합니다:
 
     ```bash
     pip install -U "langgraph-cli[inmem]"
     ```
 
-    **Usage**
+    **사용법**
 
     ```
     langgraph dev [OPTIONS]
     ```
 
-    **Options**
+    **옵션**
 
-    | Option                        | Default          | Description                                                                         |
+    | 옵션                          | 기본값           | 설명                                                                         |
     | ----------------------------- | ---------------- | ----------------------------------------------------------------------------------- |
-    | `-c, --config FILE`           | `langgraph.json` | Path to configuration file declaring dependencies, graphs and environment variables |
-    | `--host TEXT`                 | `127.0.0.1`      | Host to bind the server to                                                          |
-    | `--port INTEGER`              | `2024`           | Port to bind the server to                                                          |
-    | `--no-reload`                 |                  | Disable auto-reload                                                                 |
-    | `--n-jobs-per-worker INTEGER` |                  | Number of jobs per worker. Default is 10                                            |
-    | `--debug-port INTEGER`        |                  | Port for debugger to listen on                                                      |
-    | `--wait-for-client`           | `False`          | Wait for a debugger client to connect to the debug port before starting the server   |
-    | `--no-browser`                |                  | Skip automatically opening the browser when the server starts                       |
-    | `--studio-url TEXT`           |                  | URL of the LangGraph Studio instance to connect to. Defaults to https://smith.langchain.com |
-    | `--allow-blocking`            | `False`          | Do not raise errors for synchronous I/O blocking operations in your code (added in `0.2.6`)           |
-    | `--tunnel`                    | `False`          | Expose the local server via a public tunnel (Cloudflare) for remote frontend access. This avoids issues with browsers like Safari or networks blocking localhost connections        |
-    | `--help`                      |                  | Display command documentation                                                       |
+    | `-c, --config FILE`           | `langgraph.json` | 종속성, 그래프 및 환경 변수를 선언하는 구성 파일 경로 |
+    | `--host TEXT`                 | `127.0.0.1`      | 서버를 바인딩할 호스트                                                          |
+    | `--port INTEGER`              | `2024`           | 서버를 바인딩할 포트                                                          |
+    | `--no-reload`                 |                  | 자동 리로드 비활성화                                                                 |
+    | `--n-jobs-per-worker INTEGER` |                  | 워커당 작업 수. 기본값은 10                                            |
+    | `--debug-port INTEGER`        |                  | 디버거가 수신 대기할 포트                                                      |
+    | `--wait-for-client`           | `False`          | 서버를 시작하기 전에 디버거 클라이언트가 디버그 포트에 연결될 때까지 대기   |
+    | `--no-browser`                |                  | 서버 시작 시 브라우저를 자동으로 열지 않음                       |
+    | `--studio-url TEXT`           |                  | 연결할 LangGraph Studio 인스턴스의 URL. 기본값은 https://smith.langchain.com |
+    | `--allow-blocking`            | `False`          | 코드에서 동기 I/O 차단 작업에 대한 오류를 발생시키지 않음 (`0.2.6`에서 추가)           |
+    | `--tunnel`                    | `False`          | 원격 프론트엔드 액세스를 위해 공개 터널(Cloudflare)을 통해 로컬 서버를 노출합니다. 이렇게 하면 Safari와 같은 브라우저나 localhost 연결을 차단하는 네트워크의 문제를 피할 수 있습니다        |
+    | `--help`                      |                  | 명령 문서 표시                                                       |
 
 
 === "JS"
 
-    Run LangGraph API server in development mode with hot reloading capabilities. This lightweight server requires no Docker installation and is suitable for development and testing. State is persisted to a local directory.
+    핫 리로딩 기능을 갖춘 개발 모드에서 LangGraph API 서버를 실행합니다. 이 경량 서버는 Docker 설치가 필요하지 않으며 개발 및 테스트에 적합합니다. 상태는 로컬 디렉토리에 유지됩니다.
 
-    **Usage**
+    **사용법**
 
     ```
     npx @langchain/langgraph-cli dev [OPTIONS]
     ```
 
-    **Options**
+    **옵션**
 
-    | Option                        | Default          | Description                                                                         |
+    | 옵션                          | 기본값           | 설명                                                                         |
     | ----------------------------- | ---------------- | ----------------------------------------------------------------------------------- |
-    | `-c, --config FILE`           | `langgraph.json` | Path to configuration file declaring dependencies, graphs and environment variables |
-    | `--host TEXT`                 | `127.0.0.1`      | Host to bind the server to                                                          |
-    | `--port INTEGER`              | `2024`           | Port to bind the server to                                                          |
-    | `--no-reload`                 |                  | Disable auto-reload                                                                 |
-    | `--n-jobs-per-worker INTEGER` |                  | Number of jobs per worker. Default is 10                                            |
-    | `--debug-port INTEGER`        |                  | Port for debugger to listen on                                                      |
-    | `--wait-for-client`           | `False`          | Wait for a debugger client to connect to the debug port before starting the server   |
-    | `--no-browser`                |                  | Skip automatically opening the browser when the server starts                       |
-    | `--studio-url TEXT`           |                  | URL of the LangGraph Studio instance to connect to. Defaults to https://smith.langchain.com |
-    | `--allow-blocking`            | `False`          | Do not raise errors for synchronous I/O blocking operations in your code            |
-    | `--tunnel`                    | `False`          | Expose the local server via a public tunnel (Cloudflare) for remote frontend access. This avoids issues with browsers or networks blocking localhost connections        |
-    | `--help`                      |                  | Display command documentation                                                       |
+    | `-c, --config FILE`           | `langgraph.json` | 종속성, 그래프 및 환경 변수를 선언하는 구성 파일 경로 |
+    | `--host TEXT`                 | `127.0.0.1`      | 서버를 바인딩할 호스트                                                          |
+    | `--port INTEGER`              | `2024`           | 서버를 바인딩할 포트                                                          |
+    | `--no-reload`                 |                  | 자동 리로드 비활성화                                                                 |
+    | `--n-jobs-per-worker INTEGER` |                  | 워커당 작업 수. 기본값은 10                                            |
+    | `--debug-port INTEGER`        |                  | 디버거가 수신 대기할 포트                                                      |
+    | `--wait-for-client`           | `False`          | 서버를 시작하기 전에 디버거 클라이언트가 디버그 포트에 연결될 때까지 대기   |
+    | `--no-browser`                |                  | 서버 시작 시 브라우저를 자동으로 열지 않음                       |
+    | `--studio-url TEXT`           |                  | 연결할 LangGraph Studio 인스턴스의 URL. 기본값은 https://smith.langchain.com |
+    | `--allow-blocking`            | `False`          | 코드에서 동기 I/O 차단 작업에 대한 오류를 발생시키지 않음            |
+    | `--tunnel`                    | `False`          | 원격 프론트엔드 액세스를 위해 공개 터널(Cloudflare)을 통해 로컬 서버를 노출합니다. 이렇게 하면 브라우저나 localhost 연결을 차단하는 네트워크의 문제를 피할 수 있습니다        |
+    | `--help`                      |                  | 명령 문서 표시                                                       |
 
 ### `build`
 
 === "Python"
 
-    Build LangGraph Platform API server Docker image.
+    LangGraph Platform API 서버 Docker 이미지를 빌드합니다.
 
-    **Usage**
+    **사용법**
 
     ```
     langgraph build [OPTIONS]
     ```
 
-    **Options**
+    **옵션**
 
-    | Option               | Default          | Description                                                                                                     |
+    | 옵션                 | 기본값           | 설명                                                                                                     |
     | -------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------- |
-    | `--platform TEXT`    |                  | Target platform(s) to build the Docker image for. Example: `langgraph build --platform linux/amd64,linux/arm64`              |
-    | `-t, --tag TEXT`     |                  | **Required**. Tag for the Docker image. Example: `langgraph build -t my-image`                                               |
-    | `--pull / --no-pull` | `--pull`         | Build with latest remote Docker image. Use `--no-pull` for running the LangGraph Platform API server with locally built images. |
-    | `-c, --config FILE`  | `langgraph.json` | Path to configuration file declaring dependencies, graphs and environment variables.                                         |
-    | `--help`             |                  | Display command documentation.                                                                                               |
+    | `--platform TEXT`    |                  | Docker 이미지를 빌드할 대상 플랫폼. 예: `langgraph build --platform linux/amd64,linux/arm64`              |
+    | `-t, --tag TEXT`     |                  | **필수**. Docker 이미지의 태그. 예: `langgraph build -t my-image`                                               |
+    | `--pull / --no-pull` | `--pull`         | 최신 원격 Docker 이미지로 빌드. 로컬에서 빌드한 이미지로 LangGraph Platform API 서버를 실행하려면 `--no-pull`을 사용하세요. |
+    | `-c, --config FILE`  | `langgraph.json` | 종속성, 그래프 및 환경 변수를 선언하는 구성 파일 경로.                                         |
+    | `--help`             |                  | 명령 문서 표시.                                                                                               |
 
 === "JS"
 
-    Build LangGraph Platform API server Docker image.
+    LangGraph Platform API 서버 Docker 이미지를 빌드합니다.
 
-    **Usage**
+    **사용법**
 
     ```
     npx @langchain/langgraph-cli build [OPTIONS]
     ```
 
-    **Options**
+    **옵션**
 
-    | Option               | Default          | Description                                                                                                     |
+    | 옵션                 | 기본값           | 설명                                                                                                     |
     | -------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------- |
-    | `--platform TEXT`    |                  | Target platform(s) to build the Docker image for. Example: `langgraph build --platform linux/amd64,linux/arm64`              |
-    | `-t, --tag TEXT`     |                  | **Required**. Tag for the Docker image. Example: `langgraph build -t my-image`                                               |
-    | `--no-pull`          |                  | Use locally built images. Defaults to `false` to build with latest remote Docker image.                                      |
-    | `-c, --config FILE`  | `langgraph.json` | Path to configuration file declaring dependencies, graphs and environment variables.                                         |
-    | `--help`             |                  | Display command documentation.                                                                                               |
+    | `--platform TEXT`    |                  | Docker 이미지를 빌드할 대상 플랫폼. 예: `langgraph build --platform linux/amd64,linux/arm64`              |
+    | `-t, --tag TEXT`     |                  | **필수**. Docker 이미지의 태그. 예: `langgraph build -t my-image`                                               |
+    | `--no-pull`          |                  | 로컬에서 빌드한 이미지를 사용합니다. 기본값은 `false`로 최신 원격 Docker 이미지로 빌드합니다.                                      |
+    | `-c, --config FILE`  | `langgraph.json` | 종속성, 그래프 및 환경 변수를 선언하는 구성 파일 경로.                                         |
+    | `--help`             |                  | 명령 문서 표시.                                                                                               |
 
 
 ### `up`
 
 === "Python"
 
-    Start LangGraph API server. For local testing, requires a LangSmith API key with access to LangGraph Platform. Requires a license key for production use.
+    LangGraph API 서버를 시작합니다. 로컬 테스트의 경우 LangGraph Platform에 액세스할 수 있는 LangSmith API 키가 필요합니다. 프로덕션 사용에는 라이선스 키가 필요합니다.
 
-    **Usage**
+    **사용법**
 
     ```
     langgraph up [OPTIONS]
     ```
 
-    **Options**
+    **옵션**
 
-    | Option                       | Default                   | Description                                                                                                             |
+    | 옵션                         | 기본값                    | 설명                                                                                                             |
     | ---------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-    | `--wait`                     |                           | Wait for services to start before returning. Implies --detach                                                           |
-    | `--base-image TEXT`          | `langchain/langgraph-api`  | Base image to use for the LangGraph API server. Pin to specific versions using version tags.                            |
-    | `--image TEXT`               |                           | Docker image to use for the langgraph-api service. If specified, skips building and uses this image directly.           |
-    | `--postgres-uri TEXT`        | Local database            | Postgres URI to use for the database.                                                                                   |
-    | `--watch`                    |                           | Restart on file changes                                                                                                 |
-    | `--debugger-base-url TEXT`   | `http://127.0.0.1:[PORT]` | URL used by the debugger to access LangGraph API.                                                                       |
-    | `--debugger-port INTEGER`    |                           | Pull the debugger image locally and serve the UI on specified port                                                      |
-    | `--verbose`                  |                           | Show more output from the server logs.                                                                                  |
-    | `-c, --config FILE`          | `langgraph.json`          | Path to configuration file declaring dependencies, graphs and environment variables.                                    |
-    | `-d, --docker-compose FILE`  |                           | Path to docker-compose.yml file with additional services to launch.                                                     |
-    | `-p, --port INTEGER`         | `8123`                    | Port to expose. Example: `langgraph up --port 8000`                                                                     |
-    | `--pull / --no-pull`         | `pull`                    | Pull latest images. Use `--no-pull` for running the server with locally-built images. Example: `langgraph up --no-pull` |
-    | `--recreate / --no-recreate` | `no-recreate`             | Recreate containers even if their configuration and image haven't changed                                               |
-    | `--help`                     |                           | Display command documentation.                                                                                          |
+    | `--wait`                     |                           | 반환하기 전에 서비스가 시작될 때까지 대기합니다. --detach를 의미합니다                                                           |
+    | `--base-image TEXT`          | `langchain/langgraph-api`  | LangGraph API 서버에 사용할 기본 이미지. 버전 태그를 사용하여 특정 버전을 고정합니다.                            |
+    | `--image TEXT`               |                           | langgraph-api 서비스에 사용할 Docker 이미지. 지정하면 빌드를 건너뛰고 이 이미지를 직접 사용합니다.           |
+    | `--postgres-uri TEXT`        | 로컬 데이터베이스            | 데이터베이스에 사용할 Postgres URI.                                                                                   |
+    | `--watch`                    |                           | 파일 변경 시 재시작                                                                                                 |
+    | `--debugger-base-url TEXT`   | `http://127.0.0.1:[PORT]` | 디버거가 LangGraph API에 액세스하는 데 사용하는 URL.                                                                       |
+    | `--debugger-port INTEGER`    |                           | 디버거 이미지를 로컬로 가져와 지정된 포트에서 UI 제공                                                      |
+    | `--verbose`                  |                           | 서버 로그에서 더 많은 출력을 표시합니다.                                                                                  |
+    | `-c, --config FILE`          | `langgraph.json`          | 종속성, 그래프 및 환경 변수를 선언하는 구성 파일 경로.                                    |
+    | `-d, --docker-compose FILE`  |                           | 시작할 추가 서비스가 포함된 docker-compose.yml 파일 경로.                                                     |
+    | `-p, --port INTEGER`         | `8123`                    | 노출할 포트. 예: `langgraph up --port 8000`                                                                     |
+    | `--pull / --no-pull`         | `pull`                    | 최신 이미지를 가져옵니다. 로컬에서 빌드한 이미지로 서버를 실행하려면 `--no-pull`을 사용하세요. 예: `langgraph up --no-pull` |
+    | `--recreate / --no-recreate` | `no-recreate`             | 구성 및 이미지가 변경되지 않았더라도 컨테이너를 다시 생성합니다                                               |
+    | `--help`                     |                           | 명령 문서 표시.                                                                                          |
 
 === "JS"
 
-    Start LangGraph API server. For local testing, requires a LangSmith API key with access to LangGraph Platform. Requires a license key for production use.
+    LangGraph API 서버를 시작합니다. 로컬 테스트의 경우 LangGraph Platform에 액세스할 수 있는 LangSmith API 키가 필요합니다. 프로덕션 사용의 경우 라이선스 키가 필요합니다.
 
-    **Usage**
+    **사용법**
 
     ```
     npx @langchain/langgraph-cli up [OPTIONS]
     ```
 
-    **Options**
+    **옵션**
 
-    | Option                                                                 | Default                   | Description                                                                                                             |
+    | 옵션                                                                 | 기본값                   | 설명                                                                                                             |
     | ---------------------------------------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-    | <span style="white-space: nowrap;">`--wait`</span>                     |                           | Wait for services to start before returning. Implies --detach                                                           |
-    | <span style="white-space: nowrap;">`--base-image TEXT`</span>          | <span style="white-space: nowrap;">`langchain/langgraph-api`</span> | Base image to use for the LangGraph API server. Pin to specific versions using version tags. |
-    | <span style="white-space: nowrap;">`--image TEXT`</span>               |                           | Docker image to use for the langgraph-api service. If specified, skips building and uses this image directly. |
-    | <span style="white-space: nowrap;">`--postgres-uri TEXT`</span>        | Local database            | Postgres URI to use for the database.                                                                                   |
-    | <span style="white-space: nowrap;">`--watch`</span>                    |                           | Restart on file changes                                                                                                 |
-    | <span style="white-space: nowrap;">`-c, --config FILE`</span>          | `langgraph.json`          | Path to configuration file declaring dependencies, graphs and environment variables.                                    |
-    | <span style="white-space: nowrap;">`-d, --docker-compose FILE`</span>  |                           | Path to docker-compose.yml file with additional services to launch.                                                     |
-    | <span style="white-space: nowrap;">`-p, --port INTEGER`</span>         | `8123`                    | Port to expose. Example: `langgraph up --port 8000`                                                                     |
-    | <span style="white-space: nowrap;">`--no-pull`</span>                  |                           | Use locally built images. Defaults to `false` to build with latest remote Docker image.                                 |
-    | <span style="white-space: nowrap;">`--recreate`</span>                 |                           | Recreate containers even if their configuration and image haven't changed                                               |
-    | <span style="white-space: nowrap;">`--help`</span>                     |                           | Display command documentation.                                                                                          |
+    | <span style="white-space: nowrap;">`--wait`</span>                     |                           | 반환하기 전에 서비스가 시작될 때까지 기다립니다. --detach를 의미합니다                                                           |
+    | <span style="white-space: nowrap;">`--base-image TEXT`</span>          | <span style="white-space: nowrap;">`langchain/langgraph-api`</span> | LangGraph API 서버에 사용할 기본 이미지. 버전 태그를 사용하여 특정 버전에 고정합니다. |
+    | <span style="white-space: nowrap;">`--image TEXT`</span>               |                           | langgraph-api 서비스에 사용할 Docker 이미지. 지정된 경우 빌드를 건너뛰고 이 이미지를 직접 사용합니다. |
+    | <span style="white-space: nowrap;">`--postgres-uri TEXT`</span>        | 로컬 데이터베이스            | 데이터베이스에 사용할 Postgres URI.                                                                                   |
+    | <span style="white-space: nowrap;">`--watch`</span>                    |                           | 파일 변경 시 재시작                                                                                                 |
+    | <span style="white-space: nowrap;">`-c, --config FILE`</span>          | `langgraph.json`          | 종속성, 그래프 및 환경 변수를 선언하는 구성 파일 경로.                                    |
+    | <span style="white-space: nowrap;">`-d, --docker-compose FILE`</span>  |                           | 시작할 추가 서비스가 포함된 docker-compose.yml 파일 경로.                                                     |
+    | <span style="white-space: nowrap;">`-p, --port INTEGER`</span>         | `8123`                    | 노출할 포트. 예: `langgraph up --port 8000`                                                                     |
+    | <span style="white-space: nowrap;">`--no-pull`</span>                  |                           | 로컬에서 빌드한 이미지를 사용합니다. 최신 원격 Docker 이미지로 빌드하려면 기본값 `false`입니다.                                 |
+    | <span style="white-space: nowrap;">`--recreate`</span>                 |                           | 구성 및 이미지가 변경되지 않았더라도 컨테이너를 다시 생성합니다                                               |
+    | <span style="white-space: nowrap;">`--help`</span>                     |                           | 명령 문서 표시.                                                                                          |
 
 ### `dockerfile`
 
 === "Python"
 
-    Generate a Dockerfile for building a LangGraph Platform API server Docker image.
+    LangGraph Platform API 서버 Docker 이미지를 빌드하기 위한 Dockerfile을 생성합니다.
 
-    **Usage**
+    **사용법**
 
     ```
     langgraph dockerfile [OPTIONS] SAVE_PATH
     ```
 
-    **Options**
+    **옵션**
 
-    | Option              | Default          | Description                                                                                                     |
+    | 옵션              | 기본값          | 설명                                                                                                     |
     | ------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------- |
-    | `-c, --config FILE` | `langgraph.json` | Path to the [configuration file](#configuration-file) declaring dependencies, graphs and environment variables. |
-    | `--help`            |                  | Show this message and exit.                                                                                     |
+    | `-c, --config FILE` | `langgraph.json` | 종속성, 그래프 및 환경 변수를 선언하는 [구성 파일](#configuration-file) 경로. |
+    | `--help`            |                  | 이 메시지를 표시하고 종료합니다.                                                                                     |
 
-    Example:
+    예제:
 
     ```bash
     langgraph dockerfile -c langgraph.json Dockerfile
     ```
 
-    This generates a Dockerfile that looks similar to:
+    다음과 유사한 Dockerfile을 생성합니다:
 
     ```dockerfile
     FROM langchain/langgraph-api:3.11
@@ -498,47 +498,47 @@ The LangGraph CLI requires a JSON configuration file that follows this [schema](
     ENV LANGSERVE_GRAPHS='{"agent": "/deps/outer-graphs/src/agent.py:graph", "storm": "/deps/outer-graphs/src/storm.py:graph"}'
     ```
 
-    ???+ note "Updating your langgraph.json file"
-         The `langgraph dockerfile` command translates all the configuration in your `langgraph.json` file into Dockerfile commands. When using this command, you will have to re-run it whenever you update your `langgraph.json` file. Otherwise, your changes will not be reflected when you build or run the dockerfile.
+    ???+ note "langgraph.json 파일 업데이트"
+         `langgraph dockerfile` 명령은 `langgraph.json` 파일의 모든 구성을 Dockerfile 명령으로 변환합니다. 이 명령을 사용할 때 `langgraph.json` 파일을 업데이트할 때마다 다시 실행해야 합니다. 그렇지 않으면 dockerfile을 빌드하거나 실행할 때 변경 사항이 반영되지 않습니다.
 
 === "JS"
 
-    Generate a Dockerfile for building a LangGraph Platform API server Docker image.
+    LangGraph Platform API 서버 Docker 이미지를 빌드하기 위한 Dockerfile을 생성합니다.
 
-    **Usage**
+    **사용법**
 
     ```
     npx @langchain/langgraph-cli dockerfile [OPTIONS] SAVE_PATH
     ```
 
-    **Options**
+    **옵션**
 
-    | Option              | Default          | Description                                                                                                     |
+    | 옵션              | 기본값          | 설명                                                                                                     |
     | ------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------- |
-    | `-c, --config FILE` | `langgraph.json` | Path to the [configuration file](#configuration-file) declaring dependencies, graphs and environment variables. |
-    | `--help`            |                  | Show this message and exit.                                                                                     |
+    | `-c, --config FILE` | `langgraph.json` | 종속성, 그래프 및 환경 변수를 선언하는 [구성 파일](#configuration-file) 경로. |
+    | `--help`            |                  | 이 메시지를 표시하고 종료합니다.                                                                                     |
 
-    Example:
+    예제:
 
     ```bash
     npx @langchain/langgraph-cli dockerfile -c langgraph.json Dockerfile
     ```
 
-    This generates a Dockerfile that looks similar to:
+    다음과 유사한 Dockerfile을 생성합니다:
 
     ```dockerfile
     FROM langchain/langgraphjs-api:20
-    
+
     ADD . /deps/agent
-    
+
     RUN cd /deps/agent && yarn install
-    
+
     ENV LANGSERVE_GRAPHS='{"agent":"./src/react_agent/graph.ts:graph"}'
-    
+
     WORKDIR /deps/agent
-    
+
     RUN (test ! -f /api/langgraph_api/js/build.mts && echo "Prebuild script not found, skipping") || tsx /api/langgraph_api/js/build.mts
     ```
 
-    ???+ note "Updating your langgraph.json file"
-         The `npx @langchain/langgraph-cli dockerfile` command translates all the configuration in your `langgraph.json` file into Dockerfile commands. When using this command, you will have to re-run it whenever you update your `langgraph.json` file. Otherwise, your changes will not be reflected when you build or run the dockerfile.
+    ???+ note "langgraph.json 파일 업데이트"
+         `npx @langchain/langgraph-cli dockerfile` 명령은 `langgraph.json` 파일의 모든 구성을 Dockerfile 명령으로 변환합니다. 이 명령을 사용할 때 `langgraph.json` 파일을 업데이트할 때마다 다시 실행해야 합니다. 그렇지 않으면 dockerfile을 빌드하거나 실행할 때 변경 사항이 반영되지 않습니다.

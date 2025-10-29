@@ -1,19 +1,19 @@
-# Manage assistants
+# 어시스턴트 관리
 
-!!! info "Prerequisites"
+!!! info "사전 요구 사항"
 
-    - [Assistants Overview](../../../concepts/assistants.md)
+    - [어시스턴트 개요](../../../concepts/assistants.md)
 
-LangGraph Studio lets you view, edit, and update your assistants, and allows you to run your graph using these assistant configurations.
+LangGraph Studio를 사용하면 어시스턴트를 보고, 편집하고, 업데이트할 수 있으며, 이러한 어시스턴트 구성을 사용하여 그래프를 실행할 수 있습니다.
 
-## Graph mode
+## 그래프 모드
 
-To view your assistants, click the "Manage Assistants" button in the bottom left corner.
+어시스턴트를 보려면 왼쪽 하단 모서리의 "Manage Assistants" 버튼을 클릭합니다.
 
-This opens a modal for you to view all the assistants for the selected graph. Specify the assistant and its version you would like to mark as "Active", and this assistant will be used when submitting runs.
+그러면 선택한 그래프의 모든 어시스턴트를 볼 수 있는 모달이 열립니다. "Active"로 표시하려는 어시스턴트와 해당 버전을 지정하면 run을 제출할 때 이 어시스턴트가 사용됩니다.
 
-By default, the "Default configuration" option will be active. This option reflects the default configuration defined in your graph. Edits made to this configuration will be used to update the run-time configuration, but will not update or create a new assistant unless you click "Create new assistant".
+기본적으로 "Default configuration" 옵션이 활성화됩니다. 이 옵션은 그래프에 정의된 기본 구성을 반영합니다. 이 구성에 대한 편집은 런타임 구성을 업데이트하는 데 사용되지만 "Create new assistant"를 클릭하지 않는 한 새 어시스턴트를 업데이트하거나 생성하지 않습니다.
 
-## Chat mode
+## 챗 모드
 
-Chat mode enables you to switch through the different assistants in your graph via the dropdown selector at the top of the page. To create, edit, or delete assistants, use Graph mode.
+챗 모드에서는 페이지 상단의 드롭다운 선택기를 통해 그래프의 다양한 어시스턴트를 전환할 수 있습니다. 어시스턴트를 생성, 편집 또는 삭제하려면 그래프 모드를 사용하세요.

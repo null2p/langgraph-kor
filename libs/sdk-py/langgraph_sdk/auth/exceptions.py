@@ -1,4 +1,4 @@
-"""Exceptions used in the auth system."""
+"""auth 시스템에서 사용되는 예외입니다."""
 
 from __future__ import annotations
 
@@ -7,30 +7,30 @@ from collections.abc import Mapping
 
 
 class HTTPException(Exception):
-    """HTTP exception that you can raise to return a specific HTTP error response.
+    """특정 HTTP 오류 응답을 반환하기 위해 발생시킬 수 있는 HTTP 예외입니다.
 
-    Since this is defined in the auth module, we default to a 401 status code.
+    이것은 auth 모듈에 정의되어 있으므로 기본적으로 401 상태 코드를 사용합니다.
 
     Args:
-        status_code: HTTP status code for the error. Defaults to 401 "Unauthorized".
-        detail: Detailed error message. If `None`, uses a default
-            message based on the status code.
-        headers: Additional HTTP headers to include in the error response.
+        status_code: 오류에 대한 HTTP 상태 코드입니다. 기본값은 401 "Unauthorized"입니다.
+        detail: 상세한 오류 메시지입니다. `None`인 경우, 상태 코드를 기반으로
+            기본 메시지를 사용합니다.
+        headers: 오류 응답에 포함할 추가 HTTP 헤더입니다.
 
     Example:
-        Default:
+        기본값:
         ```python
         raise HTTPException()
         # HTTPException(status_code=401, detail='Unauthorized')
         ```
 
-        Add headers:
+        헤더 추가:
         ```python
         raise HTTPException(headers={"X-Custom-Header": "Custom Value"})
         # HTTPException(status_code=401, detail='Unauthorized', headers={"WWW-Authenticate": "Bearer"})
         ```
 
-        Custom error:
+        커스텀 오류:
         ```python
         raise HTTPException(status_code=404, detail="Not found")
         ```

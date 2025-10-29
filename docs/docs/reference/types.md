@@ -1,4 +1,4 @@
-# Types
+# 타입
 
 ::: langgraph.types
     options:

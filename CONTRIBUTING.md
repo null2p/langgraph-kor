@@ -1,293 +1,278 @@
-# Contributing to LangGraph
+# LangGraph에 기여하기
 
-Thank you for being interested in contributing to LangGraph!
+LangGraph에 기여하는 데 관심을 가져주셔서 감사합니다!
 
-## General guidelines
+## 일반 가이드라인
 
-Here are some things to keep in mind for all types of contributions:
+모든 유형의 기여에 대해 염두에 두어야 할 사항은 다음과 같습니다:
 
-- Follow the ["fork and pull request"](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project) workflow.
-- Fill out the checked-in pull request template when opening pull requests. Note related issues and tag relevant maintainers.
-- Ensure your PR passes formatting, linting, and testing checks before requesting a review.
-  - If you would like comments or feedback, please tag a maintainer.
-- Backwards compatibility is key. Your changes must not be breaking, except in case of critical bug and security fixes.
-- Look for duplicate PRs or issues that have already been opened before opening a new one.
-- Keep scope as isolated as possible. As a general rule, your changes should not affect more than one package at a time.
+- ["fork and pull request"](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project) 워크플로우를 따르세요.
+- Pull Request를 열 때 체크인된 Pull Request 템플릿을 작성하세요. 관련 이슈를 기록하고 관련 메인테이너를 태그하세요.
+- 리뷰를 요청하기 전에 PR이 포매팅, 린팅 및 테스팅 검사를 통과하는지 확인하세요.
+  - 코멘트나 피드백을 원하시면 메인테이너를 태그하세요.
+- 하위 호환성이 핵심입니다. 중요한 버그 및 보안 수정의 경우를 제외하고는 변경 사항이 호환성을 깨뜨려서는 안 됩니다.
+- 새로운 PR이나 이슈를 열기 전에 이미 열린 중복 PR이나 이슈가 있는지 확인하세요.
+- 범위를 가능한 한 격리된 상태로 유지하세요. 일반적으로 변경 사항은 한 번에 하나의 패키지에만 영향을 미쳐야 합니다.
 
-### Bugfixes
+### 버그 수정
 
-For bug fixes, please open up an issue before proposing a fix to ensure the proposal properly addresses the underlying problem. In general, bug fixes should all have an accompanying unit test that fails before the fix.
+버그 수정의 경우, 제안이 근본적인 문제를 적절하게 해결하는지 확인하기 위해 수정을 제안하기 전에 이슈를 열어주세요. 일반적으로 버그 수정에는 수정 전에 실패하는 단위 테스트가 함께 있어야 합니다.
 
-### New features
+### 새로운 기능
 
-For new features, please start a new [discussion](https://forum.langchain.com/), where the maintainers will help with scoping out the necessary changes.
+새로운 기능의 경우, 새로운 [discussion](https://forum.langchain.com/)을 시작하세요. 메인테이너가 필요한 변경 사항의 범위를 설정하는 데 도움을 드릴 것입니다.
 
-## Contribute Documentation
+## 문서 기여하기
 
-Documentation is a vital part of LangGraph. We welcome both new documentation for new features and
-community improvements to our current documentation. Please read the resources below before getting started:
+문서는 LangGraph의 핵심적인 부분입니다. 새로운 기능에 대한 새로운 문서와
+현재 문서에 대한 커뮤니티 개선을 모두 환영합니다. 시작하기 전에 아래 리소스를 읽어주세요:
 
-- [Documentation style guide](#documentation-style-guide)
-- [Documentation setup](#setup)
+- [문서 스타일 가이드](#documentation-style-guide)
+- [문서 설정](#setup)
 
-## Documentation Style Guide
+## 문서 스타일 가이드
 
-As LangGraph continues to grow, the surface area of documentation required to cover it continues to grow too.
-This page provides guidelines for anyone writing documentation for LangGraph, as well as some of our philosophies around organization and structure.
+LangGraph가 계속 성장함에 따라, 이를 다루는 데 필요한 문서의 범위도 계속 커지고 있습니다.
+이 페이지는 LangGraph를 위한 문서를 작성하는 모든 사람을 위한 가이드라인과 조직 및 구조에 대한 우리의 철학을 제공합니다.
 
-## Philosophy
+## 철학
 
-LangGraph's documentation follows the [Diataxis framework](https://diataxis.fr).
-Under this framework, all documentation falls under one of four categories: [Tutorials](#tutorials),
-[How-to guides](#how-to-guides),
-[References](#references), and [Explanations (aka conceptual guides)](#conceptual-guide).
+LangGraph의 문서는 [Diataxis framework](https://diataxis.fr)를 따릅니다.
+이 프레임워크 하에서 모든 문서는 네 가지 카테고리 중 하나에 속합니다: [튜토리얼](#tutorials),
+[How-to 가이드](#how-to-guides),
+[레퍼런스](#references), 그리고 [설명 (일명 개념 가이드)](#conceptual-guide).
 
-### Tutorials
+### 튜토리얼
 
-Tutorials are lessons that take the reader through a practical activity. Their purpose is to help the user
-gain understanding of concepts and how they interact by showing one way to achieve some goal in a hands-on way.
+튜토리얼은 독자를 실용적인 활동으로 안내하는 수업입니다. 그 목적은 사용자가
+목표를 달성하는 한 가지 방법을 실습 방식으로 보여줌으로써 개념과 그들이 상호작용하는 방식에 대한 이해를 얻도록 돕는 것입니다.
 
-They should **avoid** giving
-multiple permutations of ways to achieve that goal in-depth. Choice is burdensome. Instead, they should guide a new user through a recommended path to accomplishing a concrete goal. While the end result of a tutorial does not necessarily need to
-be completely production-ready, it should be useful and practically satisfy the goal that you clearly stated in the tutorial's introduction.
+튜토리얼은 목표를 달성하는 여러 순열의 방법을 심도 있게 제공하는 것을 **피해야** 합니다. 선택은 부담스럽습니다. 대신, 새로운 사용자가 구체적인 목표를 달성하기 위한 권장 경로를 따라가도록 안내해야 합니다. 튜토리얼의 최종 결과가 반드시 완전히 프로덕션 준비가 되어 있을 필요는 없지만, 튜토리얼 소개에서 명확하게 명시한 목표를 유용하고 실질적으로 충족해야 합니다.
 
-To quote the Diataxis website:
+Diataxis 웹사이트를 인용하자면:
 
-> A tutorial serves the user’s *acquisition* of skills and knowledge - their study. Its purpose is not to help the user get something done, but to help them learn.
+> 튜토리얼은 사용자의 기술과 지식 *습득*, 즉 학습을 돕습니다. 그 목적은 사용자가 무언가를 완료하도록 돕는 것이 아니라, 배우도록 돕는 것입니다.
 
-In LangGraph, these are often higher level guides that show off end-to-end use cases.
+LangGraph에서 이러한 튜토리얼은 종종 엔드투엔드 사용 사례를 보여주는 상위 수준 가이드입니다.
 
-Some examples include:
+몇 가지 예시는 다음과 같습니다:
 
-- [Build a Customer Support Bot](https://langchain-ai.github.io/langgraph/tutorials/customer-support/customer-support/)
-- [Build a SQL Agent](https://langchain-ai.github.io/langgraph/tutorials/sql/sql-agent/)
+- [고객 지원 봇 구축하기](https://langchain-ai.github.io/langgraph/tutorials/customer-support/customer-support/)
+- [SQL 에이전트 구축하기](https://langchain-ai.github.io/langgraph/tutorials/sql/sql-agent/)
 
-Here are some high-level tips on writing a good tutorial:
+좋은 튜토리얼을 작성하기 위한 고수준 팁은 다음과 같습니다:
 
-- Focus on guiding the user to get something done, but keep in mind the end-goal is more to impart principles than to create a perfect production system.
-- Be specific, not abstract and follow one path.
-  - No need to go deeply into alternative approaches, but it’s ok to reference them, ideally with a link to an appropriate how-to guide.
-- Get "a point on the board" as soon as possible - something the user can run that outputs something.
-  - You can iterate and expand afterwards.
-  - Try to frequently checkpoint at given steps where the user can run code and see progress.
-- Focus on results, not technical explanation.
-  - Crosslink heavily to appropriate conceptual/reference pages
-- The first time you mention a LangGraph concept, use its full name (e.g. "human-in-the-loop"), and link to its conceptual/other documentation page.
-  - It's also helpful to add a prerequisite callout that links to any pages with necessary background information.
-- End with a recap/next steps section summarizing what the tutorial covered and future reading, such as related how-to guides.
-- Use phrases like "Next we can run X & Y. We will expect Z.". Then afterwards, use language like "Notice Z" that recalls our expectations and directs the reader's attention to the topic we are trying to teach.
-- Do not shy away from repetition.
+- 사용자가 무언가를 완료하도록 안내하는 데 집중하되, 최종 목표는 완벽한 프로덕션 시스템을 만드는 것보다 원칙을 전달하는 것임을 염두에 두세요.
+- 추상적이지 않고 구체적으로 하나의 경로를 따르세요.
+  - 대안 접근 방식을 깊이 있게 다룰 필요는 없지만, 적절한 how-to 가이드 링크와 함께 참조하는 것은 괜찮습니다.
+- 가능한 한 빨리 "점수를 얻으세요" - 사용자가 실행하여 무언가를 출력할 수 있는 것.
+  - 나중에 반복하고 확장할 수 있습니다.
+  - 사용자가 코드를 실행하고 진행 상황을 볼 수 있는 주어진 단계에서 자주 체크포인트를 시도하세요.
+- 기술적 설명이 아닌 결과에 집중하세요.
+  - 적절한 개념/레퍼런스 페이지에 많이 교차 링크하세요
+- LangGraph 개념을 처음 언급할 때는 전체 이름(예: "human-in-the-loop")을 사용하고, 개념/기타 문서 페이지에 링크하세요.
+  - 필요한 배경 정보가 있는 페이지에 링크하는 전제 조건 콜아웃을 추가하는 것도 도움이 됩니다.
+- 튜토리얼이 다룬 내용과 관련 how-to 가이드와 같은 향후 읽기 자료를 요약하는 요약/다음 단계 섹션으로 마무리하세요.
+- "다음으로 X와 Y를 실행할 수 있습니다. Z를 기대할 것입니다."와 같은 문구를 사용하세요. 그런 다음 "Z를 주목하세요"와 같이 기대치를 상기시키고 가르치려는 주제에 독자의 주의를 집중시키는 언어를 사용하세요.
+- 반복을 두려워하지 마세요.
 
-### How-to guides
+### How-to 가이드
 
-A how-to guide, as the name implies, demonstrates how to do something discrete and specific.
-It should assume that the user is already familiar with underlying concepts, and is trying to solve an immediate problem, but
-should still give some background or list the scenarios where the information contained within can be relevant.
-They can and should discuss alternatives if one approach may be better than another in certain cases.
+How-to 가이드는 이름에서 알 수 있듯이 별개의 구체적인 작업을 수행하는 방법을 보여줍니다.
+사용자가 이미 기본 개념에 익숙하고 즉각적인 문제를 해결하려고 한다고 가정해야 하지만,
+여전히 일부 배경 정보를 제공하거나 포함된 정보가 관련될 수 있는 시나리오를 나열해야 합니다.
+특정 경우에 한 접근 방식이 다른 접근 방식보다 나을 수 있다면 대안을 논의할 수 있고 논의해야 합니다.
 
-To quote the Diataxis website:
+Diataxis 웹사이트를 인용하자면:
 
-> A how-to guide serves the work of the already-competent user, whom you can assume to know what they want to do, and to be able to follow your instructions correctly.
+> How-to 가이드는 이미 유능한 사용자의 작업을 돕습니다. 그들이 무엇을 하고 싶은지 알고 있고, 당신의 지침을 올바르게 따를 수 있다고 가정할 수 있습니다.
 
-Some examples include:
+몇 가지 예시는 다음과 같습니다:
 
-- [How to add persistence to your graph](https://langchain-ai.github.io/langgraph/how-tos/persistence/)
-- [How to view and update past graph state](https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/time-travel/)
+- [그래프에 영속성 추가하는 방법](https://langchain-ai.github.io/langgraph/how-tos/persistence/)
+- [과거 그래프 상태 보기 및 업데이트하는 방법](https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/time-travel/)
 
-Here are some high-level tips on writing a good how-to guide:
+좋은 how-to 가이드를 작성하기 위한 고수준 팁은 다음과 같습니다:
 
-- Clearly explain what you are guiding the user through at the start
-- Assume higher intent than a tutorial and show what the user needs to do to get that task done
-- Assume familiarity of concepts, but explain why suggested actions are helpful
-  - Crosslink heavily to conceptual/reference pages
-- Discuss alternatives and responses to real-world tradeoffs that may arise when solving a problem
-- Use lots of example code, ideally within complete code blocks that the reader can copy and run.
-- End with a recap/next steps section summarizing what the tutorial covered and future reading, such as other related how-to guides
+- 시작 부분에서 사용자를 무엇을 통해 안내하는지 명확하게 설명하세요
+- 튜토리얼보다 높은 의도를 가정하고 사용자가 작업을 완료하기 위해 수행해야 하는 작업을 보여주세요
+- 개념에 대한 친숙함을 가정하되, 제안된 작업이 왜 유용한지 설명하세요
+  - 개념/레퍼런스 페이지에 많이 교차 링크하세요
+- 문제를 해결할 때 발생할 수 있는 실제 트레이드오프에 대한 대안과 대응을 논의하세요
+- 독자가 복사하여 실행할 수 있는 완전한 코드 블록 내에서 많은 예제 코드를 사용하세요.
+- 튜토리얼이 다룬 내용과 다른 관련 how-to 가이드와 같은 향후 읽기 자료를 요약하는 요약/다음 단계 섹션으로 마무리하세요
 
-### Conceptual guides
+### 개념 가이드
 
-LangGraph's conceptual guides fall under the **Explanation** quadrant of Diataxis. They should cover LangChain terms and concepts
-in a more abstract way than how-to guides or tutorials, and should be geared towards curious users interested in
-gaining a deeper understanding of the framework. Try to avoid excessively large code examples. The goal here is to
-impart perspective to the user rather than to finish a practical project. These guides should cover **why** things work the way they do.
+LangGraph의 개념 가이드는 Diataxis의 **설명** 사분면에 속합니다. How-to 가이드나 튜토리얼보다 더 추상적인 방식으로 LangChain 용어와 개념을 다루어야 하며, 프레임워크에 대한 더 깊은 이해를 얻는 데 관심이 있는 호기심 많은 사용자를 대상으로 해야 합니다. 과도하게 큰 코드 예제는 피하도록 노력하세요. 여기서 목표는 실용적인 프로젝트를 완료하는 것이 아니라 사용자에게 관점을 전달하는 것입니다. 이러한 가이드는 **왜** 사물이 그렇게 작동하는지를 다루어야 합니다.
 
-To quote the Diataxis website:
+Diataxis 웹사이트를 인용하자면:
 
-> The perspective of explanation is higher and wider than that of the other types. It does not take the user’s eye-level view, as in a how-to guide, or a close-up view of the machinery, like reference material. Its scope in each case is a topic - “an area of knowledge”, that somehow has to be bounded in a reasonable, meaningful way.
+> 설명의 관점은 다른 유형보다 높고 넓습니다. How-to 가이드처럼 사용자의 눈높이 관점을 취하거나, 레퍼런스 자료처럼 기계의 클로즈업 뷰를 취하지 않습니다. 각 경우의 범위는 주제, 즉 "지식의 영역"이며, 합리적이고 의미 있는 방식으로 어떻게든 경계를 지어야 합니다.
 
-Some examples include:
+몇 가지 예시는 다음과 같습니다:
 
-- [What does it mean to be agentic?](https://langchain-ai.github.io/langgraph/concepts/high_level/)
-- [Tool calling](https://langchain-ai.github.io/langgraph/concepts/agentic_concepts/#tool-calling)
+- [에이전틱하다는 것은 무엇을 의미하는가?](https://langchain-ai.github.io/langgraph/concepts/high_level/)
+- [도구 호출](https://langchain-ai.github.io/langgraph/concepts/agentic_concepts/#tool-calling)
 
-Here are some high-level tips on writing a good conceptual guide:
+좋은 개념 가이드를 작성하기 위한 고수준 팁은 다음과 같습니다:
 
-- Explain design decisions. Why does concept X exist and why was it designed this way?
-- Use analogies and reference other concepts and alternatives
-- Avoid blending in too much reference content
-- You can and should reference content covered in other guides, but make sure to link to them
+- 설계 결정을 설명하세요. 개념 X는 왜 존재하며 왜 이런 방식으로 설계되었나요?
+- 비유를 사용하고 다른 개념과 대안을 참조하세요
+- 너무 많은 레퍼런스 콘텐츠를 혼합하는 것을 피하세요
+- 다른 가이드에서 다룬 콘텐츠를 참조할 수 있고 참조해야 하지만, 링크를 확실히 걸어두세요
 
-### References
+### 레퍼런스
 
-References contain detailed, low-level information that describes exactly what functionality exists and how to use it.
-In LangGraph, this is mainly our API reference pages, which are populated from docstrings within code.
-References pages are generally not read end-to-end, but are consulted as necessary when a user needs to know
-how to use something specific.
+레퍼런스는 정확히 어떤 기능이 존재하고 그것을 사용하는 방법을 설명하는 상세하고 저수준의 정보를 포함합니다.
+LangGraph에서 이것은 주로 코드 내 docstring에서 채워지는 API 레퍼런스 페이지입니다.
+레퍼런스 페이지는 일반적으로 끝에서 끝까지 읽히지 않고, 사용자가 특정한 것을 사용하는 방법을 알아야 할 때 필요에 따라 참조됩니다.
 
-To quote the Diataxis website:
+Diataxis 웹사이트를 인용하자면:
 
-> The only purpose of a reference guide is to describe, as succinctly as possible, and in an orderly way. Whereas the content of tutorials and how-to guides are led by needs of the user, reference material is led by the product it describes.
+> 레퍼런스 가이드의 유일한 목적은 가능한 한 간결하고 질서 있게 설명하는 것입니다. 튜토리얼과 how-to 가이드의 콘텐츠는 사용자의 필요에 의해 주도되지만, 레퍼런스 자료는 설명하는 제품에 의해 주도됩니다.
 
-Many of the reference pages in LangChain are automatically generated from code,
-but here are some high-level tips on writing a good docstring:
+LangChain의 많은 레퍼런스 페이지는 코드에서 자동으로 생성되지만,
+좋은 docstring을 작성하기 위한 고수준 팁은 다음과 같습니다:
 
-- Be concise
-- Discuss special cases and deviations from a user's expectations
-- Go into detail on required inputs and outputs
-- Light details on when one might use the feature are fine, but in-depth details belong in other sections.
+- 간결하게 작성하세요
+- 사용자의 기대에서 벗어나는 특수 사례와 편차를 논의하세요
+- 필수 입력 및 출력에 대해 자세히 설명하세요
+- 기능을 언제 사용할 수 있는지에 대한 간단한 세부 정보는 괜찮지만, 심층적인 세부 정보는 다른 섹션에 속합니다.
 
-Each category serves a distinct purpose and requires a specific approach to writing and structuring the content.
+각 카테고리는 별개의 목적을 제공하며 콘텐츠를 작성하고 구조화하는 데 특정 접근 방식이 필요합니다.
 
-## General guidelines
+## 일반 가이드라인
 
-Here are some other guidelines you should think about when writing and organizing documentation.
+문서를 작성하고 구성할 때 고려해야 할 다른 가이드라인은 다음과 같습니다.
 
-We generally do not merge new tutorials from outside contributors without an actual need.
-We welcome updates as well as new integration docs, how-tos, and references.
+일반적으로 실제 필요 없이 외부 기여자의 새로운 튜토리얼을 병합하지 않습니다.
+업데이트와 새로운 통합 문서, how-to 및 레퍼런스는 환영합니다.
 
-### Avoid duplication
+### 중복 피하기
 
-Multiple pages that cover the same material in depth are difficult to maintain and cause confusion. There should
-be only one (very rarely two), canonical pages for a given concept or feature. Instead, you should link to other guides.
+동일한 자료를 심도 있게 다루는 여러 페이지는 유지 관리가 어렵고 혼란을 야기합니다. 주어진 개념이나 기능에 대해 하나(매우 드물게 두 개)의 표준 페이지만 있어야 합니다. 대신 다른 가이드로 링크해야 합니다.
 
-### Link to other sections
+### 다른 섹션으로 링크하기
 
-Because sections of the docs do not exist in a vacuum, it is important to link to other sections as often as possible
-to allow a developer to learn more about an unfamiliar topic inline.
+문서의 섹션은 진공 상태에 존재하지 않기 때문에, 개발자가 익숙하지 않은 주제에 대해 인라인으로 더 배울 수 있도록 가능한 한 자주 다른 섹션으로 링크하는 것이 중요합니다.
 
-This includes linking to the API references as well as conceptual sections!
+이것은 API 레퍼런스뿐만 아니라 개념 섹션으로의 링크도 포함합니다!
 
-### Be concise
+### 간결하게 작성하기
 
-In general, take a less-is-more approach. If a section with a good explanation of a concept already exists, you should link to it rather than
-re-explain it, unless the concept you are documenting presents some new wrinkle.
+일반적으로 적을수록 좋다는 접근 방식을 취하세요. 개념에 대한 좋은 설명이 있는 섹션이 이미 존재한다면, 문서화하는 개념이 새로운 특징을 제시하지 않는 한, 다시 설명하기보다는 링크를 걸어야 합니다.
 
-Be concise, including in code samples.
+코드 샘플을 포함하여 간결하게 작성하세요.
 
-### General style
+### 일반 스타일
 
-- Use active voice and present tense whenever possible
-- Use examples and code snippets to illustrate concepts and usage
-- Use appropriate header levels (`#`, `##`, `###`, etc.) to organize the content hierarchically
-- Use fewer cells with more code to make copy/paste easier
-- Use bullet points and numbered lists to break down information into easily digestible chunks
-- Use tables (especially for **Reference** sections) and diagrams often to present information visually
-- Include the table of contents for longer documentation pages to help readers navigate the content, but hide it for shorter pages
+- 가능한 한 능동태와 현재 시제를 사용하세요
+- 개념과 사용법을 설명하기 위해 예제와 코드 스니펫을 사용하세요
+- 콘텐츠를 계층적으로 구성하기 위해 적절한 헤더 레벨(`#`, `##`, `###` 등)을 사용하세요
+- 복사/붙여넣기를 더 쉽게 하기 위해 더 많은 코드를 포함하는 더 적은 셀을 사용하세요
+- 정보를 쉽게 소화할 수 있는 덩어리로 나누기 위해 글머리 기호와 번호 목록을 사용하세요
+- 정보를 시각적으로 표현하기 위해 표(**레퍼런스** 섹션에 특히)와 다이어그램을 자주 사용하세요
+- 독자가 콘텐츠를 탐색하는 데 도움이 되도록 긴 문서 페이지에는 목차를 포함하되, 짧은 페이지에서는 숨기세요
 
-## Setup
+## 설정
 
-LangGraph documentation consists of two components:
+LangGraph 문서는 두 가지 구성 요소로 이루어져 있습니다:
 
-1. Main Documentation: Hosted at [https://langchain-ai.github.io/langgraph/](https://langchain-ai.github.io/langgraph/),
-this comprehensive resource serves as the primary user-facing documentation.
-It covers a wide array of topics, including tutorials, use cases, integrations,
-and more, offering extensive guidance on building with LangGraph.
-The content for this documentation lives in the `/docs` directory of the monorepo.
-2. In-code Documentation: This is documentation of the codebase itself, which is also
-used to generate the externally facing [API Reference](https://langchain-ai.github.io/langgraph/reference/graphs/).
-The content for the API reference is autogenerated by scanning the docstrings in the codebase. For this reason we ask that developers document their code well.
+1. 메인 문서: [https://langchain-ai.github.io/langgraph/](https://langchain-ai.github.io/langgraph/)에 호스팅되며,
+이 포괄적인 리소스는 주요 사용자 대면 문서 역할을 합니다.
+튜토리얼, 사용 사례, 통합 등을 포함한 광범위한 주제를 다루며,
+LangGraph로 구축하는 방법에 대한 광범위한 가이드를 제공합니다.
+이 문서의 콘텐츠는 모노레포의 `/docs` 디렉토리에 있습니다.
+2. 코드 내 문서: 이것은 코드베이스 자체의 문서이며, 외부에 공개되는 [API 레퍼런스](https://langchain-ai.github.io/langgraph/reference/graphs/)를 생성하는 데도 사용됩니다.
+API 레퍼런스의 콘텐츠는 코드베이스의 docstring을 스캔하여 자동 생성됩니다. 이러한 이유로 개발자가 코드를 잘 문서화할 것을 요청합니다.
 
-We appreciate all contributions to the documentation, whether it be fixing a typo,
-adding a new tutorial or example and whether it be in the main documentation or the API Reference.
+오타 수정, 새로운 튜토리얼이나 예제 추가 등 메인 문서나 API 레퍼런스에 대한 모든 기여를 환영합니다.
 
-### 📜 Main Documentation
+### 📜 메인 문서
 
-The content for the main documentation is located in the `/docs` directory of the monorepo.
+메인 문서의 콘텐츠는 모노레포의 `/docs` 디렉토리에 있습니다.
 
-The documentation is written using a combination of ipython notebooks (`.ipynb` files)
-and markdown (`.md` files). The notebooks are converted to markdown
-and then built using [MkDocs](https://www.mkdocs.org/).
+문서는 ipython 노트북(`.ipynb` 파일)과 마크다운(`.md` 파일)의 조합을 사용하여 작성됩니다. 노트북은 마크다운으로 변환된 다음 [MkDocs](https://www.mkdocs.org/)를 사용하여 빌드됩니다.
 
-Feel free to make contributions to the main documentation! 🥰
+메인 문서에 대한 기여를 자유롭게 해주세요! 🥰
 
-After modifying the documentation:
+문서를 수정한 후:
 
-1. Run the linting and formatting commands (see below) to ensure that the documentation is well-formatted and free of errors.
-2. Optionally build the documentation locally to verify that the changes look good.
-3. Make a pull request with the changes.
+1. 문서가 잘 포맷되어 있고 오류가 없는지 확인하기 위해 린팅 및 포매팅 명령을 실행하세요(아래 참조).
+2. 선택적으로 변경 사항이 좋아 보이는지 확인하기 위해 로컬에서 문서를 빌드하세요.
+3. 변경 사항으로 pull request를 만드세요.
 
-### ⚒️ Linting and Building Documentation Locally
+### ⚒️ 로컬에서 문서 린팅 및 빌드하기
 
-After writing up the documentation, you may want to lint and build the documentation
-locally to ensure that it looks good and is free of errors.
+문서를 작성한 후, 문서가 좋아 보이고 오류가 없는지 확인하기 위해 로컬에서 린팅하고 빌드할 수 있습니다.
 
-If you're unable to build it locally that's okay as well, as you will be able to
-see a preview of the documentation on the pull request page.
+로컬에서 빌드할 수 없어도 괜찮습니다. pull request 페이지에서 문서 미리보기를 볼 수 있기 때문입니다.
 
-From the **monorepo root**, run the following command to install the dependencies:
+**모노레포 루트**에서 다음 명령을 실행하여 의존성을 설치하세요:
 
 <!-- TODO -->
 ```bash
 poetry install --with docs --no-root
 ```
 
-#### Building
+#### 빌드하기
 
-The code that builds the documentation is located in the `/docs` directory of the monorepo.
+문서를 빌드하는 코드는 모노레포의 `/docs` 디렉토리에 있습니다.
 
-Before building the documentation, it is always a good idea to clean the build directory:
+문서를 빌드하기 전에 빌드 디렉토리를 정리하는 것이 항상 좋습니다:
 
 ```bash
 make clean-docs
 ```
 
-You can build and preview the documentation as outlined below:
+아래와 같이 문서를 빌드하고 미리볼 수 있습니다:
 
 ```bash
 make serve-docs
 ```
 
-#### Linting
+#### 린팅
 
-To spell check the docs, run the following from the `docs` directory:
+문서의 맞춤법을 검사하려면 `docs` 디렉토리에서 다음을 실행하세요:
 
 ```bash
 codespell --skip="*.ambr,*.lock,*.ipynb,*.yaml,*.zlib,*.css.map,*.js.map" --ignore-words-list="infor,thead,stdio,nd,jupyter,lets,lite,uis,deque" .
 ```
 
-### ️In-code Documentation
+### ️코드 내 문서
 
-The in-code documentation is autogenerated from docstrings.
+코드 내 문서는 docstring에서 자동 생성됩니다.
 
-For the API reference to be useful, the codebase must be well-documented. This means that all functions, classes, and methods should have a docstring that explains what they do, what the arguments are, and what the return value is. This is a good practice in general, but it is especially important for LangGraph because the API reference is the primary resource for developers to understand how to use the codebase.
+API 레퍼런스가 유용하려면 코드베이스가 잘 문서화되어야 합니다. 이는 모든 함수, 클래스 및 메서드에 무엇을 하는지, 인수가 무엇인지, 반환 값이 무엇인지 설명하는 docstring이 있어야 함을 의미합니다. 이것은 일반적으로 좋은 관행이지만, API 레퍼런스가 개발자가 코드베이스를 사용하는 방법을 이해하는 주요 리소스이기 때문에 LangGraph에서는 특히 중요합니다.
 
-We generally follow the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for docstrings.
+일반적으로 docstring에 대해 [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings)를 따릅니다.
 
-Here is an example of a well-documented function:
+다음은 잘 문서화된 함수의 예입니다:
 
 ```python
 
 def my_function(arg1: int, arg2: str) -> float:
-    """This is a short description of the function. (It should be a single sentence.)
+    """함수에 대한 짧은 설명입니다. (한 문장이어야 합니다.)
 
-    This is a longer description of the function. It should explain what
-    the function does, what the arguments are, and what the return value is.
-    It should wrap at 88 characters.
+    함수에 대한 더 긴 설명입니다. 함수가 무엇을 하는지, 인수가 무엇인지,
+    반환 값이 무엇인지 설명해야 합니다.
+    88자에서 줄바꿈해야 합니다.
 
     Examples:
-        This is a section for examples of how to use the function.
+        함수를 사용하는 방법에 대한 예제 섹션입니다.
 
         ```python
         my_function(1, "hello")
         \```
 
     Args:
-        arg1: This is a description of arg1. We do not need to specify the type since
-            it is already specified in the function signature.
-        arg2: This is a description of arg2.
+        arg1: arg1에 대한 설명입니다. 이미 함수 시그니처에 지정되어 있으므로
+            타입을 지정할 필요가 없습니다.
+        arg2: arg2에 대한 설명입니다.
 
     Returns:
-        This is a description of the return value.
+        반환 값에 대한 설명입니다.
     """
     return 3.14
 ```

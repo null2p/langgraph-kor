@@ -1,12 +1,12 @@
-# How to use the interrupt option
+# interrupt 옵션 사용 방법
 
-This guide assumes knowledge of what double-texting is, which you can learn about in the [double-texting conceptual guide](../../concepts/double_texting.md).
+이 가이드는 더블 텍스팅이 무엇인지에 대한 지식을 가정하며, [더블 텍스팅 개념 가이드](../../concepts/double_texting.md)에서 이에 대해 배울 수 있습니다.
 
-The guide covers the `interrupt` option for double texting, which interrupts the prior run of the graph and starts a new one with the double-text. This option does not delete the first run, but rather keeps it in the database but sets its status to `interrupted`. Below is a quick example of using the `interrupt` option.
+이 가이드는 더블 텍스팅을 위한 `interrupt` 옵션을 다루며, 이는 그래프의 이전 실행을 중단하고 더블 텍스트로 새 실행을 시작합니다. 이 옵션은 첫 번째 실행을 삭제하지 않고 데이터베이스에 유지하지만 상태를 `interrupted`로 설정합니다. 다음은 `interrupt` 옵션 사용의 간단한 예제입니다.
 
-## Setup
+## 설정
 
-First, we will define a quick helper function for printing out JS and CURL model outputs (you can skip this if using Python):
+먼저 JS 및 CURL 모델 출력을 출력하기 위한 간단한 헬퍼 함수를 정의합니다(Python을 사용하는 경우 건너뛸 수 있습니다):
 
 === "Javascript"
 
@@ -45,7 +45,7 @@ First, we will define a quick helper function for printing out JS and CURL model
     }
     ```
 
-Now, let's import our required packages and instantiate our client, assistant, and thread.
+이제 필요한 패키지를 가져오고 클라이언트, 어시스턴트 및 스레드를 인스턴스화합니다.
 
 === "Python"
 
@@ -81,9 +81,9 @@ Now, let's import our required packages and instantiate our client, assistant, a
       --data '{}'
     ```
 
-## Create runs
+## 실행 생성
 
-Now we can start our two runs and join the second one until it has completed:
+이제 두 개의 실행을 시작하고 두 번째 실행이 완료될 때까지 조인할 수 있습니다:
 
 === "Python"
 
@@ -151,9 +151,9 @@ Now we can start our two runs and join the second one until it has completed:
     --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/<RUN_ID>/join
     ```
 
-## View run results
+## 실행 결과 보기
 
-We can see that the thread has partial data from the first run + data from the second run
+스레드에 첫 번째 실행의 부분 데이터와 두 번째 실행의 데이터가 있음을 확인할 수 있습니다
 
 
 === "Python"
@@ -187,7 +187,7 @@ We can see that the thread has partial data from the first run + data from the s
     done
     ```
 
-Output:
+출력:
 
     ================================ Human Message =================================
     
@@ -231,7 +231,7 @@ Output:
     So in summary, the search provides a convenient overview of the expected weather conditions in New York City over the next month to give you an idea of what to prepare for if traveling or making plans there. Let me know if you need any other details!
 
 
-Verify that the original, interrupted run was interrupted
+원래 중단된 run이 중단되었는지 확인합니다
 
 === "Python"
 
@@ -245,7 +245,7 @@ Verify that the original, interrupted run was interrupted
     console.log((await client.runs.get(thread['thread_id'], interruptedRun["run_id"]))["status"])
     ```
 
-Output:
+출력:
 
     ```
     'interrupted'

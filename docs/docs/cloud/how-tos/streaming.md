@@ -1,14 +1,14 @@
-# Streaming API
+# 스트리밍 API
 
-[LangGraph SDK](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/) allows you to [stream outputs](../../concepts/streaming.md) from the LangGraph API server.
+[LangGraph SDK](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/)를 사용하면 LangGraph API 서버에서 [출력을 스트리밍](../../concepts/streaming.md)할 수 있습니다.
 
 !!! note
 
-    LangGraph SDK and LangGraph Server are a part of [LangGraph Platform](../../concepts/langgraph_platform.md).
+    LangGraph SDK와 LangGraph Server는 [LangGraph Platform](../../concepts/langgraph_platform.md)의 일부입니다.
 
-## Basic usage
+## 기본 사용법
 
-Basic usage example:
+기본 사용 예제:
 
 === "Python"
 
@@ -64,7 +64,7 @@ Basic usage example:
 
 === "cURL"
 
-    Create a thread:
+    스레드 생성:
 
     ```bash
     curl --request POST \
@@ -73,7 +73,7 @@ Basic usage example:
     --data '{}'
     ```
 
-    Create a streaming run:
+    스트리밍 실행 생성:
 
     ```bash
     curl --request POST \
@@ -87,10 +87,10 @@ Basic usage example:
     }"
     ```
 
-??? example "Extended example: streaming updates"
+??? example "확장 예제: 업데이트 스트리밍"
 
-    This is an example graph you can run in the LangGraph API server.
-    See [LangGraph Platform quickstart](../quick_start.md) for more details.
+    이것은 LangGraph API 서버에서 실행할 수 있는 예제 그래프입니다.
+    자세한 내용은 [LangGraph Platform 빠른 시작](../quick_start.md)을 참조하세요.
 
     ```python
     # graph.py
@@ -118,8 +118,7 @@ Basic usage example:
     )
     ```
 
-    Once you have a running LangGraph API server, you can interact with it using
-    [LangGraph SDK](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/)
+    실행 중인 LangGraph API 서버가 있으면, [LangGraph SDK](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/)를 사용하여 상호작용할 수 있습니다
 
     === "Python"
 
@@ -146,8 +145,8 @@ Basic usage example:
             print(chunk.data)
         ```
 
-        1. The `client.runs.stream()` method returns an iterator that yields streamed outputs.
-        2. Set `stream_mode="updates"` to stream only the updates to the graph state after each node. Other stream modes are also available. See [supported stream modes](#supported-stream-modes) for details.
+        1. `client.runs.stream()` 메서드는 스트리밍 출력을 생성하는 이터레이터를 반환합니다.
+        2. `stream_mode="updates"`를 설정하여 각 노드 이후 그래프 상태의 업데이트만 스트리밍합니다. 다른 스트림 모드도 사용할 수 있습니다. 자세한 내용은 [지원되는 스트림 모드](#supported-stream-modes)를 참조하세요.
 
     === "JavaScript"
 
@@ -178,12 +177,12 @@ Basic usage example:
         }
         ```
 
-        1. The `client.runs.stream()` method returns an iterator that yields streamed outputs.
-        2. Set `streamMode: "updates"` to stream only the updates to the graph state after each node. Other stream modes are also available. See [supported stream modes](#supported-stream-modes) for details.
+        1. `client.runs.stream()` 메서드는 스트리밍 출력을 생성하는 이터레이터를 반환합니다.
+        2. `streamMode: "updates"`를 설정하여 각 노드 이후 그래프 상태의 업데이트만 스트리밍합니다. 다른 스트림 모드도 사용할 수 있습니다. 자세한 내용은 [지원되는 스트림 모드](#supported-stream-modes)를 참조하세요.
 
     === "cURL"
 
-        Create a thread:
+        스레드 생성:
 
         ```bash
         curl --request POST \
@@ -192,7 +191,7 @@ Basic usage example:
         --data '{}'
         ```
 
-        Create a streaming run:
+        스트리밍 실행 생성:
 
         ```bash
         curl --request POST \
@@ -212,7 +211,7 @@ Basic usage example:
     ```
 
 
-### Supported stream modes
+### 지원되는 스트림 모드
 
 | Mode                             | Description                                                                                                                                                                         | LangGraph Library Method                                                                                 |
 |----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
@@ -223,7 +222,7 @@ Basic usage example:
 | [`custom`](#stream-custom-data)  | Streams custom data from inside your graph                                                                                                                                          | `.stream()` / `.astream()` with [`stream_mode="custom"`](../../how-tos/streaming.md#stream-custom-data)  |
 | [`events`](#stream-events)       | Stream all events (including the state of the graph); mainly useful when migrating large LCEL apps.                                                                                 | `.astream_events()`                                                                                      |
 
-### Stream multiple modes
+### 여러 모드 스트리밍
 
 You can pass a list as the `stream_mode` parameter to stream multiple modes at once.
 
@@ -273,14 +272,14 @@ The streamed outputs will be tuples of `(mode, chunk)` where `mode` is the name 
      }"
     ```
 
-## Stream graph state
+## 그래프 상태 스트리밍
 
 Use the stream modes `updates` and `values` to stream the state of the graph as it executes.
 
 * `updates` streams the **updates** to the state after each step of the graph.
 * `values` streams the **full value** of the state after each step of the graph.
 
-??? example "Example graph"
+??? example "예제 그래프"
 
     ```python
     from typing import TypedDict
@@ -307,9 +306,9 @@ Use the stream modes `updates` and `values` to stream the state of the graph as 
     )
     ```
 
-!!! note "Stateful runs"
+!!! note "상태 저장 실행"
 
-    Examples below assume that you want to **persist the outputs** of a streaming run in the [checkpointer](../../concepts/persistence.md) DB and have created a thread. To create a thread:
+    아래 예제는 스트리밍 실행의 **출력을 지속**하려고 [체크포인터](../../concepts/persistence.md) DB에 저장하고 스레드를 생성했다고 가정합니다. 스레드를 생성하려면:
 
     === "Python"
 
@@ -346,11 +345,11 @@ Use the stream modes `updates` and `values` to stream the state of the graph as 
         --data '{}'
         ```
 
-    If you don't need to persist the outputs of a run, you can pass `None` instead of `thread_id` when streaming.
+    실행의 출력을 지속할 필요가 없는 경우, 스트리밍할 때 `thread_id` 대신 `None`을 전달할 수 있습니다.
 
 === "updates"
 
-    Use this to stream only the **state updates** returned by the nodes after each step. The streamed outputs include the name of the node as well as the update.
+    각 단계 이후 노드에서 반환된 **상태 업데이트**만 스트리밍하려면 이것을 사용하세요. 스트리밍된 출력에는 노드 이름과 업데이트가 포함됩니다.
 
     === "Python"
 
@@ -397,7 +396,7 @@ Use the stream modes `updates` and `values` to stream the state of the graph as 
 
 ===  "values"
 
-    Use this to stream the **full state** of the graph after each step.
+    각 단계 이후 그래프의 **전체 상태**를 스트리밍하려면 이것을 사용하세요.
 
     === "Python"
 
@@ -443,7 +442,7 @@ Use the stream modes `updates` and `values` to stream the state of the graph as 
         ```
 
 
-## Subgraphs
+## 서브그래프
 
 To include outputs from [subgraphs](../../concepts/subgraphs.md) in the streamed outputs, you can set `subgraphs=True` in the `.stream()` method of the parent graph. This will stream outputs from both the parent graph and any subgraphs.
 
@@ -459,12 +458,12 @@ for chunk in client.runs.stream(
     print(chunk)
 ```
 
-1. Set `stream_subgraphs=True` to stream outputs from subgraphs.
+1. `stream_subgraphs=True`를 설정하여 서브그래프에서 출력을 스트리밍합니다.
 
-??? example "Extended example: streaming from subgraphs"
+??? example "확장 예제: 서브그래프에서 스트리밍"
 
-    This is an example graph you can run in the LangGraph API server.
-    See [LangGraph Platform quickstart](../quick_start.md) for more details.
+    이것은 LangGraph API 서버에서 실행할 수 있는 예제 그래프입니다.
+    자세한 내용은 [LangGraph Platform 빠른 시작](../quick_start.md)을 참조하세요.
 
     ```python
     # graph.py
@@ -504,8 +503,7 @@ for chunk in client.runs.stream(
     graph = builder.compile()
     ```
 
-    Once you have a running LangGraph API server, you can interact with it using
-    [LangGraph SDK](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/)
+    실행 중인 LangGraph API 서버가 있으면, [LangGraph SDK](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/)를 사용하여 상호작용할 수 있습니다
 
     === "Python"
 
@@ -530,8 +528,8 @@ for chunk in client.runs.stream(
         ):
             print(chunk)
         ```
-        
-        1. Set `stream_subgraphs=True` to stream outputs from subgraphs.
+
+        1. `stream_subgraphs=True`를 설정하여 서브그래프에서 출력을 스트리밍합니다.
 
     === "JavaScript"
 
@@ -562,11 +560,11 @@ for chunk in client.runs.stream(
         }
         ```
 
-        1. Set `streamSubgraphs: true` to stream outputs from subgraphs.
+        1. `streamSubgraphs: true`를 설정하여 서브그래프에서 출력을 스트리밍합니다.
 
     === "cURL"
 
-        Create a thread:
+        스레드 생성:
 
         ```bash
         curl --request POST \
@@ -575,7 +573,7 @@ for chunk in client.runs.stream(
         --data '{}'
         ```
 
-        Create a streaming run:
+        스트리밍 실행 생성:
 
         ```bash
         curl --request POST \
@@ -591,9 +589,9 @@ for chunk in client.runs.stream(
         }"
         ```
 
-    **Note** that we are receiving not just the node updates, but we also the namespaces which tell us what graph (or subgraph) we are streaming from.
+    **참고**: 노드 업데이트뿐만 아니라 어떤 그래프(또는 서브그래프)에서 스트리밍하는지 알려주는 네임스페이스도 수신하고 있습니다.
 
-## Debugging {#debug}
+## 디버깅 {#debug}
 
 Use the `debug` streaming mode to stream as much information as possible throughout the execution of the graph. The streamed outputs include the name of the node as well as the full state.
 
@@ -640,7 +638,7 @@ Use the `debug` streaming mode to stream as much information as possible through
     }"
     ```
 
-## LLM tokens {#messages}
+## LLM 토큰 {#messages}
 
 Use the `messages-tuple` streaming mode to stream Large Language Model (LLM) outputs **token by token** from any part of your graph, including nodes, tools, subgraphs, or tasks.
 
@@ -649,7 +647,7 @@ The streamed output from [`messages-tuple` mode](#supported-stream-modes) is a t
 - `message_chunk`: the token or message segment from the LLM.
 - `metadata`: a dictionary containing details about the graph node and LLM invocation.
  
-??? example "Example graph"
+??? example "예제 그래프"
 
     ```python
     from dataclasses import dataclass
@@ -682,7 +680,7 @@ The streamed output from [`messages-tuple` mode](#supported-stream-modes) is a t
     )
     ```
 
-    1. Note that the message events are emitted even when the LLM is run using `.invoke` rather than `.stream`.
+    1. LLM이 `.stream`이 아닌 `.invoke`를 사용하여 실행되는 경우에도 메시지 이벤트가 발생됩니다.
 
 === "Python"
 
@@ -702,7 +700,7 @@ The streamed output from [`messages-tuple` mode](#supported-stream-modes) is a t
             print(message_chunk["content"], end="|", flush=True)
     ```
 
-    1. The "messages-tuple" stream mode returns an iterator of tuples `(message_chunk, metadata)` where `message_chunk` is the token streamed by the LLM and `metadata` is a dictionary with information about the graph node where the LLM was called and other information.
+    1. "messages-tuple" 스트림 모드는 튜플 `(message_chunk, metadata)`의 이터레이터를 반환합니다. 여기서 `message_chunk`는 LLM에 의해 스트리밍된 토큰이고 `metadata`는 LLM이 호출된 그래프 노드 및 기타 정보에 대한 정보가 포함된 딕셔너리입니다.
 
 === "JavaScript"
 
@@ -724,7 +722,7 @@ The streamed output from [`messages-tuple` mode](#supported-stream-modes) is a t
     }
     ```
 
-    1. The "messages-tuple" stream mode returns an iterator of tuples `(message_chunk, metadata)` where `message_chunk` is the token streamed by the LLM and `metadata` is a dictionary with information about the graph node where the LLM was called and other information.
+    1. "messages-tuple" 스트림 모드는 튜플 `(message_chunk, metadata)`의 이터레이터를 반환합니다. 여기서 `message_chunk`는 LLM에 의해 스트리밍된 토큰이고 `metadata`는 LLM이 호출된 그래프 노드 및 기타 정보에 대한 정보가 포함된 딕셔너리입니다.
 
 === "cURL"
 
@@ -739,12 +737,12 @@ The streamed output from [`messages-tuple` mode](#supported-stream-modes) is a t
     }"
     ```
 
-### Filter LLM tokens
+### LLM 토큰 필터링
 
-* To filter the streamed tokens by LLM invocation, you can [associate `tags` with LLM invocations](../../how-tos/streaming.md#filter-by-llm-invocation).
-* To stream tokens only from specific nodes, use `stream_mode="messages"` and [filter the outputs by the `langgraph_node` field](../../how-tos/streaming.md#filter-by-node) in the streamed metadata.
+* LLM 호출별로 스트리밍된 토큰을 필터링하려면 [LLM 호출에 `tags`를 연결](../../how-tos/streaming.md#filter-by-llm-invocation)할 수 있습니다.
+* 특정 노드에서만 토큰을 스트리밍하려면 `stream_mode="messages"`를 사용하고 스트리밍된 메타데이터의 [`langgraph_node` 필드로 출력을 필터링](../../how-tos/streaming.md#filter-by-node)합니다.
 
-## Stream custom data
+## 커스텀 데이터 스트리밍
 
 To send **custom user-defined data**:
 
@@ -791,7 +789,7 @@ To send **custom user-defined data**:
     }"
     ```
 
-## Stream events
+## 이벤트 스트리밍
 
 To stream all events, including the state of the graph:
 
@@ -838,7 +836,7 @@ To stream all events, including the state of the graph:
     }"
     ```
 
-## Stateless runs
+## 무상태 실행
 
 If you don't want to **persist the outputs** of a streaming run in the [checkpointer](../../concepts/persistence.md) DB, you can create a stateless run without creating a thread:
 
@@ -858,7 +856,7 @@ If you don't want to **persist the outputs** of a streaming run in the [checkpoi
         print(chunk.data)
     ```
 
-    1. We are passing `None` instead of a `thread_id` UUID.
+    1. `thread_id` UUID 대신 `None`을 전달하고 있습니다.
 
 === "JavaScript"
 
@@ -882,7 +880,7 @@ If you don't want to **persist the outputs** of a streaming run in the [checkpoi
     }
     ```
 
-    1. We are passing `None` instead of a `thread_id` UUID.
+    1. `thread_id` UUID 대신 `None`을 전달하고 있습니다.
 
 === "cURL"
 
@@ -898,7 +896,7 @@ If you don't want to **persist the outputs** of a streaming run in the [checkpoi
     }"
     ```
 
-## Join and stream
+## 조인 및 스트리밍
 
 LangGraph Platform allows you to join an active [background run](../how-tos/background_run.md) and stream outputs from it. To do so, you can use [LangGraph SDK's](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/) `client.runs.join_stream` method:
 
@@ -917,7 +915,7 @@ LangGraph Platform allows you to join an active [background run](../how-tos/back
         print(chunk)
     ```
 
-    1. This is the `run_id` of an existing run you want to join.
+    1. 이것은 조인하려는 기존 실행의 `run_id`입니다.
 
 
 === "JavaScript"
@@ -937,7 +935,7 @@ LangGraph Platform allows you to join an active [background run](../how-tos/back
     }
     ```
 
-    1. This is the `run_id` of an existing run you want to join.
+    1. 이것은 조인하려는 기존 실행의 `run_id`입니다.
 
 === "cURL"
 
@@ -948,10 +946,10 @@ LangGraph Platform allows you to join an active [background run](../how-tos/back
     --header 'x-api-key: <API_KEY>'
     ```
 
-!!! warning "Outputs not buffered"
+!!! warning "출력이 버퍼링되지 않음"
 
-    When you use `.join_stream`, output is not buffered, so any output produced before joining will not be received.
+    `.join_stream`을 사용할 때 출력이 버퍼링되지 않으므로, 조인하기 전에 생성된 출력은 수신되지 않습니다.
 
-## API Reference
+## API 레퍼런스
 
-For API usage and implementation, refer to the [API reference](../reference/api/api_ref.html#tag/thread-runs/POST/threads/{thread_id}/runs/stream). 
+API 사용법 및 구현에 대해서는 [API 레퍼런스](../reference/api/api_ref.html#tag/thread-runs/POST/threads/{thread_id}/runs/stream)를 참조하세요. 

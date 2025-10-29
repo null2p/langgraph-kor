@@ -1,4 +1,4 @@
-# LangGraph Swarm
+# LangGraph 스웜
 
 ::: langgraph_swarm.swarm
     options:

@@ -14,21 +14,21 @@ __all__ = (
     "TAG_HIDDEN",
     "START",
     "END",
-    # retained for backwards compatibility (mostly langgraph-api), should be removed in v2 (or earlier)
+    # 하위 호환성을 위해 유지됨 (주로 langgraph-api), v2 (또는 그 이전)에서 제거될 예정
     "CONF",
     "TASKS",
     "CONFIG_KEY_CHECKPOINTER",
 )
 
-# --- Public constants ---
+# --- 공개 상수 ---
 TAG_NOSTREAM = sys.intern("nostream")
-"""Tag to disable streaming for a chat model."""
+"""채팅 모델의 스트리밍을 비활성화하는 태그입니다."""
 TAG_HIDDEN = sys.intern("langsmith:hidden")
-"""Tag to hide a node/edge from certain tracing/streaming environments."""
+"""특정 추적/스트리밍 환경에서 노드/엣지를 숨기는 태그입니다."""
 END = sys.intern("__end__")
-"""The last (maybe virtual) node in graph-style Pregel."""
+"""그래프 스타일 Pregel의 마지막 (가상일 수 있는) 노드입니다."""
 START = sys.intern("__start__")
-"""The first (maybe virtual) node in graph-style Pregel."""
+"""그래프 스타일 Pregel의 첫 번째 (가상일 수 있는) 노드입니다."""
 
 
 def __getattr__(name: str) -> Any:

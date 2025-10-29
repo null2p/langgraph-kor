@@ -29,13 +29,13 @@ def _exclude_keys(config: dict[str, Any]) -> dict[str, Any]:
 
 @contextmanager
 def _pool_saver():
-    """Fixture for pool mode testing."""
+    """풀 모드 테스트를 위한 픽스처입니다."""
     database = f"test_{uuid4().hex[:16]}"
-    # create unique db
+    # 고유한 데이터베이스 생성
     with Connection.connect(DEFAULT_POSTGRES_URI, autocommit=True) as conn:
         conn.execute(f"CREATE DATABASE {database}")
     try:
-        # yield checkpointer
+        # 체크포인터 반환
         with ConnectionPool(
             DEFAULT_POSTGRES_URI + database,
             max_size=10,
@@ -45,16 +45,16 @@ def _pool_saver():
             checkpointer.setup()
             yield checkpointer
     finally:
-        # drop unique db
+        # 고유한 데이터베이스 삭제
         with Connection.connect(DEFAULT_POSTGRES_URI, autocommit=True) as conn:
             conn.execute(f"DROP DATABASE {database}")
 
 
 @contextmanager
 def _pipe_saver():
-    """Fixture for pipeline mode testing."""
+    """파이프라인 모드 테스트를 위한 픽스처입니다."""
     database = f"test_{uuid4().hex[:16]}"
-    # create unique db
+    # 고유한 데이터베이스 생성
     with Connection.connect(DEFAULT_POSTGRES_URI, autocommit=True) as conn:
         conn.execute(f"CREATE DATABASE {database}")
     try:
@@ -70,16 +70,16 @@ def _pipe_saver():
                 checkpointer = PostgresSaver(conn, pipe=pipe)
                 yield checkpointer
     finally:
-        # drop unique db
+        # 고유한 데이터베이스 삭제
         with Connection.connect(DEFAULT_POSTGRES_URI, autocommit=True) as conn:
             conn.execute(f"DROP DATABASE {database}")
 
 
 @contextmanager
 def _base_saver():
-    """Fixture for regular connection mode testing."""
+    """일반 연결 모드 테스트를 위한 픽스처입니다."""
     database = f"test_{uuid4().hex[:16]}"
-    # create unique db
+    # 고유한 데이터베이스 생성
     with Connection.connect(DEFAULT_POSTGRES_URI, autocommit=True) as conn:
         conn.execute(f"CREATE DATABASE {database}")
     try:
@@ -93,16 +93,16 @@ def _base_saver():
             checkpointer.setup()
             yield checkpointer
     finally:
-        # drop unique db
+        # 고유한 데이터베이스 삭제
         with Connection.connect(DEFAULT_POSTGRES_URI, autocommit=True) as conn:
             conn.execute(f"DROP DATABASE {database}")
 
 
 @contextmanager
 def _shallow_saver():
-    """Fixture for regular connection mode testing with a shallow checkpointer."""
+    """얕은 체크포인터를 사용하는 일반 연결 모드 테스트를 위한 픽스처입니다."""
     database = f"test_{uuid4().hex[:16]}"
-    # create unique db
+    # 고유한 데이터베이스 생성
     with Connection.connect(DEFAULT_POSTGRES_URI, autocommit=True) as conn:
         conn.execute(f"CREATE DATABASE {database}")
     try:
@@ -116,7 +116,7 @@ def _shallow_saver():
             checkpointer.setup()
             yield checkpointer
     finally:
-        # drop unique db
+        # 고유한 데이터베이스 삭제
         with Connection.connect(DEFAULT_POSTGRES_URI, autocommit=True) as conn:
             conn.execute(f"DROP DATABASE {database}")
 
@@ -139,7 +139,7 @@ def _saver(name: str):
 
 @pytest.fixture
 def test_data():
-    """Fixture providing test data for checkpoint tests."""
+    """체크포인트 테스트를 위한 테스트 데이터를 제공하는 픽스처입니다."""
     config_1: RunnableConfig = {
         "configurable": {
             "thread_id": "thread-1",
@@ -221,13 +221,13 @@ def test_search(saver_name: str, test_data) -> None:
         saver.put(configs[1], checkpoints[1], metadata[1], {})
         saver.put(configs[2], checkpoints[2], metadata[2], {})
 
-        # call method / assertions
-        query_1 = {"source": "input"}  # search by 1 key
+        # 메서드 호출 및 단언문
+        query_1 = {"source": "input"}  # 1개의 키로 검색
         query_2 = {
             "step": 1,
-        }  # search by multiple keys
-        query_3: dict[str, Any] = {}  # search by no keys, return all checkpoints
-        query_4 = {"source": "update", "step": 1}  # no match
+        }  # 여러 키로 검색
+        query_3: dict[str, Any] = {}  # 키 없이 검색하여 모든 체크포인트 반환
+        query_4 = {"source": "update", "step": 1}  # 일치하는 항목 없음
 
         search_results_1 = list(saver.list(None, filter=query_1))
         assert len(search_results_1) == 1
@@ -249,7 +249,7 @@ def test_search(saver_name: str, test_data) -> None:
         search_results_4 = list(saver.list(None, filter=query_4))
         assert len(search_results_4) == 0
 
-        # search by config (defaults to checkpoints across all namespaces)
+        # config로 검색 (기본값은 모든 네임스페이스의 체크포인트)
         search_results_5 = list(saver.list({"configurable": {"thread_id": "thread-2"}}))
         assert len(search_results_5) == 2
         assert {
@@ -291,8 +291,8 @@ def test_pending_sends_migration(saver_name: str) -> None:
             }
         }
 
-        # create the first checkpoint
-        # and put some pending sends
+        # 첫 번째 체크포인트 생성
+        # 그리고 일부 대기 중인 전송 추가
         checkpoint_0 = empty_checkpoint()
         config = saver.put(config, checkpoint_0, {}, {})
         saver.put_writes(
@@ -300,24 +300,24 @@ def test_pending_sends_migration(saver_name: str) -> None:
         )
         saver.put_writes(config, [(TASKS, "send-3")], task_id="task-2")
 
-        # check that fetching checkpoint_0 doesn't attach pending sends
-        # (they should be attached to the next checkpoint)
+        # checkpoint_0을 가져올 때 대기 중인 전송이 첨부되지 않는지 확인
+        # (다음 체크포인트에 첨부되어야 함)
         tuple_0 = saver.get_tuple(config)
         assert tuple_0.checkpoint["channel_values"] == {}
         assert tuple_0.checkpoint["channel_versions"] == {}
 
-        # create the second checkpoint
+        # 두 번째 체크포인트 생성
         checkpoint_1 = create_checkpoint(checkpoint_0, {}, 1)
         config = saver.put(config, checkpoint_1, {}, {})
 
-        # check that pending sends are attached to checkpoint_1
+        # 대기 중인 전송이 checkpoint_1에 첨부되었는지 확인
         checkpoint_1 = saver.get_tuple(config)
         assert checkpoint_1.checkpoint["channel_values"] == {
             TASKS: ["send-1", "send-2", "send-3"]
         }
         assert TASKS in checkpoint_1.checkpoint["channel_versions"]
 
-        # check that list also applies the migration
+        # list가 마이그레이션도 적용하는지 확인
         search_results = [
             c for c in saver.list({"configurable": {"thread_id": "thread-1"}})
         ]
@@ -334,7 +334,7 @@ def test_pending_sends_migration(saver_name: str) -> None:
 def test_get_checkpoint_no_channel_values(
     monkeypatch, saver_name: str, test_data
 ) -> None:
-    """Backwards compatibility test that verifies a checkpoint with no channel_values key can be retrieved without throwing an error."""
+    """channel_values 키가 없는 체크포인트를 오류 없이 검색할 수 있는지 확인하는 하위 호환성 테스트입니다."""
     with _saver(saver_name) as saver:
         config = {
             "configurable": {

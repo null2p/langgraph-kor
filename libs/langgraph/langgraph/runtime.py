@@ -26,11 +26,11 @@ class _RuntimeOverrides(TypedDict, Generic[ContextT], total=False):
 
 @dataclass(**_DC_KWARGS)
 class Runtime(Generic[ContextT]):
-    """Convenience class that bundles run-scoped context and other runtime utilities.
+    """실행 범위 컨텍스트 및 기타 런타임 유틸리티를 번들링하는 편의 클래스입니다.
 
-    !!! version-added "Added in version v0.6.0"
+    !!! version-added "버전 v0.6.0에서 추가됨"
 
-    Example:
+    예제:
 
     ```python
     from typing import TypedDict
@@ -54,7 +54,7 @@ class Runtime(Generic[ContextT]):
 
 
     def personalized_greeting(state: State, runtime: Runtime[Context]) -> State:
-        '''Generate personalized greeting using runtime context and store.'''
+        '''런타임 컨텍스트와 스토어를 사용하여 개인화된 인사말을 생성합니다.'''
         user_id = runtime.context.user_id  # (3)!
         name = "unknown_user"
         if runtime.store:
@@ -78,32 +78,32 @@ class Runtime(Generic[ContextT]):
     # > {'response': 'Hello Alice! Nice to see you again.'}
     ```
 
-    1. Define a schema for the runtime context.
-    2. Create a store to persist memories and other information.
-    3. Use the runtime context to access the `user_id`.
+    1. 런타임 컨텍스트의 스키마를 정의합니다.
+    2. 메모리 및 기타 정보를 영속화할 스토어를 생성합니다.
+    3. 런타임 컨텍스트를 사용하여 `user_id`에 액세스합니다.
     """
 
     context: ContextT = field(default=None)  # type: ignore[assignment]
-    """Static context for the graph run, like `user_id`, `db_conn`, etc.
-    
-    Can also be thought of as 'run dependencies'."""
+    """그래프 실행을 위한 정적 컨텍스트입니다. 예: `user_id`, `db_conn` 등.
+
+    '실행 종속성'으로도 생각할 수 있습니다."""
 
     store: BaseStore | None = field(default=None)
-    """Store for the graph run, enabling persistence and memory."""
+    """그래프 실행을 위한 스토어로, 영속성과 메모리를 가능하게 합니다."""
 
     stream_writer: StreamWriter = field(default=_no_op_stream_writer)
-    """Function that writes to the custom stream."""
+    """사용자 정의 스트림에 기록하는 함수입니다."""
 
     previous: Any = field(default=None)
-    """The previous return value for the given thread.
-    
-    Only available with the functional API when a checkpointer is provided.
+    """주어진 스레드의 이전 반환 값입니다.
+
+    체크포인터가 제공된 경우에만 함수형 API에서 사용할 수 있습니다.
     """
 
     def merge(self, other: Runtime[ContextT]) -> Runtime[ContextT]:
-        """Merge two runtimes together.
+        """두 런타임을 병합합니다.
 
-        If a value is not provided in the other runtime, the value from the current runtime is used.
+        다른 런타임에 값이 제공되지 않으면 현재 런타임의 값이 사용됩니다.
         """
         return Runtime(
             context=other.context or self.context,
@@ -117,7 +117,7 @@ class Runtime(Generic[ContextT]):
     def override(
         self, **overrides: Unpack[_RuntimeOverrides[ContextT]]
     ) -> Runtime[ContextT]:
-        """Replace the runtime with a new runtime with the given overrides."""
+        """주어진 재정의로 런타임을 새 런타임으로 교체합니다."""
         return replace(self, **overrides)
 
 
@@ -130,17 +130,17 @@ DEFAULT_RUNTIME = Runtime(
 
 
 def get_runtime(context_schema: type[ContextT] | None = None) -> Runtime[ContextT]:
-    """Get the runtime for the current graph run.
+    """현재 그래프 실행의 런타임을 가져옵니다.
 
-    Args:
-        context_schema: Optional schema used for type hinting the return type of the runtime.
+    인자:
+        context_schema: 런타임의 반환 타입을 타입 힌팅하는 데 사용되는 선택적 스키마입니다.
 
-    Returns:
-        The runtime for the current graph run.
+    반환:
+        현재 그래프 실행의 런타임입니다.
     """
 
-    # TODO: in an ideal world, we would have a context manager for
-    # the runtime that's independent of the config. this will follow
-    # from the removal of the configurable packing
+    # TODO: 이상적인 세계에서는 설정과 독립적인
+    # 런타임용 컨텍스트 매니저를 가질 것입니다. 이것은
+    # configurable 패킹의 제거로부터 이어질 것입니다
     runtime = cast(Runtime[ContextT], get_config()[CONF].get(CONFIG_KEY_RUNTIME))
     return runtime

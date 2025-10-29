@@ -17,7 +17,7 @@ class TestMemorySaver:
     def setup(self) -> None:
         self.memory_saver = InMemorySaver()
 
-        # objects for test setup
+        # 테스트 설정을 위한 객체들
         self.config_1: RunnableConfig = {
             "configurable": {
                 "thread_id": "thread-1",
@@ -78,8 +78,8 @@ class TestMemorySaver:
         }
 
     async def test_search(self) -> None:
-        # set up test
-        # save checkpoints
+        # 테스트 설정
+        # 체크포인트 저장
         self.memory_saver.put(
             self.config_1,
             self.chkpnt_1,
@@ -99,14 +99,14 @@ class TestMemorySaver:
             self.chkpnt_3["channel_versions"],
         )
 
-        # call method / assertions
-        query_1 = {"source": "input"}  # search by 1 key
+        # 메서드 호출 및 검증
+        query_1 = {"source": "input"}  # 단일 키로 검색
         query_2 = {
             "step": 1,
             "writes": {"foo": "bar"},
-        }  # search by multiple keys
-        query_3: dict[str, Any] = {}  # search by no keys, return all checkpoints
-        query_4 = {"source": "update", "step": 1}  # no match
+        }  # 여러 키로 검색
+        query_3: dict[str, Any] = {}  # 키 없이 검색, 모든 체크포인트 반환
+        query_4 = {"source": "update", "step": 1}  # 매치 없음
 
         search_results_1 = list(self.memory_saver.list(None, filter=query_1))
         assert len(search_results_1) == 1
@@ -122,7 +122,7 @@ class TestMemorySaver:
         search_results_4 = list(self.memory_saver.list(None, filter=query_4))
         assert len(search_results_4) == 0
 
-        # search by config (defaults to checkpoints across all namespaces)
+        # config로 검색 (기본적으로 모든 네임스페이스의 체크포인트를 검색)
         search_results_5 = list(
             self.memory_saver.list({"configurable": {"thread_id": "thread-2"}})
         )
@@ -132,11 +132,11 @@ class TestMemorySaver:
             search_results_5[1].config["configurable"]["checkpoint_ns"],
         } == {"", "inner"}
 
-        # TODO: test before and limit params
+        # TODO: before와 limit 파라미터 테스트
 
     async def test_asearch(self) -> None:
-        # set up test
-        # save checkpoints
+        # 테스트 설정
+        # 체크포인트 저장
         self.memory_saver.put(
             self.config_1,
             self.chkpnt_1,
@@ -156,14 +156,14 @@ class TestMemorySaver:
             self.chkpnt_3["channel_versions"],
         )
 
-        # call method / assertions
-        query_1 = {"source": "input"}  # search by 1 key
+        # 메서드 호출 및 검증
+        query_1 = {"source": "input"}  # 단일 키로 검색
         query_2 = {
             "step": 1,
             "writes": {"foo": "bar"},
-        }  # search by multiple keys
-        query_3: dict[str, Any] = {}  # search by no keys, return all checkpoints
-        query_4 = {"source": "update", "step": 1}  # no match
+        }  # 여러 키로 검색
+        query_3: dict[str, Any] = {}  # 키 없이 검색, 모든 체크포인트 반환
+        query_4 = {"source": "update", "step": 1}  # 매치 없음
 
         search_results_1 = [
             c async for c in self.memory_saver.alist(None, filter=query_1)

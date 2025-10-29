@@ -1,24 +1,24 @@
-"""Tool execution node for LangGraph workflows.
+"""LangGraph 워크플로우를 위한 도구 실행 노드입니다.
 
-This module provides prebuilt functionality for executing tools in LangGraph.
+이 모듈은 LangGraph에서 도구를 실행하기 위한 사전 구축된 기능을 제공합니다.
 
-Tools are functions that models can call to interact with external systems,
-APIs, databases, or perform computations.
+도구는 모델이 외부 시스템, API, 데이터베이스와 상호 작용하거나
+계산을 수행하기 위해 호출할 수 있는 함수입니다.
 
-The module implements several key design patterns:
-- Parallel execution of multiple tool calls for efficiency
-- Robust error handling with customizable error messages
-- State injection for tools that need access to graph state
-- Store injection for tools that need persistent storage
-- Command-based state updates for advanced control flow
+이 모듈은 여러 주요 디자인 패턴을 구현합니다:
+- 효율성을 위한 여러 도구 호출의 병렬 실행
+- 사용자 정의 가능한 오류 메시지를 가진 강력한 오류 처리
+- 그래프 상태에 접근해야 하는 도구를 위한 상태 주입
+- 영구 저장소가 필요한 도구를 위한 저장소 주입
+- 고급 제어 흐름을 위한 명령 기반 상태 업데이트
 
-Key Components:
-    ToolNode: Main class for executing tools in LangGraph workflows
-    InjectedState: Annotation for injecting graph state into tools
-    InjectedStore: Annotation for injecting persistent store into tools
-    tools_condition: Utility function for conditional routing based on tool calls
+주요 구성 요소:
+    ToolNode: LangGraph 워크플로우에서 도구를 실행하는 메인 클래스
+    InjectedState: 도구에 그래프 상태를 주입하기 위한 어노테이션
+    InjectedStore: 도구에 영구 저장소를 주입하기 위한 어노테이션
+    tools_condition: 도구 호출을 기반으로 조건부 라우팅을 위한 유틸리티 함수
 
-Typical Usage:
+일반적인 사용법:
     ```python
     from langchain_core.tools import tool
     from langgraph.prebuilt import ToolNode
@@ -82,23 +82,23 @@ TOOL_CALL_ERROR_TEMPLATE = "Error: {error}\n Please fix your mistakes."
 
 
 def msg_content_output(output: Any) -> str | list[dict]:
-    """Convert tool output to valid message content format.
+    """도구 출력을 유효한 메시지 콘텐츠 형식으로 변환합니다.
 
-    LangChain ToolMessages accept either string content or a list of content blocks.
-    This function ensures tool outputs are properly formatted for message consumption
-    by attempting to preserve structured data when possible, falling back to JSON
-    serialization or string conversion.
+    LangChain ToolMessage는 문자열 콘텐츠 또는 콘텐츠 블록 목록을 허용합니다.
+    이 함수는 가능한 경우 구조화된 데이터를 보존하려고 시도하고,
+    JSON 직렬화 또는 문자열 변환으로 폴백하여 도구 출력이 메시지 소비를 위해
+    적절하게 포맷되도록 보장합니다.
 
     Args:
-        output: The raw output from a tool execution. Can be any type.
+        output: 도구 실행의 원시 출력입니다. 모든 타입이 가능합니다.
 
     Returns:
-        Either a string representation of the output or a list of content blocks
-        if the output is already in the correct format for structured content.
+        출력이 이미 구조화된 콘텐츠를 위한 올바른 형식인 경우
+        출력의 문자열 표현 또는 콘텐츠 블록 목록입니다.
 
     Note:
-        This function prioritizes backward compatibility by defaulting to JSON
-        serialization rather than supporting all possible message content formats.
+        이 함수는 모든 가능한 메시지 콘텐츠 형식을 지원하는 대신
+        JSON 직렬화를 기본값으로 사용하여 이전 버전과의 호환성을 우선시합니다.
     """
     if isinstance(output, str):
         return output
@@ -109,10 +109,10 @@ def msg_content_output(output: Any) -> str | list[dict]:
         ]
     ):
         return output
-    # Technically a list of strings is also valid message content, but it's
-    # not currently well tested that all chat models support this.
-    # And for backwards compatibility we want to make sure we don't break
-    # any existing ToolNode usage.
+    # 기술적으로 문자열 목록도 유효한 메시지 콘텐츠이지만,
+    # 현재 모든 채팅 모델이 이를 지원하는지 충분히 테스트되지 않았습니다.
+    # 그리고 이전 버전과의 호환성을 위해 기존 ToolNode 사용을 중단하지 않도록
+    # 확인하고 싶습니다.
     else:
         try:
             return json.dumps(output, ensure_ascii=False)
@@ -125,29 +125,28 @@ def _handle_tool_error(
     *,
     flag: bool | str | Callable[..., str] | tuple[type[Exception], ...],
 ) -> str:
-    """Generate error message content based on exception handling configuration.
+    """예외 처리 설정에 따라 오류 메시지 콘텐츠를 생성합니다.
 
-    This function centralizes error message generation logic, supporting different
-    error handling strategies configured via the ToolNode's handle_tool_errors
-    parameter.
+    이 함수는 ToolNode의 handle_tool_errors 매개변수를 통해 구성된
+    다양한 오류 처리 전략을 지원하여 오류 메시지 생성 로직을 중앙 집중화합니다.
 
     Args:
-        e: The exception that occurred during tool execution.
-        flag: Configuration for how to handle the error. Can be:
-            - bool: If `True`, use default error template
-            - str: Use this string as the error message
-            - Callable: Call this function with the exception to get error message
-            - tuple: Not used in this context (handled by caller)
+        e: 도구 실행 중 발생한 예외입니다.
+        flag: 오류 처리 방법에 대한 설정입니다. 다음 중 하나일 수 있습니다:
+            - bool: `True`인 경우 기본 오류 템플릿을 사용합니다
+            - str: 이 문자열을 오류 메시지로 사용합니다
+            - Callable: 예외와 함께 이 함수를 호출하여 오류 메시지를 가져옵니다
+            - tuple: 이 컨텍스트에서는 사용되지 않음 (호출자가 처리)
 
     Returns:
-        A string containing the error message to include in the ToolMessage.
+        ToolMessage에 포함할 오류 메시지를 포함하는 문자열입니다.
 
     Raises:
-        ValueError: If flag is not one of the supported types.
+        ValueError: flag가 지원되는 타입 중 하나가 아닌 경우.
 
     Note:
-        The tuple case is handled by the caller through exception type checking,
-        not by this function directly.
+        튜플 케이스는 이 함수가 직접 처리하지 않고
+        호출자가 예외 타입 검사를 통해 처리합니다.
     """
     if isinstance(flag, (bool, tuple)):
         content = TOOL_CALL_ERROR_TEMPLATE.format(error=repr(e))
@@ -164,33 +163,33 @@ def _handle_tool_error(
 
 
 def _infer_handled_types(handler: Callable[..., str]) -> tuple[type[Exception], ...]:
-    """Infer exception types handled by a custom error handler function.
+    """커스텀 오류 핸들러 함수가 처리하는 예외 타입을 추론합니다.
 
-    This function analyzes the type annotations of a custom error handler to determine
-    which exception types it's designed to handle. This enables type-safe error handling
-    where only specific exceptions are caught and processed by the handler.
+    이 함수는 커스텀 오류 핸들러의 타입 어노테이션을 분석하여
+    처리하도록 설계된 예외 타입을 결정합니다. 이를 통해 특정 예외만
+    핸들러에 의해 포착되고 처리되는 타입 안전 오류 처리가 가능합니다.
 
     Args:
-        handler: A callable that takes an exception and returns an error message string.
-                The first parameter (after self/cls if present) should be type-annotated
-                with the exception type(s) to handle.
+        handler: 예외를 받아 오류 메시지 문자열을 반환하는 callable입니다.
+                첫 번째 매개변수(self/cls가 있는 경우 그 다음)는 처리할
+                예외 타입으로 타입 어노테이션되어야 합니다.
 
     Returns:
-        A tuple of exception types that the handler can process. Returns (Exception,)
-        if no specific type information is available for backward compatibility.
+        핸들러가 처리할 수 있는 예외 타입의 튜플입니다. 이전 버전과의 호환성을 위해
+        특정 타입 정보가 없으면 (Exception,)을 반환합니다.
 
     Raises:
-        ValueError: If the handler's annotation contains non-Exception types or
-                   if Union types contain non-Exception types.
+        ValueError: 핸들러의 어노테이션에 Exception이 아닌 타입이 포함되어 있거나
+                   Union 타입에 Exception이 아닌 타입이 포함된 경우.
 
     Note:
-        This function supports both single exception types and Union types for
-        handlers that need to handle multiple exception types differently.
+        이 함수는 여러 예외 타입을 다르게 처리해야 하는 핸들러를 위해
+        단일 예외 타입과 Union 타입을 모두 지원합니다.
     """
     sig = inspect.signature(handler)
     params = list(sig.parameters.values())
     if params:
-        # If it's a method, the first argument is typically 'self' or 'cls'
+        # 메서드인 경우 첫 번째 인수는 일반적으로 'self' 또는 'cls'입니다
         if params[0].name in ["self", "cls"] and len(params) == 2:
             first_param = params[1]
         else:
@@ -199,7 +198,7 @@ def _infer_handled_types(handler: Callable[..., str]) -> tuple[type[Exception], 
         type_hints = get_type_hints(handler)
         if first_param.name in type_hints:
             origin = get_origin(first_param.annotation)
-            # Handle both typing.Union and types.UnionType (Python 3.10+ X | Y syntax)
+            # typing.Union과 types.UnionType (Python 3.10+ X | Y 구문) 모두 처리합니다
             if origin is Union or origin is types.UnionType:
                 args = get_args(first_param.annotation)
                 if all(issubclass(arg, Exception) for arg in args):
@@ -225,22 +224,22 @@ def _infer_handled_types(handler: Callable[..., str]) -> tuple[type[Exception], 
                     f"Got '{exception_type}' instead."
                 )
 
-    # If no type information is available, return (Exception,)
-    # for backwards compatibility.
+    # 타입 정보가 없으면 이전 버전과의 호환성을 위해
+    # (Exception,)을 반환합니다.
     return (Exception,)
 
 
 class ToolNode(RunnableCallable):
-    """A node that runs the tools called in the last AIMessage.
+    """마지막 AIMessage에서 호출된 도구를 실행하는 노드입니다.
 
-    It can be used either in StateGraph with a "messages" state key (or a custom key passed via ToolNode's 'messages_key').
-    If multiple tool calls are requested, they will be run in parallel. The output will be
-    a list of ToolMessages, one for each tool call.
+    "messages" 상태 키(또는 ToolNode의 'messages_key'를 통해 전달된 커스텀 키)가 있는 StateGraph에서 사용할 수 있습니다.
+    여러 도구 호출이 요청되면 병렬로 실행됩니다. 출력은 각 도구 호출마다
+    하나씩 ToolMessage 목록이 됩니다.
 
-    Tool calls can also be passed directly as a list of `ToolCall` dicts.
+    도구 호출은 `ToolCall` dict 목록으로 직접 전달할 수도 있습니다.
 
     Example:
-        Basic usage with simple tools:
+        간단한 도구와 함께 기본 사용법:
 
         ```python
         from langgraph.prebuilt import ToolNode
@@ -248,22 +247,22 @@ class ToolNode(RunnableCallable):
 
         @tool
         def calculator(a: int, b: int) -> int:
-            \"\"\"Add two numbers.\"\"\"
+            \"\"\"두 숫자를 더합니다.\"\"\"
             return a + b
 
         tool_node = ToolNode([calculator])
         ```
 
-        Custom error handling:
+        커스텀 오류 처리:
 
         ```python
         def handle_math_errors(e: ZeroDivisionError) -> str:
-            return "Cannot divide by zero!"
+            return "0으로 나눌 수 없습니다!"
 
         tool_node = ToolNode([calculator], handle_tool_errors=handle_math_errors)
         ```
 
-        Direct tool call execution:
+        직접 도구 호출 실행:
 
         ```python
         tool_calls = [{"name": "calculator", "args": {"a": 5, "b": 3}, "id": "1", "type": "tool_call"}]
@@ -271,18 +270,18 @@ class ToolNode(RunnableCallable):
         ```
 
     Note:
-        The ToolNode expects input in one of three formats:
-        1. A dictionary with a messages key containing a list of messages
-        2. A list of messages directly
-        3. A list of tool call dictionaries
+        ToolNode는 다음 세 가지 형식 중 하나의 입력을 예상합니다:
+        1. 메시지 목록을 포함하는 messages 키가 있는 딕셔너리
+        2. 메시지 목록을 직접
+        3. 도구 호출 딕셔너리 목록
 
-        When using message formats, the last message must be an AIMessage with
-        tool_calls populated. The node automatically extracts and processes these
-        tool calls concurrently.
+        메시지 형식을 사용할 때 마지막 메시지는 tool_calls가 채워진
+        AIMessage여야 합니다. 노드는 자동으로 이러한 도구 호출을
+        동시에 추출하고 처리합니다.
 
-        For advanced use cases involving state injection or store access, tools
-        can be annotated with InjectedState or InjectedStore to receive graph
-        context automatically.
+        상태 주입 또는 저장소 액세스와 관련된 고급 사용 사례의 경우, 도구에
+        InjectedState 또는 InjectedStore를 어노테이션하여 그래프 컨텍스트를
+        자동으로 받을 수 있습니다.
     """
 
     name: str = "ToolNode"
@@ -299,29 +298,28 @@ class ToolNode(RunnableCallable):
         | tuple[type[Exception], ...] = True,
         messages_key: str = "messages",
     ) -> None:
-        """Initialize the ToolNode with the provided tools and configuration.
+        """제공된 도구와 설정으로 ToolNode를 초기화합니다.
 
         Args:
-            tools: A sequence of tools that can be invoked by this node. Tools can be
-                BaseTool instances or plain functions that will be converted to tools.
-            name: The name identifier for this node in the graph. Used for debugging
-                and visualization.
-            tags: Optional metadata tags to associate with the node for filtering
-                and organization.
-            handle_tool_errors: Configuration for error handling during tool execution.
-                Defaults to True. Supports multiple strategies:
+            tools: 이 노드가 호출할 수 있는 도구의 시퀀스입니다. 도구는
+                BaseTool 인스턴스 또는 도구로 변환될 일반 함수일 수 있습니다.
+            name: 그래프에서 이 노드의 이름 식별자입니다. 디버깅 및
+                시각화에 사용됩니다.
+            tags: 필터링 및 구성을 위해 노드와 연결할 선택적 메타데이터 태그입니다.
+            handle_tool_errors: 도구 실행 중 오류 처리를 위한 설정입니다.
+                기본값은 True입니다. 여러 전략을 지원합니다:
 
-                - True: Catch all errors and return a ToolMessage with the default
-                    error template containing the exception details.
-                - str: Catch all errors and return a ToolMessage with this custom
-                    error message string.
-                - tuple[type[Exception], ...]: Only catch exceptions of the specified
-                    types and return default error messages for them.
-                - Callable[..., str]: Catch exceptions matching the callable's signature
-                    and return the string result of calling it with the exception.
-                - False: Disable error handling entirely, allowing exceptions to propagate.
-            messages_key: The key in the state dictionary that contains the message list.
-                This same key will be used for the output ToolMessages.
+                - True: 모든 오류를 포착하고 예외 세부 정보가 포함된 기본
+                    오류 템플릿과 함께 ToolMessage를 반환합니다.
+                - str: 모든 오류를 포착하고 이 커스텀 오류 메시지 문자열과
+                    함께 ToolMessage를 반환합니다.
+                - tuple[type[Exception], ...]: 지정된 타입의 예외만 포착하고
+                    이에 대한 기본 오류 메시지를 반환합니다.
+                - Callable[..., str]: callable의 시그니처와 일치하는 예외를 포착하고
+                    예외와 함께 호출한 문자열 결과를 반환합니다.
+                - False: 오류 처리를 완전히 비활성화하여 예외가 전파되도록 합니다.
+            messages_key: 메시지 목록을 포함하는 상태 딕셔너리의 키입니다.
+                이 동일한 키가 출력 ToolMessage에도 사용됩니다.
         """
         super().__init__(self._func, self._afunc, name=name, tags=tags, trace=False)
         self.tools_by_name: dict[str, BaseTool] = {}

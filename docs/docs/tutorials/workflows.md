@@ -3,23 +3,23 @@ search:
   boost: 2
 ---
 
-# Workflows and Agents
+# 워크플로우와 에이전트
 
-This guide reviews common patterns for agentic systems. In describing these systems, it can be useful to make a distinction between "workflows" and "agents". One way to think about this difference is nicely explained in Anthropic's `Building Effective Agents` blog post:
+이 가이드는 에이전트 시스템의 일반적인 패턴을 검토합니다. 이러한 시스템을 설명할 때 "워크플로우"와 "에이전트"를 구분하는 것이 유용할 수 있습니다. 이 차이에 대해 생각하는 한 가지 방법은 Anthropic의 `Building Effective Agents` 블로그 게시물에 잘 설명되어 있습니다:
 
-> Workflows are systems where LLMs and tools are orchestrated through predefined code paths.
-> Agents, on the other hand, are systems where LLMs dynamically direct their own processes and tool usage, maintaining control over how they accomplish tasks.
+> 워크플로우는 LLM과 도구가 미리 정의된 코드 경로를 통해 오케스트레이션되는 시스템입니다.
+> 반면 에이전트는 LLM이 자체 프로세스와 도구 사용을 동적으로 지시하여 작업을 수행하는 방법을 제어하는 시스템입니다.
 
-Here is a simple way to visualize these differences:
+다음은 이러한 차이를 시각화하는 간단한 방법입니다:
 
 ![Agent Workflow](../concepts/img/agent_workflow.png)
 
-When building agents and workflows, LangGraph offers a number of benefits including persistence, streaming, and support for debugging as well as deployment.
+에이전트와 워크플로우를 구축할 때 LangGraph는 지속성, 스트리밍, 디버깅 지원 및 배포를 포함한 여러 이점을 제공합니다.
 
-## Set up
+## 설정
 
 :::python
-You can use [any chat model](https://python.langchain.com/docs/integrations/chat/) that supports structured outputs and tool calling. Below, we show the process of installing the packages, setting API keys, and testing structured outputs / tool calling for Anthropic.
+구조화된 출력과 도구 호출을 지원하는 [모든 채팅 모델](https://python.langchain.com/docs/integrations/chat/)을 사용할 수 있습니다. 아래에서는 Anthropic에 대한 패키지 설치, API 키 설정 및 구조화된 출력 / 도구 호출 테스트 프로세스를 보여줍니다.
 
 ??? "Install dependencies"
 
@@ -48,7 +48,7 @@ llm = ChatAnthropic(model="claude-3-5-sonnet-latest")
 :::
 
 :::js
-You can use [any chat model](https://js.langchain.com/docs/integrations/chat/) that supports structured outputs and tool calling. Below, we show the process of installing the packages, setting API keys, and testing structured outputs / tool calling for Anthropic.
+구조화된 출력과 도구 호출을 지원하는 [모든 채팅 모델](https://js.langchain.com/docs/integrations/chat/)을 사용할 수 있습니다. 아래에서는 Anthropic에 대한 패키지 설치, API 키 설정 및 구조화된 출력 / 도구 호출 테스트 프로세스를 보여줍니다.
 
 ??? "Install dependencies"
 
@@ -68,9 +68,9 @@ const llm = new ChatAnthropic({ model: "claude-3-5-sonnet-latest" });
 
 :::
 
-## Building Blocks: The Augmented LLM
+## 구성 요소: 증강된 LLM
 
-LLM have augmentations that support building workflows and agents. These include structured outputs and tool calling, as shown in this image from the Anthropic blog on `Building Effective Agents`:
+LLM에는 워크플로우와 에이전트 구축을 지원하는 증강 기능이 있습니다. 여기에는 `Building Effective Agents`에 대한 Anthropic 블로그의 이 이미지에 표시된 것처럼 구조화된 출력과 도구 호출이 포함됩니다:
 
 ![augmented_llm.png](./workflows/img/augmented_llm.png)
 
@@ -158,15 +158,15 @@ console.log(msg.tool_calls);
 
 :::
 
-## Prompt chaining
+## 프롬프트 체이닝
 
-In prompt chaining, each LLM call processes the output of the previous one.
+프롬프트 체이닝에서는 각 LLM 호출이 이전 호출의 출력을 처리합니다.
 
-As noted in the Anthropic blog on `Building Effective Agents`:
+`Building Effective Agents`에 대한 Anthropic 블로그에서 언급한 것처럼:
 
-> Prompt chaining decomposes a task into a sequence of steps, where each LLM call processes the output of the previous one. You can add programmatic checks (see "gate" in the diagram below) on any intermediate steps to ensure that the process is still on track.
+> 프롬프트 체이닝은 작업을 일련의 단계로 분해하며, 각 LLM 호출은 이전 호출의 출력을 처리합니다. 프로세스가 여전히 정상 궤도에 있는지 확인하기 위해 중간 단계에 프로그래밍 방식 검사(아래 다이어그램의 "gate" 참조)를 추가할 수 있습니다.
 
-> When to use this workflow: This workflow is ideal for situations where the task can be easily and cleanly decomposed into fixed subtasks. The main goal is to trade off latency for higher accuracy, by making each LLM call an easier task.
+> 이 워크플로우를 사용하는 경우: 이 워크플로우는 작업을 고정된 하위 작업으로 쉽고 깔끔하게 분해할 수 있는 상황에 이상적입니다. 주요 목표는 각 LLM 호출을 더 쉬운 작업으로 만들어 대기 시간을 더 높은 정확도로 절충하는 것입니다.
 
 ![prompt_chain.png](./workflows/img/prompt_chain.png)
 
@@ -459,13 +459,13 @@ As noted in the Anthropic blog on `Building Effective Agents`:
     ```
     :::
 
-## Parallelization
+## 병렬화
 
-With parallelization, LLMs work simultaneously on a task:
+병렬화를 사용하면 LLM이 작업을 동시에 수행합니다:
 
-> LLMs can sometimes work simultaneously on a task and have their outputs aggregated programmatically. This workflow, parallelization, manifests in two key variations: Sectioning: Breaking a task into independent subtasks run in parallel. Voting: Running the same task multiple times to get diverse outputs.
+> LLM은 때때로 작업을 동시에 수행하고 출력을 프로그래밍 방식으로 집계할 수 있습니다. 이 워크플로우인 병렬화는 두 가지 주요 변형으로 나타납니다: 섹셔닝: 작업을 병렬로 실행되는 독립적인 하위 작업으로 나눕니다. 투표: 다양한 출력을 얻기 위해 동일한 작업을 여러 번 실행합니다.
 
-> When to use this workflow: Parallelization is effective when the divided subtasks can be parallelized for speed, or when multiple perspectives or attempts are needed for higher confidence results. For complex tasks with multiple considerations, LLMs generally perform better when each consideration is handled by a separate LLM call, allowing focused attention on each specific aspect.
+> 이 워크플로우를 사용하는 경우: 병렬화는 분할된 하위 작업을 속도를 위해 병렬화할 수 있을 때 또는 더 높은 신뢰도 결과를 위해 여러 관점이나 시도가 필요할 때 효과적입니다. 여러 고려 사항이 있는 복잡한 작업의 경우 일반적으로 각 고려 사항이 별도의 LLM 호출로 처리될 때 LLM이 더 나은 성능을 발휘하며, 각 특정 측면에 집중된 주의를 기울일 수 있습니다.
 
 ![parallelization.png](./workflows/img/parallelization.png)
 
@@ -726,13 +726,13 @@ With parallelization, LLMs work simultaneously on a task:
     ```
     :::
 
-## Routing
+## 라우팅
 
-Routing classifies an input and directs it to a followup task. As noted in the Anthropic blog on `Building Effective Agents`:
+라우팅은 입력을 분류하고 후속 작업으로 안내합니다. `Building Effective Agents`에 대한 Anthropic 블로그에서 언급한 것처럼:
 
-> Routing classifies an input and directs it to a specialized followup task. This workflow allows for separation of concerns, and building more specialized prompts. Without this workflow, optimizing for one kind of input can hurt performance on other inputs.
+> 라우팅은 입력을 분류하고 전문화된 후속 작업으로 안내합니다. 이 워크플로우를 사용하면 관심사를 분리하고 더 전문화된 프롬프트를 구축할 수 있습니다. 이 워크플로우가 없으면 한 종류의 입력에 최적화하면 다른 입력의 성능이 저하될 수 있습니다.
 
-> When to use this workflow: Routing works well for complex tasks where there are distinct categories that are better handled separately, and where classification can be handled accurately, either by an LLM or a more traditional classification model/algorithm.
+> 이 워크플로우를 사용하는 경우: 라우팅은 별도로 처리하는 것이 더 나은 뚜렷한 범주가 있고 LLM 또는 더 전통적인 분류 모델/알고리즘에 의해 분류를 정확하게 처리할 수 있는 복잡한 작업에 적합합니다.
 
 ![routing.png](./workflows/img/routing.png)
 
@@ -1094,13 +1094,13 @@ Routing classifies an input and directs it to a followup task. As noted in the A
     ```
     :::
 
-## Orchestrator-Worker
+## 오케스트레이터-워커
 
-With orchestrator-worker, an orchestrator breaks down a task and delegates each sub-task to workers. As noted in the Anthropic blog on `Building Effective Agents`:
+오케스트레이터-워커에서는 오케스트레이터가 작업을 분해하고 각 하위 작업을 워커에게 위임합니다. `Building Effective Agents`에 대한 Anthropic 블로그에서 언급한 것처럼:
 
-> In the orchestrator-workers workflow, a central LLM dynamically breaks down tasks, delegates them to worker LLMs, and synthesizes their results.
+> 오케스트레이터-워커 워크플로우에서는 중앙 LLM이 작업을 동적으로 분해하고 워커 LLM에 위임한 다음 결과를 종합합니다.
 
-> When to use this workflow: This workflow is well-suited for complex tasks where you can't predict the subtasks needed (in coding, for example, the number of files that need to be changed and the nature of the change in each file likely depend on the task). Whereas it's topographically similar, the key difference from parallelization is its flexibility—subtasks aren't pre-defined, but determined by the orchestrator based on the specific input.
+> 이 워크플로우를 사용하는 경우: 이 워크플로우는 필요한 하위 작업을 예측할 수 없는 복잡한 작업에 적합합니다(예를 들어 코딩에서 변경해야 하는 파일의 수와 각 파일의 변경 특성은 작업에 따라 달라질 수 있습니다). 토폴로지상 유사하지만 병렬화와의 주요 차이점은 유연성입니다 — 하위 작업이 미리 정의되지 않고 특정 입력을 기반으로 오케스트레이터가 결정합니다.
 
 ![worker.png](./workflows/img/worker.png)
 
@@ -1132,9 +1132,9 @@ With orchestrator-worker, an orchestrator breaks down a task and delegates each 
     planner = llm.with_structured_output(Sections)
     ```
 
-    **Creating Workers in LangGraph**
+    **LangGraph에서 워커 생성**
 
-    Because orchestrator-worker workflows are common, LangGraph **has the `Send` API to support this**. It lets you dynamically create worker nodes and send each one a specific input. Each worker has its own state, and all worker outputs are written to a *shared state key* that is accessible to the orchestrator graph. This gives the orchestrator access to all worker output and allows it to synthesize them into a final output. As you can see below, we iterate over a list of sections and `Send` each to a worker node. See further documentation [here](https://langchain-ai.github.io/langgraph/how-tos/map-reduce/) and [here](https://langchain-ai.github.io/langgraph/concepts/low_level/#send).
+    오케스트레이터-워커 워크플로우가 일반적이기 때문에 LangGraph는 **이를 지원하는 `Send` API를 제공합니다**. 이를 통해 워커 노드를 동적으로 생성하고 각 노드에 특정 입력을 보낼 수 있습니다. 각 워커에는 자체 상태가 있으며 모든 워커 출력은 오케스트레이터 그래프가 액세스할 수 있는 *공유 상태 키*에 기록됩니다. 이를 통해 오케스트레이터는 모든 워커 출력에 액세스하고 이를 최종 출력으로 합성할 수 있습니다. 아래에서 볼 수 있듯이 섹션 목록을 반복하고 각각을 워커 노드에 `Send`합니다. 추가 문서는 [여기](https://langchain-ai.github.io/langgraph/how-tos/map-reduce/)와 [여기](https://langchain-ai.github.io/langgraph/concepts/low_level/#send)를 참조하세요.
 
     ```python
     from langgraph.types import Send
@@ -1272,9 +1272,9 @@ With orchestrator-worker, an orchestrator breaks down a task and delegates each 
     const planner = llm.withStructuredOutput(Sections);
     ```
 
-    **Creating Workers in LangGraph**
+    **LangGraph에서 워커 생성**
 
-    Because orchestrator-worker workflows are common, LangGraph **has the `Send` API to support this**. It lets you dynamically create worker nodes and send each one a specific input. Each worker has its own state, and all worker outputs are written to a *shared state key* that is accessible to the orchestrator graph. This gives the orchestrator access to all worker output and allows it to synthesize them into a final output. As you can see below, we iterate over a list of sections and `Send` each to a worker node. See further documentation [here](https://langchain-ai.github.io/langgraph/how-tos/map-reduce/) and [here](https://langchain-ai.github.io/langgraph/concepts/low_level/#send).
+    오케스트레이터-워커 워크플로우가 일반적이기 때문에 LangGraph는 **이를 지원하는 `Send` API를 제공합니다**. 이를 통해 워커 노드를 동적으로 생성하고 각 노드에 특정 입력을 보낼 수 있습니다. 각 워커에는 자체 상태가 있으며 모든 워커 출력은 오케스트레이터 그래프가 액세스할 수 있는 *공유 상태 키*에 기록됩니다. 이를 통해 오케스트레이터는 모든 워커 출력에 액세스하고 이를 최종 출력으로 합성할 수 있습니다. 아래에서 볼 수 있듯이 섹션 목록을 반복하고 각각을 워커 노드에 `Send`합니다. 추가 문서는 [여기](https://langchain-ai.github.io/langgraph/how-tos/map-reduce/)와 [여기](https://langchain-ai.github.io/langgraph/concepts/low_level/#send)를 참조하세요.
 
     ```typescript
     import { withLangGraph } from "@langchain/langgraph/zod";
@@ -1505,11 +1505,11 @@ With orchestrator-worker, an orchestrator breaks down a task and delegates each 
     ```
     :::
 
-## Evaluator-optimizer
+## 평가자-최적화자
 
-In the evaluator-optimizer workflow, one LLM call generates a response while another provides evaluation and feedback in a loop:
+평가자-최적화자 워크플로우에서는 한 LLM 호출이 응답을 생성하고 다른 호출이 루프에서 평가와 피드백을 제공합니다:
 
-> When to use this workflow: This workflow is particularly effective when we have clear evaluation criteria, and when iterative refinement provides measurable value. The two signs of good fit are, first, that LLM responses can be demonstrably improved when a human articulates their feedback; and second, that the LLM can provide such feedback. This is analogous to the iterative writing process a human writer might go through when producing a polished document.
+> 이 워크플로우를 사용하는 경우: 이 워크플로우는 명확한 평가 기준이 있고 반복적인 개선이 측정 가능한 가치를 제공할 때 특히 효과적입니다. 적합성의 두 가지 징후는 첫째, 사람이 피드백을 명확하게 표현할 때 LLM 응답을 입증 가능하게 개선할 수 있다는 것이고, 둘째, LLM이 그러한 피드백을 제공할 수 있다는 것입니다. 이것은 인간 작가가 세련된 문서를 작성할 때 거치는 반복적인 작성 프로세스와 유사합니다.
 
 ![evaluator_optimizer.png](./workflows/img/evaluator_optimizer.png)
 
@@ -1796,13 +1796,13 @@ In the evaluator-optimizer workflow, one LLM call generates a response while ano
     ```
     :::
 
-## Agent
+## 에이전트
 
-Agents are typically implemented as an LLM performing actions (via tool-calling) based on environmental feedback in a loop. As noted in the Anthropic blog on `Building Effective Agents`:
+에이전트는 일반적으로 루프에서 환경 피드백을 기반으로 (도구 호출을 통해) 작업을 수행하는 LLM으로 구현됩니다. `Building Effective Agents`에 대한 Anthropic 블로그에서 언급한 것처럼:
 
-> Agents can handle sophisticated tasks, but their implementation is often straightforward. They are typically just LLMs using tools based on environmental feedback in a loop. It is therefore crucial to design toolsets and their documentation clearly and thoughtfully.
+> 에이전트는 정교한 작업을 처리할 수 있지만 구현은 종종 간단합니다. 일반적으로 루프에서 환경 피드백을 기반으로 도구를 사용하는 LLM일 뿐입니다. 따라서 도구 세트와 문서를 명확하고 신중하게 설계하는 것이 중요합니다.
 
-> When to use agents: Agents can be used for open-ended problems where it's difficult or impossible to predict the required number of steps, and where you can't hardcode a fixed path. The LLM will potentially operate for many turns, and you must have some level of trust in its decision-making. Agents' autonomy makes them ideal for scaling tasks in trusted environments.
+> 에이전트를 사용하는 경우: 에이전트는 필요한 단계 수를 예측하기 어렵거나 불가능하고 고정된 경로를 하드코딩할 수 없는 개방형 문제에 사용할 수 있습니다. LLM은 잠재적으로 많은 턴 동안 작동하며 의사 결정에 대해 어느 정도 신뢰가 있어야 합니다. 에이전트의 자율성은 신뢰할 수 있는 환경에서 작업을 확장하는 데 이상적입니다.
 
 ![agent.png](./workflows/img/agent.png)
 
@@ -2194,10 +2194,10 @@ const llmWithTools = llm.bindTools(tools);
     ```
     :::
 
-#### Pre-built
+#### 사전 구축
 
 :::python
-LangGraph also provides a **pre-built method** for creating an agent as defined above (using the @[`create_react_agent`][create_react_agent] function):
+LangGraph는 위에서 정의한 에이전트를 생성하기 위한 **사전 구축 방법**도 제공합니다(@[`create_react_agent`][create_react_agent] 함수 사용):
 
 https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/
 
@@ -2225,7 +2225,7 @@ https://smith.langchain.com/public/abab6a44-29f6-4b97-8164-af77413e494d/r
 :::
 
 :::js
-LangGraph also provides a **pre-built method** for creating an agent as defined above (using the @[`createReactAgent`][create_react_agent] function):
+LangGraph는 위에서 정의한 에이전트를 생성하기 위한 **사전 구축 방법**도 제공합니다(@[`createReactAgent`][create_react_agent] 함수 사용):
 
 ```typescript
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
@@ -2245,22 +2245,22 @@ for (const m of result.messages) {
 
 :::
 
-## What LangGraph provides
+## LangGraph가 제공하는 것
 
-By constructing each of the above in LangGraph, we get a few things:
+LangGraph에서 위의 각 항목을 구성하면 다음과 같은 몇 가지 이점을 얻을 수 있습니다:
 
-### Persistence: Human-in-the-Loop
+### 지속성: 휴먼 인 더 루프
 
-LangGraph persistence layer supports interruption and approval of actions (e.g., Human In The Loop). See [Module 3 of LangChain Academy](https://github.com/langchain-ai/langchain-academy/tree/main/module-3).
+LangGraph 지속성 레이어는 작업의 중단 및 승인(예: Human In The Loop)을 지원합니다. [LangChain Academy의 모듈 3](https://github.com/langchain-ai/langchain-academy/tree/main/module-3)을 참조하세요.
 
-### Persistence: Memory
+### 지속성: 메모리
 
-LangGraph persistence layer supports conversational (short-term) memory and long-term memory. See [Modules 2](https://github.com/langchain-ai/langchain-academy/tree/main/module-2) [and 5](https://github.com/langchain-ai/langchain-academy/tree/main/module-5) of LangChain Academy:
+LangGraph 지속성 레이어는 대화형(단기) 메모리와 장기 메모리를 지원합니다. LangChain Academy의 [모듈 2](https://github.com/langchain-ai/langchain-academy/tree/main/module-2) [및 5](https://github.com/langchain-ai/langchain-academy/tree/main/module-5)를 참조하세요:
 
-### Streaming
+### 스트리밍
 
-LangGraph provides several ways to stream workflow / agent outputs or intermediate state. See [Module 3 of LangChain Academy](https://github.com/langchain-ai/langchain-academy/blob/main/module-3/streaming-interruption.ipynb).
+LangGraph는 워크플로우 / 에이전트 출력 또는 중간 상태를 스트리밍하는 여러 방법을 제공합니다. [LangChain Academy의 모듈 3](https://github.com/langchain-ai/langchain-academy/blob/main/module-3/streaming-interruption.ipynb)을 참조하세요.
 
-### Deployment
+### 배포
 
-LangGraph provides an easy on-ramp for deployment, observability, and evaluation. See [module 6](https://github.com/langchain-ai/langchain-academy/tree/main/module-6) of LangChain Academy.
+LangGraph는 배포, 관찰 가능성 및 평가를 위한 쉬운 진입로를 제공합니다. LangChain Academy의 [모듈 6](https://github.com/langchain-ai/langchain-academy/tree/main/module-6)을 참조하세요.

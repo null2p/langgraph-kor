@@ -11,7 +11,7 @@ __all__ = ("NamedBarrierValue", "NamedBarrierValueAfterFinish")
 
 
 class NamedBarrierValue(Generic[Value], BaseChannel[Value, Value, set[Value]]):
-    """A channel that waits until all named values are received before making the value available."""
+    """모든 이름이 지정된 값이 수신될 때까지 기다린 후 값을 사용 가능하게 만드는 채널입니다."""
 
     __slots__ = ("names", "seen")
 
@@ -28,16 +28,16 @@ class NamedBarrierValue(Generic[Value], BaseChannel[Value, Value, set[Value]]):
 
     @property
     def ValueType(self) -> type[Value]:
-        """The type of the value stored in the channel."""
+        """채널에 저장된 값의 타입입니다."""
         return self.typ
 
     @property
     def UpdateType(self) -> type[Value]:
-        """The type of the update received by the channel."""
+        """채널이 받는 업데이트의 타입입니다."""
         return self.typ
 
     def copy(self) -> Self:
-        """Return a copy of the channel."""
+        """채널의 복사본을 반환합니다."""
         empty = self.__class__(self.typ, self.names)
         empty.key = self.key
         empty.seen = self.seen.copy()
@@ -84,7 +84,8 @@ class NamedBarrierValue(Generic[Value], BaseChannel[Value, Value, set[Value]]):
 class NamedBarrierValueAfterFinish(
     Generic[Value], BaseChannel[Value, Value, set[Value]]
 ):
-    """A channel that waits until all named values are received before making the value ready to be made available. It is only made available after finish() is called."""
+    """모든 이름이 지정된 값이 수신될 때까지 기다린 후 값을 사용 가능하도록 준비합니다.
+    finish()가 호출된 후에만 사용 가능하게 됩니다."""
 
     __slots__ = ("names", "seen", "finished")
 
@@ -105,16 +106,16 @@ class NamedBarrierValueAfterFinish(
 
     @property
     def ValueType(self) -> type[Value]:
-        """The type of the value stored in the channel."""
+        """채널에 저장된 값의 타입입니다."""
         return self.typ
 
     @property
     def UpdateType(self) -> type[Value]:
-        """The type of the update received by the channel."""
+        """채널이 받는 업데이트의 타입입니다."""
         return self.typ
 
     def copy(self) -> Self:
-        """Return a copy of the channel."""
+        """채널의 복사본을 반환합니다."""
         empty = self.__class__(self.typ, self.names)
         empty.key = self.key
         empty.seen = self.seen.copy()

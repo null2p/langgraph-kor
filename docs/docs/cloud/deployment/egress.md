@@ -1,32 +1,32 @@
-# Egress for Subscription Metrics and Operational Metadata
+# 구독 메트릭 및 운영 메타데이터를 위한 Egress
 
-> **Important: Self Hosted Only** 
-> This section only applies to customers who are not running in offline mode and assumes you are using a self-hosted LangGraph Platform instance.
-> This does not apply to SaaS or Hybrid deployments.
+> **중요: Self Hosted 전용**
+> 이 섹션은 오프라인 모드에서 실행하지 않는 고객에게만 적용되며, self-hosted LangGraph Platform 인스턴스를 사용한다고 가정합니다.
+> 이는 SaaS 또는 Hybrid 배포에는 적용되지 않습니다.
 
-Self-Hosted LangGraph Platform instances store all information locally and will never send sensitive information outside of your network. We currently only track platform usage for billing purposes according to the entitlements in your order. In order to better remotely support our customers, we do require egress to `https://beacon.langchain.com`.
+Self-Hosted LangGraph Platform 인스턴스는 모든 정보를 로컬에 저장하며 네트워크 외부로 민감한 정보를 절대 전송하지 않습니다. 현재 주문서의 권한에 따라 청구 목적으로만 플랫폼 사용량을 추적합니다. 고객을 원격으로 더 잘 지원하기 위해 `https://beacon.langchain.com`로의 egress가 필요합니다.
 
-In the future, we will be introducing support diagnostics to help us ensure that the LangGraph Platform is running at an optimal level within your environment.
+향후 LangGraph Platform이 환경 내에서 최적의 수준으로 실행되고 있는지 확인하는 데 도움이 되는 지원 진단을 도입할 예정입니다.
 
-> **Warning**  
-> **This will require egress to `https://beacon.langchain.com` from your network.**
-> **If using an API key, you will also need to allow egress to `https://api.smith.langchain.com` or `https://eu.api.smith.langchain.com` for API key verification.**
+> **경고**
+> **네트워크에서 `https://beacon.langchain.com`로의 egress가 필요합니다.**
+> **API 키를 사용하는 경우 API 키 확인을 위해 `https://api.smith.langchain.com` 또는 `https://eu.api.smith.langchain.com`로의 egress도 허용해야 합니다.**
 
-Generally, data that we send to Beacon can be categorized as follows:
+일반적으로 Beacon에 전송하는 데이터는 다음과 같이 분류할 수 있습니다:
 
-- **Subscription Metrics**
-  - Subscription metrics are used to determine level of access and utilization of LangSmith. This includes, but are not limited to:
-    - Nodes Executed
-    - Runs Executed
-    - License Key Verification
-- **Operational Metadata**
-  - This metadata will contain and collect the above subscription metrics to assist with remote support, allowing the LangChain team to diagnose and troubleshoot performance issues more effectively and proactively.
+- **구독 메트릭**
+  - 구독 메트릭은 LangSmith의 액세스 수준 및 활용도를 결정하는 데 사용됩니다. 여기에는 다음이 포함되지만 이에 국한되지 않습니다:
+    - 실행된 노드 수
+    - 실행된 Run 수
+    - 라이선스 키 확인
+- **운영 메타데이터**
+  - 이 메타데이터는 원격 지원을 지원하기 위해 위의 구독 메트릭을 포함하고 수집하며, LangChain 팀이 성능 문제를 보다 효과적이고 사전에 진단 및 해결할 수 있도록 합니다.
 
 ## Example Payloads
 
-In an effort to maximize transparency, we provide sample payloads here:
+투명성을 최대화하기 위해 여기에 샘플 페이로드를 제공합니다:
 
-### License Verification (If using an Enterprise License)
+### License Verification (Enterprise 라이선스 사용 시)
 
 **Endpoint:**
 
@@ -48,7 +48,7 @@ In an effort to maximize transparency, we provide sample payloads here:
 }
 ```
 
-### Api Key Verification (If using a LangSmith API Key)
+### Api Key Verification (LangSmith API 키 사용 시)
 
 **Endpoint:**
 `POST api.smith.langchain.com/auth`
@@ -116,4 +116,4 @@ In an effort to maximize transparency, we provide sample payloads here:
 
 ## Our Commitment
 
-LangChain will not store any sensitive information in the Subscription Metrics or Operational Metadata. Any data collected will not be shared with a third party. If you have any concerns about the data being sent, please reach out to your account team.
+LangChain은 구독 메트릭 또는 운영 메타데이터에 민감한 정보를 저장하지 않습니다. 수집된 모든 데이터는 제3자와 공유되지 않습니다. 전송되는 데이터에 대해 우려가 있는 경우 계정 팀에 문의하세요.

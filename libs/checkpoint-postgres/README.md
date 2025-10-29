@@ -1,30 +1,30 @@
 # LangGraph Checkpoint Postgres
 
-Implementation of LangGraph CheckpointSaver that uses Postgres.
+Postgres를 사용하는 LangGraph CheckpointSaver의 구현입니다.
 
-## Dependencies
+## 의존성
 
-By default `langgraph-checkpoint-postgres` installs `psycopg` (Psycopg 3) without any extras. However, you can choose a specific installation that best suits your needs [here](https://www.psycopg.org/psycopg3/docs/basic/install.html) (for example, `psycopg[binary]`).
+기본적으로 `langgraph-checkpoint-postgres`는 추가 항목 없이 `psycopg` (Psycopg 3)를 설치합니다. 그러나 [여기](https://www.psycopg.org/psycopg3/docs/basic/install.html)에서 필요에 가장 적합한 특정 설치를 선택할 수 있습니다 (예: `psycopg[binary]`).
 
-## Usage
-
-> [!IMPORTANT]
-> When using Postgres checkpointers for the first time, make sure to call `.setup()` method on them to create required tables. See example below.
+## 사용법
 
 > [!IMPORTANT]
-> When manually creating Postgres connections and passing them to `PostgresSaver` or `AsyncPostgresSaver`, make sure to include `autocommit=True` and `row_factory=dict_row` (`from psycopg.rows import dict_row`). See a full example in this [how-to guide](https://langchain-ai.github.io/langgraph/how-tos/persistence_postgres/).
+> Postgres 체크포인터를 처음 사용할 때는 필수 테이블을 생성하기 위해 `.setup()` 메서드를 반드시 호출하세요. 아래 예제를 참조하세요.
+
+> [!IMPORTANT]
+> Postgres 연결을 수동으로 생성하여 `PostgresSaver` 또는 `AsyncPostgresSaver`에 전달할 때는 `autocommit=True`와 `row_factory=dict_row` (`from psycopg.rows import dict_row`)를 반드시 포함하세요. 전체 예제는 이 [how-to 가이드](https://langchain-ai.github.io/langgraph/how-tos/persistence_postgres/)를 참조하세요.
 >
-> **Why these parameters are required:**
-> - `autocommit=True`: Required for the `.setup()` method to properly commit the checkpoint tables to the database. Without this, table creation may not be persisted.
-> - `row_factory=dict_row`: Required because the PostgresSaver implementation accesses database rows using dictionary-style syntax (e.g., `row["column_name"]`). The default `tuple_row` factory returns tuples that only support index-based access (e.g., `row[0]`), which will cause `TypeError` exceptions when the checkpointer tries to access columns by name.
+> **이 매개변수들이 필요한 이유:**
+> - `autocommit=True`: `.setup()` 메서드가 체크포인트 테이블을 데이터베이스에 올바르게 커밋하기 위해 필요합니다. 이것이 없으면 테이블 생성이 지속되지 않을 수 있습니다.
+> - `row_factory=dict_row`: PostgresSaver 구현이 딕셔너리 스타일 구문(예: `row["column_name"]`)을 사용하여 데이터베이스 행에 액세스하기 때문에 필요합니다. 기본 `tuple_row` 팩토리는 인덱스 기반 액세스(예: `row[0]`)만 지원하는 튜플을 반환하므로, 체크포인터가 이름으로 열에 액세스하려고 할 때 `TypeError` 예외가 발생합니다.
 >
-> **Example of incorrect usage:**
+> **잘못된 사용 예:**
 > ```python
-> # ❌ This will fail with TypeError during checkpointer operations
-> with psycopg.connect(DB_URI) as conn:  # Missing autocommit=True and row_factory=dict_row
+> # ❌ 체크포인터 작업 중 TypeError로 실패합니다
+> with psycopg.connect(DB_URI) as conn:  # autocommit=True와 row_factory=dict_row가 누락됨
 >     checkpointer = PostgresSaver(conn)
->     checkpointer.setup()  # May not persist tables properly
->     # Any operation that reads from database will fail with:
+>     checkpointer.setup()  # 테이블이 제대로 지속되지 않을 수 있음
+>     # 데이터베이스에서 읽는 모든 작업은 다음과 같이 실패합니다:
 >     # TypeError: tuple indices must be integers or slices, not str
 > ```
 
@@ -36,7 +36,7 @@ read_config = {"configurable": {"thread_id": "1"}}
 
 DB_URI = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
 with PostgresSaver.from_conn_string(DB_URI) as checkpointer:
-    # call .setup() the first time you're using the checkpointer
+    # 체크포인터를 처음 사용할 때 .setup()을 호출합니다
     checkpointer.setup()
     checkpoint = {
         "v": 4,
@@ -63,17 +63,17 @@ with PostgresSaver.from_conn_string(DB_URI) as checkpointer:
         },
     }
 
-    # store checkpoint
+    # 체크포인트 저장
     checkpointer.put(write_config, checkpoint, {}, {})
 
-    # load checkpoint
+    # 체크포인트 로드
     checkpointer.get(read_config)
 
-    # list checkpoints
+    # 체크포인트 목록
     list(checkpointer.list(read_config))
 ```
 
-### Async
+### 비동기
 
 ```python
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
@@ -104,12 +104,12 @@ async with AsyncPostgresSaver.from_conn_string(DB_URI) as checkpointer:
         },
     }
 
-    # store checkpoint
+    # 체크포인트 저장
     await checkpointer.aput(write_config, checkpoint, {}, {})
 
-    # load checkpoint
+    # 체크포인트 로드
     await checkpointer.aget(read_config)
 
-    # list checkpoints
+    # 체크포인트 목록
     [c async for c in checkpointer.alist(read_config)]
 ```

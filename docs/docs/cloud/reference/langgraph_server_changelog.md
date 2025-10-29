@@ -1,8 +1,8 @@
-# LangGraph Server Changelog
+# LangGraph Server 변경 로그
 
-> **Note:** This changelog is no longer actively maintained. For the most up-to-date LangGraph Server changelog, please visit our new documentation site: [LangGraph Server Changelog](https://docs.langchain.com/langgraph-platform/langgraph-server-changelog#langgraph-server-changelog)
+> **참고:** 이 변경 로그는 더 이상 적극적으로 유지되지 않습니다. 최신 LangGraph Server 변경 로그는 새 문서 사이트를 방문하세요: [LangGraph Server Changelog](https://docs.langchain.com/langgraph-platform/langgraph-server-changelog#langgraph-server-changelog)
 
-[LangGraph Server](../../concepts/langgraph_server.md) is an API platform for creating and managing agent-based applications. It provides built-in persistence, a task queue, and supports deploying, configuring, and running assistants (agentic workflows) at scale. This changelog documents all notable updates, features, and fixes to LangGraph Server releases.
+[LangGraph Server](../../concepts/langgraph_server.md)는 에이전트 기반 애플리케이션을 생성하고 관리하기 위한 API 플랫폼입니다. 내장 영속성, 작업 대기열을 제공하며 대규모로 어시스턴트(에이전틱 워크플로)를 배포, 구성 및 실행하는 것을 지원합니다. 이 변경 로그는 LangGraph Server 릴리스에 대한 모든 주목할 만한 업데이트, 기능 및 수정 사항을 문서화합니다.
 
 ---
 

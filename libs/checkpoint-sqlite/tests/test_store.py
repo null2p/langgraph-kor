@@ -22,19 +22,19 @@ from langgraph.store.sqlite import SqliteStore
 from langgraph.store.sqlite.base import SqliteIndexConfig
 
 
-# Local embeddings implementation for testing vector search
+# 벡터 검색 테스트를 위한 로컬 임베딩 구현
 class CharacterEmbeddings(Embeddings):
-    """Simple character-frequency based embeddings using random projections."""
+    """랜덤 프로젝션을 사용한 간단한 문자 빈도 기반 임베딩입니다."""
 
     def __init__(self, dims: int = 50, seed: int = 42):
-        """Initialize with embedding dimensions and random seed."""
+        """임베딩 차원과 랜덤 시드로 초기화합니다."""
         import math
         import random
         from collections import defaultdict
 
         self._rng = random.Random(seed)
         self.dims = dims
-        # Create projection vector for each character lazily
+        # 각 문자에 대한 프로젝션 벡터를 지연 생성
         self._char_projections: dict[str, list[float]] = defaultdict(
             lambda: [
                 self._rng.gauss(0, 1 / math.sqrt(self.dims)) for _ in range(self.dims)
@@ -42,7 +42,7 @@ class CharacterEmbeddings(Embeddings):
         )
 
     def _embed_one(self, text: str) -> list[float]:
-        """Embed a single text."""
+        """단일 텍스트를 임베딩합니다."""
         import math
         from collections import Counter
 
@@ -66,11 +66,11 @@ class CharacterEmbeddings(Embeddings):
         return embedding
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
-        """Embed a list of documents."""
+        """문서 목록을 임베딩합니다."""
         return [self._embed_one(text) for text in texts]
 
     def embed_query(self, text: str) -> list[float]:
-        """Embed a query string."""
+        """쿼리 문자열을 임베딩합니다."""
         return self._embed_one(text)
 
     def __eq__(self, other: Any) -> bool:
@@ -79,14 +79,14 @@ class CharacterEmbeddings(Embeddings):
 
 @pytest.fixture(scope="function", params=["memory", "file"])
 def store(request: Any) -> Generator[SqliteStore, None, None]:
-    """Create a SqliteStore for testing."""
+    """테스트용 SqliteStore를 생성합니다."""
     if request.param == "memory":
-        # In-memory store
+        # 메모리 저장소
         with SqliteStore.from_conn_string(":memory:") as store:
             store.setup()
             yield store
     else:
-        # Temporary file store
+        # 임시 파일 저장소
         temp_file = tempfile.NamedTemporaryFile(delete=False)
         temp_file.close()
         try:
@@ -99,12 +99,12 @@ def store(request: Any) -> Generator[SqliteStore, None, None]:
 
 @pytest.fixture(scope="function")
 def fake_embeddings() -> CharacterEmbeddings:
-    """Create fake embeddings for testing."""
+    """테스트용 가짜 임베딩을 생성합니다."""
     return CharacterEmbeddings(dims=500)
 
 
-# Define vector types and distance types for parametrized tests
-VECTOR_TYPES = ["cosine"]  # SQLite only supports cosine similarity
+# 매개변수화된 테스트를 위한 벡터 타입 및 거리 타입 정의
+VECTOR_TYPES = ["cosine"]  # SQLite는 코사인 유사도만 지원
 
 
 @contextmanager
@@ -114,12 +114,12 @@ def create_vector_store(
     distance_type: str = "cosine",
     conn_type: Literal["memory", "file"] = "memory",
 ) -> Generator[SqliteStore, None, None]:
-    """Create a SqliteStore with vector search enabled."""
+    """벡터 검색이 활성화된 SqliteStore를 생성합니다."""
     index_config: SqliteIndexConfig = {
         "dims": fake_embeddings.dims,
         "embed": fake_embeddings,
         "text_fields": text_fields,
-        "distance_type": distance_type,  # This is for API consistency but SQLite only supports cosine
+        "distance_type": distance_type,  # API 일관성을 위한 것이지만 SQLite는 코사인만 지원
     }
     if conn_type == "memory":
         conn_str = ":memory:"
@@ -138,7 +138,7 @@ def create_vector_store(
 
 
 def test_batch_order(store: SqliteStore) -> None:
-    # Setup test data
+    # 테스트 데이터 설정
     store.put(("test", "foo"), "key1", {"data": "value1"})
     store.put(("test", "bar"), "key2", {"data": "value2"})
 
@@ -161,18 +161,18 @@ def test_batch_order(store: SqliteStore) -> None:
     assert results[0].value == {"data": "value1"}
     assert results[0].key == "key1"
     assert results[0].namespace == ("test", "foo")
-    assert results[1] is None  # Put operation returns None
+    assert results[1] is None  # Put 작업은 None을 반환
     assert isinstance(results[2], list)
     assert len(results[2]) == 1
     assert results[2][0].key == "key1"
     assert results[2][0].value == {"data": "value1"}
     assert isinstance(results[3], list)
-    assert len(results[3]) > 0  # Should contain at least our test namespaces
+    assert len(results[3]) > 0  # 최소한 우리의 테스트 네임스페이스를 포함해야 함
     assert ("test", "foo") in results[3]
     assert ("test", "bar") in results[3]
-    assert results[4] is None  # Non-existent key returns None
+    assert results[4] is None  # 존재하지 않는 키는 None을 반환
 
-    # Test reordered operations
+    # 재정렬된 작업 테스트
     ops_reordered = [
         SearchOp(namespace_prefix=("test",), filter=None, limit=5, offset=0),
         GetOp(namespace=("test", "bar"), key="key2"),
@@ -186,34 +186,34 @@ def test_batch_order(store: SqliteStore) -> None:
     )
     assert len(results_reordered) == 5
     assert isinstance(results_reordered[0], list)
-    assert len(results_reordered[0]) >= 2  # Should find at least our two test items
+    assert len(results_reordered[0]) >= 2  # 최소한 두 개의 테스트 항목을 찾아야 함
     assert isinstance(results_reordered[1], Item)
     assert results_reordered[1].value == {"data": "value2"}
     assert results_reordered[1].key == "key2"
     assert results_reordered[1].namespace == ("test", "bar")
     assert isinstance(results_reordered[2], list)
     assert len(results_reordered[2]) > 0
-    assert results_reordered[3] is None  # Put operation returns None
+    assert results_reordered[3] is None  # Put 작업은 None을 반환
     assert isinstance(results_reordered[4], Item)
     assert results_reordered[4].value == {"data": "value1"}
     assert results_reordered[4].key == "key1"
     assert results_reordered[4].namespace == ("test", "foo")
 
-    # Verify the put worked
+    # put이 작동했는지 확인
     item3 = store.get(("test",), "key3")
     assert item3 is not None
     assert item3.value == {"data": "value3"}
 
 
 def test_batch_get_ops(store: SqliteStore) -> None:
-    # Setup test data
+    # 테스트 데이터 설정
     store.put(("test",), "key1", {"data": "value1"})
     store.put(("test",), "key2", {"data": "value2"})
 
     ops = [
         GetOp(namespace=("test",), key="key1"),
         GetOp(namespace=("test",), key="key2"),
-        GetOp(namespace=("test",), key="key3"),  # Non-existent key
+        GetOp(namespace=("test",), key="key3"),  # 존재하지 않는 키
     ]
 
     results = store.batch(ops)
@@ -230,14 +230,14 @@ def test_batch_put_ops(store: SqliteStore) -> None:
     ops = [
         PutOp(namespace=("test",), key="key1", value={"data": "value1"}),
         PutOp(namespace=("test",), key="key2", value={"data": "value2"}),
-        PutOp(namespace=("test",), key="key3", value=None),  # Delete operation
+        PutOp(namespace=("test",), key="key3", value=None),  # 삭제 작업
     ]
 
     results = store.batch(ops)
     assert len(results) == 3
     assert all(result is None for result in results)
 
-    # Verify the puts worked
+    # put이 작동했는지 확인
     item1 = store.get(("test",), "key1")
     item2 = store.get(("test",), "key2")
     item3 = store.get(("test",), "key3")
@@ -248,7 +248,7 @@ def test_batch_put_ops(store: SqliteStore) -> None:
 
 
 def test_batch_search_ops(store: SqliteStore) -> None:
-    # Setup test data
+    # 테스트 데이터 설정
     test_data = [
         (("test", "foo"), "key1", {"data": "value1", "tag": "a"}),
         (("test", "bar"), "key2", {"data": "value2", "tag": "a"}),
@@ -266,20 +266,20 @@ def test_batch_search_ops(store: SqliteStore) -> None:
     results = store.batch(ops)
     assert len(results) == 3
 
-    # First search should find items with tag "a"
+    # 첫 번째 검색은 tag "a"를 가진 항목을 찾아야 함
     assert len(results[0]) == 2
     assert all(item.value["tag"] == "a" for item in results[0])
 
-    # Second search should return first 2 items
+    # 두 번째 검색은 처음 2개의 항목을 반환해야 함
     assert len(results[1]) == 2
 
-    # Third search should only find items in test/foo namespace
+    # 세 번째 검색은 test/foo 네임스페이스의 항목만 찾아야 함
     assert len(results[2]) == 1
     assert results[2][0].namespace == ("test", "foo")
 
 
 def test_batch_list_namespaces_ops(store: SqliteStore) -> None:
-    # Setup test data with various namespaces
+    # 테스트 데이터 설정 with various namespaces
     test_data = [
         (("test", "documents", "public"), "doc1", {"content": "public doc"}),
         (("test", "documents", "private"), "doc2", {"content": "private doc"}),
@@ -305,13 +305,13 @@ def test_batch_list_namespaces_ops(store: SqliteStore) -> None:
     )
     assert len(results) == 3
 
-    # First operation should list all namespaces
+    # 첫 번째 작업은 모든 네임스페이스를 나열해야 함
     assert len(results[0]) == len(test_data)
 
-    # Second operation should only return namespaces up to depth 2
+    # 두 번째 작업은 깊이 2까지의 네임스페이스만 반환해야 함
     assert all(len(ns) <= 2 for ns in results[1])
 
-    # Third operation should only return namespaces ending with "public"
+    # 세 번째 작업은 "public"으로 끝나는 네임스페이스만 반환해야 함
     assert all(ns[-1] == "public" for ns in results[2])
 
 
@@ -331,8 +331,8 @@ class TestSqliteStore:
             assert item.key == item_id
             assert item.value == item_value
 
-            # Test update
-            # Small delay to ensure the updated timestamp is different
+            # 업데이트 테스트
+            # 업데이트된 타임스탬프가 다른지 확인하기 위한 약간의 지연
             import time
 
             time.sleep(0.01)
@@ -342,15 +342,15 @@ class TestSqliteStore:
             updated_item = store.get(namespace, item_id)
 
             assert updated_item.value == updated_value
-            # Don't check timestamps because SQLite execution might be too fast
+            # SQLite 실행이 너무 빠를 수 있으므로 타임스탬프는 확인하지 않음
             # assert updated_item.updated_at > item.updated_at
 
-            # Test get from non-existent namespace
+            # 존재하지 않는 네임스페이스에서 가져오기 테스트
             different_namespace = ("test", "other_documents")
             item_in_different_namespace = store.get(different_namespace, item_id)
             assert item_in_different_namespace is None
 
-            # Test delete
+            # 삭제 테스트
             store.delete(namespace, item_id)
             deleted_item = store.get(namespace, item_id)
             assert deleted_item is None
@@ -358,7 +358,7 @@ class TestSqliteStore:
     def test_list_namespaces(self) -> None:
         with SqliteStore.from_conn_string(":memory:") as store:
             store.setup()
-            # Create test data with various namespaces
+            # 다양한 네임스페이스로 테스트 데이터 생성
             test_namespaces = [
                 ("test", "documents", "public"),
                 ("test", "documents", "private"),
@@ -368,40 +368,40 @@ class TestSqliteStore:
                 ("prod", "documents", "private"),
             ]
 
-            # Insert test data
+            # 테스트 데이터 삽입
             for namespace in test_namespaces:
                 store.put(namespace, "dummy", {"content": "dummy"})
 
-            # Test listing with various filters
+            # 다양한 필터로 나열 테스트
             all_namespaces = store.list_namespaces()
             assert len(all_namespaces) == len(test_namespaces)
 
-            # Test prefix filtering
+            # 프리픽스 필터링 테스트
             test_prefix_namespaces = store.list_namespaces(prefix=["test"])
             assert len(test_prefix_namespaces) == 4
             assert all(ns[0] == "test" for ns in test_prefix_namespaces)
 
-            # Test suffix filtering
+            # 서픽스 필터링 테스트
             public_namespaces = store.list_namespaces(suffix=["public"])
             assert len(public_namespaces) == 3
             assert all(ns[-1] == "public" for ns in public_namespaces)
 
-            # Test max depth
+            # 최대 깊이 테스트
             depth_2_namespaces = store.list_namespaces(max_depth=2)
             assert all(len(ns) <= 2 for ns in depth_2_namespaces)
 
-            # Test pagination
+            # 페이지네이션 테스트
             paginated_namespaces = store.list_namespaces(limit=3)
             assert len(paginated_namespaces) == 3
 
-            # Cleanup
+            # 정리
             for namespace in test_namespaces:
                 store.delete(namespace, "dummy")
 
     def test_search(self) -> None:
         with SqliteStore.from_conn_string(":memory:") as store:
             store.setup()
-            # Create test data
+            # 테스트 데이터 생성
             test_data = [
                 (
                     ("test", "docs"),
@@ -423,42 +423,42 @@ class TestSqliteStore:
             for namespace, key, value in test_data:
                 store.put(namespace, key, value)
 
-            # Test basic search
+            # 기본 검색 테스트
             all_items = store.search(["test"])
             assert len(all_items) == 3
 
-            # Test namespace filtering
+            # 네임스페이스 필터링 테스트
             docs_items = store.search(["test", "docs"])
             assert len(docs_items) == 2
             assert all(item.namespace == ("test", "docs") for item in docs_items)
 
-            # Test value filtering
+            # 값 필터링 테스트
             alice_items = store.search(["test"], filter={"author": "Alice"})
             assert len(alice_items) == 2
             assert all(item.value["author"] == "Alice" for item in alice_items)
 
-            # Test pagination
+            # 페이지네이션 테스트
             paginated_items = store.search(["test"], limit=2)
             assert len(paginated_items) == 2
 
             offset_items = store.search(["test"], offset=2)
             assert len(offset_items) == 1
 
-            # Cleanup
+            # 정리
             for namespace, key, _ in test_data:
                 store.delete(namespace, key)
 
 
 def test_vector_store_initialization(fake_embeddings: CharacterEmbeddings) -> None:
-    """Test store initialization with embedding config."""
-    # Basic initialization
+    """임베딩 구성으로 저장소 초기화를 테스트합니다."""
+    # 기본 초기화
     with create_vector_store(fake_embeddings) as store:
         assert store.index_config is not None
         assert store.embeddings == fake_embeddings
         assert store.index_config["dims"] == fake_embeddings.dims
         assert store.index_config.get("text_fields") is None
 
-    # With text fields specified
+    # 텍스트 필드 지정
     text_fields = ["content", "title"]
     with create_vector_store(fake_embeddings, text_fields=text_fields) as store:
         assert store.index_config is not None
@@ -484,7 +484,7 @@ def test_vector_insert_with_auto_embedding(
     distance_type: str,
     conn_type: Literal["memory", "file"],
 ) -> None:
-    """Test inserting items that get auto-embedded."""
+    """자동으로 임베딩되는 항목 삽입을 테스트합니다."""
     with create_vector_store(
         fake_embeddings, distance_type=distance_type, conn_type=conn_type
     ) as store:
@@ -515,7 +515,7 @@ def test_vector_update_with_embedding(
     distance_type: str,
     conn_type: Literal["memory", "file"],
 ) -> None:
-    """Test that updating items properly updates their embeddings."""
+    """항목을 업데이트할 때 임베딩이 올바르게 업데이트되는지 테스트합니다."""
     with create_vector_store(
         fake_embeddings, distance_type=distance_type, conn_type=conn_type
     ) as store:
@@ -539,7 +539,7 @@ def test_vector_update_with_embedding(
             if r.key == "doc1":
                 assert r.score > after_score
 
-        # Don't index this one
+        # 이것은 인덱싱하지 않음
         store.put(("test",), "doc4", {"text": "new text about dogs"}, index=False)
         results_new = store.search(("test",), query="new text about dogs", limit=3)
         assert not any(r.key == "doc4" for r in results_new)
@@ -550,9 +550,9 @@ def test_vector_search_with_filters(
     fake_embeddings: CharacterEmbeddings,
     distance_type: str,
 ) -> None:
-    """Test combining vector search with filters."""
+    """벡터 검색과 필터를 결합하는 것을 테스트합니다."""
     with create_vector_store(fake_embeddings, distance_type=distance_type) as store:
-        # Insert test documents
+        # 테스트 문서 삽입
         docs = [
             ("doc1", {"text": "red apple", "color": "red", "score": 4.5}),
             ("doc2", {"text": "red car", "color": "red", "score": 3.0}),
@@ -585,7 +585,7 @@ def test_vector_search_with_filters(
         assert "doc1" in high_score_keys  # score 4.5
         assert "doc3" in high_score_keys  # score 4.0
 
-        # Multiple filters
+        # 여러 필터
         results = store.search(
             ("test",), query="apple", filter={"score": {"$gte": 4.0}, "color": "green"}
         )

@@ -13,8 +13,8 @@ __all__ = ("AnyValue",)
 
 
 class AnyValue(Generic[Value], BaseChannel[Value, Value, Value]):
-    """Stores the last value received, assumes that if multiple values are
-    received, they are all equal."""
+    """수신된 마지막 값을 저장하며, 여러 값이 수신되면
+    모두 동일하다고 가정합니다."""
 
     __slots__ = ("typ", "value")
 
@@ -29,16 +29,16 @@ class AnyValue(Generic[Value], BaseChannel[Value, Value, Value]):
 
     @property
     def ValueType(self) -> type[Value]:
-        """The type of the value stored in the channel."""
+        """채널에 저장된 값의 타입입니다."""
         return self.typ
 
     @property
     def UpdateType(self) -> type[Value]:
-        """The type of the update received by the channel."""
+        """채널이 받는 업데이트의 타입입니다."""
         return self.typ
 
     def copy(self) -> Self:
-        """Return a copy of the channel."""
+        """채널의 복사본을 반환합니다."""
         empty = self.__class__(self.typ, self.key)
         empty.value = self.value
         return empty

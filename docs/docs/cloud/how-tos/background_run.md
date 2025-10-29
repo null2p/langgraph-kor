@@ -1,12 +1,12 @@
-# How to kick off background runs
- 
+# 백그라운드 실행을 시작하는 방법
 
-This guide covers how to kick off background runs for your agent.
-This can be useful for long running jobs.
 
-## Setup
+이 가이드는 에이전트에 대한 백그라운드 실행을 시작하는 방법을 다룹니다.
+이는 장기 실행 작업에 유용할 수 있습니다.
 
-First let's set up our client and thread:
+## 설정
+
+먼저 클라이언트와 스레드를 설정합니다:
 
 === "Python"
 
@@ -43,7 +43,7 @@ First let's set up our client and thread:
       --data '{}'
     ```
 
-Output:
+출력:
 
     {
         'thread_id': '5cb1e8a1-34b3-4a61-a34e-71a9799bd00d',
@@ -55,9 +55,9 @@ Output:
         'values': None
     }
 
-## Check runs on thread
+## 스레드의 실행 확인
 
-If we list the current runs on this thread, we will see that it's empty:
+이 스레드의 현재 실행을 나열하면 비어 있음을 확인할 수 있습니다:
 
 === "Python"
 
@@ -80,13 +80,13 @@ If we list the current runs on this thread, we will see that it's empty:
         --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs
     ```
 
-Output:
+출력:
 
     []
 
-## Start runs on thread
+## 스레드에서 실행 시작
 
-Now let's kick off a run:
+이제 실행을 시작해 보겠습니다:
 
 === "Python"
 
@@ -113,7 +113,7 @@ Now let's kick off a run:
         }'
     ```
 
-The first time we poll it, we can see `status=pending`:
+처음 폴링할 때 `status=pending`을 확인할 수 있습니다:
 
 === "Python"
 
@@ -134,7 +134,7 @@ The first time we poll it, we can see `status=pending`:
         --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/<RUN_ID>
     ```
 
-Output:
+출력:
 
         {
             "run_id": "1ef6a5f8-bd86-6763-bbd6-bff042db7b1b",
@@ -180,7 +180,7 @@ Output:
 
 
 
-Now we can join the run, wait for it to finish and check that status again:
+이제 실행에 조인하고, 완료될 때까지 기다린 후 상태를 다시 확인할 수 있습니다:
 
 === "Python"
 
@@ -205,7 +205,7 @@ Now we can join the run, wait for it to finish and check that status again:
         --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/<RUN_ID>
     ```
 
-Output:
+출력:
 
     {
         "run_id": "1ef6a5f8-bd86-6763-bbd6-bff042db7b1b",
@@ -250,7 +250,7 @@ Output:
     }
 
 
-Perfect! The run succeeded as we would expect. We can double check that the run worked as expected by printing out the final state:
+완벽합니다! 예상대로 실행이 성공했습니다. 최종 상태를 출력하여 실행이 예상대로 작동했는지 다시 확인할 수 있습니다:
 
 === "Python"
 
@@ -273,7 +273,7 @@ Perfect! The run succeeded as we would expect. We can double check that the run 
         --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/state
     ```
 
-Output:
+출력:
 
     {
         "values": {
@@ -425,7 +425,7 @@ Output:
         "parent_checkpoint_id": "1ef67141-2129-6b37-8002-61fc3bf69cb5"
     }
 
-We can also just print the content of the last AIMessage:
+마지막 AIMessage의 내용만 출력할 수도 있습니다:
 
 === "Python"
 
@@ -446,6 +446,6 @@ We can also just print the content of the last AIMessage:
         --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/state | jq -r '.values.messages[-1].content.[0].text'
     ```
 
-Output:
+출력:
 
     The search results provide the current weather conditions in San Francisco. According to the data, as of 2:00 PM on August 30, 2024, the temperature in San Francisco is 70°F (21.1°C) with partly cloudy skies. The wind is blowing from the west-northwest at around 12 mph (19 km/h). The humidity is 59% and visibility is 9 miles (16 km). Overall, it looks like a nice late summer day in San Francisco with comfortable temperatures and partly sunny conditions.

@@ -1,12 +1,12 @@
-"""Base classes and types for persistent key-value stores.
+"""영구 키-값 저장소를 위한 기본 클래스 및 타입입니다.
 
-Stores provide long-term memory that persists across threads and conversations.
-Supports hierarchical namespaces, key-value storage, and optional vector search.
+저장소는 스레드 및 대화에 걸쳐 지속되는 장기 메모리를 제공합니다.
+계층적 네임스페이스, 키-값 저장 및 선택적 벡터 검색을 지원합니다.
 
-Core types:
-    - `BaseStore`: Store interface with sync/async operations
-    - `Item`: Stored key-value pairs with metadata
-    - `Op`: Get/Put/Search/List operations
+핵심 타입:
+    - `BaseStore`: 동기/비동기 작업을 지원하는 저장소 인터페이스
+    - `Item`: 메타데이터가 있는 저장된 키-값 쌍
+    - `Op`: Get/Put/Search/List 작업
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ from langgraph.store.base.embed import (
 
 
 class NotProvided:
-    """Sentinel singleton."""
+    """센티넬 싱글톤입니다."""
 
     def __bool__(self) -> Literal[False]:
         return False
@@ -49,16 +49,16 @@ NOT_PROVIDED = NotProvided()
 
 
 class Item:
-    """Represents a stored item with metadata.
+    """메타데이터가 있는 저장된 항목을 나타냅니다.
 
     Args:
-        value: The stored data as a dictionary. Keys are filterable.
-        key: Unique identifier within the namespace.
-        namespace: Hierarchical path defining the collection in which this document resides.
-            Represented as a tuple of strings, allowing for nested categorization.
-            For example: `("documents", 'user123')`
-        created_at: Timestamp of item creation.
-        updated_at: Timestamp of last update.
+        value: 딕셔너리로 저장된 데이터입니다. 키는 필터링 가능합니다.
+        key: 네임스페이스 내의 고유 식별자입니다.
+        namespace: 이 문서가 속한 컬렉션을 정의하는 계층적 경로입니다.
+            문자열 튜플로 표현되어 중첩 분류를 허용합니다.
+            예: `("documents", 'user123')`
+        created_at: 항목 생성 타임스탬프입니다.
+        updated_at: 마지막 업데이트 타임스탬프입니다.
     """
 
     __slots__ = ("value", "key", "namespace", "created_at", "updated_at")
@@ -74,8 +74,8 @@ class Item:
     ):
         self.value = value
         self.key = key
-        # The casting from json-like types is for if this object is
-        # deserialized.
+        # json과 유사한 타입에서의 캐스팅은 이 객체가
+        # 역직렬화된 경우를 위한 것입니다.
         self.namespace = tuple(namespace)
         self.created_at = (
             datetime.fromisoformat(cast(str, created_at))
@@ -116,7 +116,7 @@ class Item:
 
 
 class SearchItem(Item):
-    """Represents an item returned from a search operation with additional metadata."""
+    """추가 메타데이터와 함께 검색 작업에서 반환된 항목을 나타냅니다."""
 
     __slots__ = ("score",)
 
@@ -129,15 +129,15 @@ class SearchItem(Item):
         updated_at: datetime,
         score: float | None = None,
     ) -> None:
-        """Initialize a result item.
+        """결과 항목을 초기화합니다.
 
         Args:
-            namespace: Hierarchical path to the item.
-            key: Unique identifier within the namespace.
-            value: The stored value.
-            created_at: When the item was first created.
-            updated_at: When the item was last updated.
-            score: Relevance/similarity score if from a ranked operation.
+            namespace: 항목으로의 계층적 경로입니다.
+            key: 네임스페이스 내의 고유 식별자입니다.
+            value: 저장된 값입니다.
+            created_at: 항목이 처음 생성된 시간입니다.
+            updated_at: 항목이 마지막으로 업데이트된 시간입니다.
+            score: 순위 작업에서 온 경우 관련성/유사도 점수입니다.
         """
         super().__init__(
             value=value,
@@ -155,14 +155,14 @@ class SearchItem(Item):
 
 
 class GetOp(NamedTuple):
-    """Operation to retrieve a specific item by its namespace and key.
+    """네임스페이스와 키로 특정 항목을 검색하는 작업입니다.
 
-    This operation allows precise retrieval of stored items using their full path
-    (namespace) and unique identifier (key) combination.
+    이 작업은 전체 경로(네임스페이스)와 고유 식별자(키) 조합을 사용하여
+    저장된 항목을 정확하게 검색할 수 있게 합니다.
 
     ???+ example "Examples"
 
-        Basic item retrieval:
+        기본 항목 검색:
 
         ```python
         GetOp(namespace=("users", "profiles"), key="user123")
@@ -171,32 +171,32 @@ class GetOp(NamedTuple):
     """
 
     namespace: tuple[str, ...]
-    """Hierarchical path that uniquely identifies the item's location.
+    """항목의 위치를 고유하게 식별하는 계층적 경로입니다.
 
     ???+ example "Examples"
 
         ```python
-        ("users",)  # Root level users namespace
-        ("users", "profiles")  # Profiles within users namespace
+        ("users",)  # 루트 레벨 users 네임스페이스
+        ("users", "profiles")  # users 네임스페이스 내의 프로필
         ```
     """
 
     key: str
-    """Unique identifier for the item within its specific namespace.
+    """특정 네임스페이스 내 항목의 고유 식별자입니다.
 
     ???+ example "Examples"
 
         ```python
-        "user123"  # For a user profile
-        "doc456"  # For a document
+        "user123"  # 사용자 프로필용
+        "doc456"  # 문서용
         ```
     """
     refresh_ttl: bool = True
-    """Whether to refresh TTLs for the returned item.
+    """반환된 항목의 TTL을 갱신할지 여부입니다.
 
-    If no TTL was specified for the original item(s),
-    or if TTL support is not enabled for your adapter,
-    this argument is ignored.
+    원본 항목에 TTL이 지정되지 않았거나,
+    어댑터에 TTL 지원이 활성화되지 않은 경우
+    이 인수는 무시됩니다.
     """
 
 

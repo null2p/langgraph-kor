@@ -58,64 +58,64 @@ __all__ = (
 )
 
 Durability = Literal["sync", "async", "exit"]
-"""Durability mode for the graph execution.
-- `"sync"`: Changes are persisted synchronously before the next step starts.
-- `"async"`: Changes are persisted asynchronously while the next step executes.
-- `"exit"`: Changes are persisted only when the graph exits."""
+"""그래프 실행의 내구성 모드입니다.
+- `"sync"`: 다음 단계가 시작되기 전에 변경 사항이 동기적으로 영속화됩니다.
+- `"async"`: 다음 단계가 실행되는 동안 변경 사항이 비동기적으로 영속화됩니다.
+- `"exit"`: 그래프가 종료될 때만 변경 사항이 영속화됩니다."""
 
 All = Literal["*"]
-"""Special value to indicate that graph should interrupt on all nodes."""
+"""그래프가 모든 노드에서 중단되어야 함을 나타내는 특수 값입니다."""
 
 Checkpointer = None | bool | BaseCheckpointSaver
-"""Type of the checkpointer to use for a subgraph.
-- True enables persistent checkpointing for this subgraph.
-- False disables checkpointing, even if the parent graph has a checkpointer.
-- None inherits checkpointer from the parent graph."""
+"""서브그래프에 사용할 체크포인터의 타입입니다.
+- True는 이 서브그래프의 영속적 체크포인팅을 활성화합니다.
+- False는 부모 그래프에 체크포인터가 있어도 체크포인팅을 비활성화합니다.
+- None은 부모 그래프로부터 체크포인터를 상속받습니다."""
 
 StreamMode = Literal[
     "values", "updates", "checkpoints", "tasks", "debug", "messages", "custom"
 ]
-"""How the stream method should emit outputs.
+"""stream 메서드가 출력을 방출하는 방식입니다.
 
-- `"values"`: Emit all values in the state after each step, including interrupts.
-    When used with functional API, values are emitted once at the end of the workflow.
-- `"updates"`: Emit only the node or task names and updates returned by the nodes or tasks after each step.
-    If multiple updates are made in the same step (e.g. multiple nodes are run) then those updates are emitted separately.
-- `"custom"`: Emit custom data using from inside nodes or tasks using `StreamWriter`.
-- `"messages"`: Emit LLM messages token-by-token together with metadata for any LLM invocations inside nodes or tasks.
-- `"checkpoints"`: Emit an event when a checkpoint is created, in the same format as returned by `get_state()`.
-- `"tasks"`: Emit events when tasks start and finish, including their results and errors.
-- `"debug"`: Emit `"checkpoints"` and `"tasks"` events for debugging purposes.
+- `"values"`: 중단을 포함하여 각 단계 후 상태의 모든 값을 방출합니다.
+    함수형 API와 함께 사용되는 경우, 값은 워크플로우 끝에 한 번 방출됩니다.
+- `"updates"`: 각 단계 후 노드 또는 작업 이름과 노드 또는 작업이 반환한 업데이트만 방출합니다.
+    동일한 단계에서 여러 업데이트가 이루어지면 (예: 여러 노드가 실행되면) 해당 업데이트들이 별도로 방출됩니다.
+- `"custom"`: `StreamWriter`를 사용하여 노드 또는 작업 내부에서 사용자 정의 데이터를 방출합니다.
+- `"messages"`: 노드 또는 작업 내부의 모든 LLM 호출에 대한 메타데이터와 함께 LLM 메시지를 토큰별로 방출합니다.
+- `"checkpoints"`: 체크포인트가 생성될 때 `get_state()`가 반환하는 것과 동일한 형식으로 이벤트를 방출합니다.
+- `"tasks"`: 작업이 시작되고 완료될 때 결과와 오류를 포함하여 이벤트를 방출합니다.
+- `"debug"`: 디버깅 목적으로 `"checkpoints"` 및 `"tasks"` 이벤트를 방출합니다.
 """
 
 StreamWriter = Callable[[Any], None]
-"""`Callable` that accepts a single argument and writes it to the output stream.
-Always injected into nodes if requested as a keyword argument, but it's a no-op
-when not using `stream_mode="custom"`."""
+"""단일 인자를 받아 출력 스트림에 기록하는 `Callable`입니다.
+키워드 인자로 요청되면 항상 노드에 주입되지만,
+`stream_mode="custom"`을 사용하지 않으면 작동하지 않습니다."""
 
 _DC_KWARGS = {"kw_only": True, "slots": True, "frozen": True}
 
 
 class RetryPolicy(NamedTuple):
-    """Configuration for retrying nodes.
+    """노드 재시도 설정입니다.
 
-    !!! version-added "Added in version 0.2.24"
+    !!! version-added "버전 0.2.24에서 추가됨"
     """
 
     initial_interval: float = 0.5
-    """Amount of time that must elapse before the first retry occurs. In seconds."""
+    """첫 번째 재시도가 발생하기 전에 경과해야 하는 시간입니다. 초 단위입니다."""
     backoff_factor: float = 2.0
-    """Multiplier by which the interval increases after each retry."""
+    """각 재시도 후 간격이 증가하는 배수입니다."""
     max_interval: float = 128.0
-    """Maximum amount of time that may elapse between retries. In seconds."""
+    """재시도 간에 경과할 수 있는 최대 시간입니다. 초 단위입니다."""
     max_attempts: int = 3
-    """Maximum number of attempts to make before giving up, including the first."""
+    """첫 번째 시도를 포함하여 포기하기 전에 시도할 최대 횟수입니다."""
     jitter: bool = True
-    """Whether to add random jitter to the interval between retries."""
+    """재시도 간 간격에 무작위 지터를 추가할지 여부입니다."""
     retry_on: (
         type[Exception] | Sequence[type[Exception]] | Callable[[Exception], bool]
     ) = default_retry_on
-    """List of exception classes that should trigger a retry, or a callable that returns `True` for exceptions that should trigger a retry."""
+    """재시도를 트리거해야 하는 예외 클래스 목록이거나, 재시도를 트리거해야 하는 예외에 대해 `True`를 반환하는 callable입니다."""
 
 
 KeyFuncT = TypeVar("KeyFuncT", bound=Callable[..., str | bytes])
@@ -123,14 +123,14 @@ KeyFuncT = TypeVar("KeyFuncT", bound=Callable[..., str | bytes])
 
 @dataclass(**_DC_KWARGS)
 class CachePolicy(Generic[KeyFuncT]):
-    """Configuration for caching nodes."""
+    """노드 캐싱 설정입니다."""
 
     key_func: KeyFuncT = default_cache_key  # type: ignore[assignment]
-    """Function to generate a cache key from the node's input.
-    Defaults to hashing the input with pickle."""
+    """노드의 입력으로부터 캐시 키를 생성하는 함수입니다.
+    기본값은 pickle로 입력을 해싱합니다."""
 
     ttl: int | None = None
-    """Time to live for the cache entry in seconds. If `None`, the entry never expires."""
+    """캐시 항목의 수명(초)입니다. `None`이면 항목이 만료되지 않습니다."""
 
 
 _DEFAULT_INTERRUPT_ID = "placeholder-id"
@@ -139,28 +139,28 @@ _DEFAULT_INTERRUPT_ID = "placeholder-id"
 @final
 @dataclass(init=False, slots=True)
 class Interrupt:
-    """Information about an interrupt that occurred in a node.
+    """노드에서 발생한 중단에 대한 정보입니다.
 
-    !!! version-added "Added in version 0.2.24"
+    !!! version-added "버전 0.2.24에서 추가됨"
 
-    !!! version-changed "Changed in version v0.4.0"
-        * `interrupt_id` was introduced as a property
+    !!! version-changed "버전 v0.4.0에서 변경됨"
+        * `interrupt_id`가 속성으로 도입됨
 
-    !!! version-changed "Changed in version v0.6.0"
+    !!! version-changed "버전 v0.6.0에서 변경됨"
 
-        The following attributes have been removed:
+        다음 속성이 제거되었습니다:
 
         * `ns`
         * `when`
         * `resumable`
-        * `interrupt_id`, deprecated in favor of `id`
+        * `interrupt_id`, `id`로 대체되어 지원 중단됨
     """
 
     value: Any
-    """The value associated with the interrupt."""
+    """중단과 연관된 값입니다."""
 
     id: str
-    """The ID of the interrupt. Can be used to resume the interrupt directly."""
+    """중단의 ID입니다. 중단을 직접 재개하는 데 사용할 수 있습니다."""
 
     def __init__(
         self,
@@ -201,7 +201,7 @@ class StateUpdate(NamedTuple):
 
 
 class PregelTask(NamedTuple):
-    """A Pregel task."""
+    """Pregel 작업입니다."""
 
     id: str
     name: str
@@ -219,14 +219,14 @@ else:
 
 
 class CacheKey(NamedTuple):
-    """Cache key for a task."""
+    """작업의 캐시 키입니다."""
 
     ns: tuple[str, ...]
-    """Namespace for the cache entry."""
+    """캐시 항목의 네임스페이스입니다."""
     key: str
-    """Key for the cache entry."""
+    """캐시 항목의 키입니다."""
     ttl: int | None
-    """Time to live for the cache entry in seconds."""
+    """캐시 항목의 수명(초)입니다."""
 
 
 @dataclass(**_T_DC_KWARGS)
@@ -246,44 +246,43 @@ class PregelExecutableTask:
 
 
 class StateSnapshot(NamedTuple):
-    """Snapshot of the state of the graph at the beginning of a step."""
+    """단계 시작 시 그래프 상태의 스냅샷입니다."""
 
     values: dict[str, Any] | Any
-    """Current values of channels."""
+    """채널의 현재 값입니다."""
     next: tuple[str, ...]
-    """The name of the node to execute in each task for this step."""
+    """이 단계의 각 작업에서 실행할 노드의 이름입니다."""
     config: RunnableConfig
-    """Config used to fetch this snapshot."""
+    """이 스냅샷을 가져오는 데 사용된 설정입니다."""
     metadata: CheckpointMetadata | None
-    """Metadata associated with this snapshot."""
+    """이 스냅샷과 연관된 메타데이터입니다."""
     created_at: str | None
-    """Timestamp of snapshot creation."""
+    """스냅샷 생성 타임스탬프입니다."""
     parent_config: RunnableConfig | None
-    """Config used to fetch the parent snapshot, if any."""
+    """있는 경우 부모 스냅샷을 가져오는 데 사용된 설정입니다."""
     tasks: tuple[PregelTask, ...]
-    """Tasks to execute in this step. If already attempted, may contain an error."""
+    """이 단계에서 실행할 작업입니다. 이미 시도된 경우 오류를 포함할 수 있습니다."""
     interrupts: tuple[Interrupt, ...]
-    """Interrupts that occurred in this step that are pending resolution."""
+    """이 단계에서 발생하여 해결이 보류 중인 중단입니다."""
 
 
 class Send:
-    """A message or packet to send to a specific node in the graph.
+    """그래프의 특정 노드로 전송할 메시지 또는 패킷입니다.
 
-    The `Send` class is used within a `StateGraph`'s conditional edges to
-    dynamically invoke a node with a custom state at the next step.
+    `Send` 클래스는 `StateGraph`의 조건부 엣지 내에서 사용되어
+    다음 단계에서 사용자 정의 상태로 노드를 동적으로 호출합니다.
 
-    Importantly, the sent state can differ from the core graph's state,
-    allowing for flexible and dynamic workflow management.
+    중요한 점은 전송된 상태가 핵심 그래프의 상태와 다를 수 있어,
+    유연하고 동적인 워크플로우 관리가 가능하다는 것입니다.
 
-    One such example is a "map-reduce" workflow where your graph invokes
-    the same node multiple times in parallel with different states,
-    before aggregating the results back into the main graph's state.
+    한 가지 예로, 그래프가 다른 상태로 동일한 노드를 여러 번 병렬로 호출한 후
+    결과를 메인 그래프의 상태로 다시 집계하는 "map-reduce" 워크플로우가 있습니다.
 
-    Attributes:
-        node (str): The name of the target node to send the message to.
-        arg (Any): The state or message to send to the target node.
+    속성:
+        node (str): 메시지를 전송할 대상 노드의 이름입니다.
+        arg (Any): 대상 노드로 전송할 상태 또는 메시지입니다.
 
-    Examples:
+    예제:
         >>> from typing import Annotated
         >>> import operator
         >>> class OverallState(TypedDict):
@@ -300,7 +299,7 @@ class Send:
         >>> builder.add_edge("generate_joke", END)
         >>> graph = builder.compile()
         >>>
-        >>> # Invoking with two subjects results in a generated joke for each
+        >>> # 두 주제로 호출하면 각 주제에 대한 농담이 생성됩니다
         >>> graph.invoke({"subjects": ["cats", "dogs"]})
         {'subjects': ['cats', 'dogs'], 'jokes': ['Joke about cats', 'Joke about dogs']}
     """
@@ -312,11 +311,11 @@ class Send:
 
     def __init__(self, /, node: str, arg: Any) -> None:
         """
-        Initialize a new instance of the `Send` class.
+        `Send` 클래스의 새 인스턴스를 초기화합니다.
 
-        Args:
-            node: The name of the target node to send the message to.
-            arg: The state or message to send to the target node.
+        인자:
+            node: 메시지를 전송할 대상 노드의 이름입니다.
+            arg: 대상 노드로 전송할 상태 또는 메시지입니다.
         """
         self.node = node
         self.arg = arg
@@ -340,27 +339,27 @@ N = TypeVar("N", bound=Hashable)
 
 @dataclass(**_DC_KWARGS)
 class Command(Generic[N], ToolOutputMixin):
-    """One or more commands to update the graph's state and send messages to nodes.
+    """그래프의 상태를 업데이트하고 노드에 메시지를 전송하는 하나 이상의 명령입니다.
 
-    !!! version-added "Added in version 0.2.24"
+    !!! version-added "버전 0.2.24에서 추가됨"
 
-    Args:
-        graph: graph to send the command to. Supported values are:
+    인자:
+        graph: 명령을 전송할 그래프입니다. 지원되는 값은:
 
-            - `None`: the current graph
-            - `Command.PARENT`: closest parent graph
-        update: Update to apply to the graph's state.
-        resume: Value to resume execution with. To be used together with [`interrupt()`][langgraph.types.interrupt].
-            Can be one of the following:
+            - `None`: 현재 그래프
+            - `Command.PARENT`: 가장 가까운 부모 그래프
+        update: 그래프의 상태에 적용할 업데이트입니다.
+        resume: 실행을 재개할 값입니다. [`interrupt()`][langgraph.types.interrupt]와 함께 사용됩니다.
+            다음 중 하나일 수 있습니다:
 
-            - Mapping of interrupt ids to resume values
-            - A single value with which to resume the next interrupt
-        goto: Can be one of the following:
+            - 중단 ID를 재개 값에 매핑
+            - 다음 중단을 재개할 단일 값
+        goto: 다음 중 하나일 수 있습니다:
 
-            - Name of the node to navigate to next (any node that belongs to the specified `graph`)
-            - Sequence of node names to navigate to next
-            - `Send` object (to execute a node with the input provided)
-            - Sequence of `Send` objects
+            - 다음으로 이동할 노드의 이름 (지정된 `graph`에 속하는 모든 노드)
+            - 다음으로 이동할 노드 이름의 시퀀스
+            - `Send` 객체 (제공된 입력으로 노드를 실행)
+            - `Send` 객체의 시퀀스
     """
 
     graph: str | None = None
@@ -369,7 +368,7 @@ class Command(Generic[N], ToolOutputMixin):
     goto: Send | Sequence[Send | N] | N = ()
 
     def __repr__(self) -> str:
-        # get all non-None values
+        # None이 아닌 모든 값을 가져옵니다
         contents = ", ".join(
             f"{key}={value!r}" for key, value in asdict(self).items() if value
         )
@@ -394,28 +393,28 @@ class Command(Generic[N], ToolOutputMixin):
 
 
 def interrupt(value: Any) -> Any:
-    """Interrupt the graph with a resumable exception from within a node.
+    """노드 내에서 재개 가능한 예외로 그래프를 중단합니다.
 
-    The `interrupt` function enables human-in-the-loop workflows by pausing graph
-    execution and surfacing a value to the client. This value can communicate context
-    or request input required to resume execution.
+    `interrupt` 함수는 그래프 실행을 일시 중지하고 클라이언트에 값을 노출하여
+    human-in-the-loop 워크플로우를 가능하게 합니다. 이 값은 컨텍스트를 전달하거나
+    실행을 재개하는 데 필요한 입력을 요청할 수 있습니다.
 
-    In a given node, the first invocation of this function raises a `GraphInterrupt`
-    exception, halting execution. The provided `value` is included with the exception
-    and sent to the client executing the graph.
+    주어진 노드에서 이 함수의 첫 번째 호출은 `GraphInterrupt` 예외를 발생시켜
+    실행을 중단합니다. 제공된 `value`는 예외와 함께 포함되어
+    그래프를 실행하는 클라이언트로 전송됩니다.
 
-    A client resuming the graph must use the [`Command`][langgraph.types.Command]
-    primitive to specify a value for the interrupt and continue execution.
-    The graph resumes from the start of the node, **re-executing** all logic.
+    그래프를 재개하는 클라이언트는 [`Command`][langgraph.types.Command] 프리미티브를
+    사용하여 중단에 대한 값을 지정하고 실행을 계속해야 합니다.
+    그래프는 노드의 시작 부분부터 **모든 로직을 다시 실행**하며 재개됩니다.
 
-    If a node contains multiple `interrupt` calls, LangGraph matches resume values
-    to interrupts based on their order in the node. This list of resume values
-    is scoped to the specific task executing the node and is not shared across tasks.
+    노드에 여러 `interrupt` 호출이 포함된 경우, LangGraph는 노드 내 순서를
+    기반으로 재개 값을 중단과 매칭합니다. 이 재개 값 목록은 노드를 실행하는
+    특정 작업에만 적용되며 작업 간에 공유되지 않습니다.
 
-    To use an `interrupt`, you must enable a checkpointer, as the feature relies
-    on persisting the graph state.
+    `interrupt`를 사용하려면 체크포인터를 활성화해야 합니다. 이 기능은
+    그래프 상태를 영속화하는 데 의존하기 때문입니다.
 
-    Example:
+    예제:
         ```python
         import uuid
         from typing import Optional
@@ -473,14 +472,14 @@ def interrupt(value: Any) -> Any:
         # > {'node': {'human_value': 'some input from a human!!!'}}
         ```
 
-    Args:
-        value: The value to surface to the client when the graph is interrupted.
+    인자:
+        value: 그래프가 중단될 때 클라이언트에 노출할 값입니다.
 
-    Returns:
-        Any: On subsequent invocations within the same node (same task to be precise), returns the value provided during the first invocation
+    반환:
+        Any: 동일한 노드(정확하게는 동일한 작업) 내에서 후속 호출 시, 첫 번째 호출 중에 제공된 값을 반환합니다
 
-    Raises:
-        GraphInterrupt: On the first invocation within the node, halts execution and surfaces the provided value to the client.
+    예외:
+        GraphInterrupt: 노드 내의 첫 번째 호출 시, 실행을 중단하고 제공된 값을 클라이언트에 노출합니다.
     """
     from langgraph._internal._constants import (
         CONFIG_KEY_CHECKPOINT_NS,
@@ -492,22 +491,22 @@ def interrupt(value: Any) -> Any:
     from langgraph.errors import GraphInterrupt
 
     conf = get_config()["configurable"]
-    # track interrupt index
+    # 중단 인덱스 추적
     scratchpad = conf[CONFIG_KEY_SCRATCHPAD]
     idx = scratchpad.interrupt_counter()
-    # find previous resume values
+    # 이전 재개 값 찾기
     if scratchpad.resume:
         if idx < len(scratchpad.resume):
             conf[CONFIG_KEY_SEND]([(RESUME, scratchpad.resume)])
             return scratchpad.resume[idx]
-    # find current resume value
+    # 현재 재개 값 찾기
     v = scratchpad.get_null_resume(True)
     if v is not None:
         assert len(scratchpad.resume) == idx, (scratchpad.resume, idx)
         scratchpad.resume.append(v)
         conf[CONFIG_KEY_SEND]([(RESUME, scratchpad.resume)])
         return v
-    # no resume value found
+    # 재개 값을 찾지 못함
     raise GraphInterrupt(
         (
             Interrupt.from_ns(

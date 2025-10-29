@@ -3,38 +3,38 @@ search:
   boost: 2
 ---
 
-# Scalability & Resilience
+# 확장성 및 복원력
 
-LangGraph Platform is designed to scale horizontally with your workload. Each instance of the service is stateless, and keeps no resources in memory. The service is designed to gracefully handle new instances being added or removed, including hard shutdown cases.
+LangGraph Platform은 워크로드에 따라 수평으로 확장하도록 설계되었습니다. 서비스의 각 인스턴스는 상태가 없으며 메모리에 리소스를 유지하지 않습니다. 서비스는 하드 셧다운 케이스를 포함하여 새 인스턴스가 추가되거나 제거되는 것을 우아하게 처리하도록 설계되었습니다.
 
-## Server scalability
+## 서버 확장성
 
-As you add more instances to a service, they will share the HTTP load as long as an appropriate load balancer mechanism is placed in front of them. In most deployment modalities we configure a load balancer for the service automatically. In the “self-hosted without control plane” modality it’s your responsibility to add a load balancer. Since the instances are stateless any load balancing strategy will work, no session stickiness is needed, or recommended. Any instance of the server can communicate with any queue instance (through Redis PubSub), meaning that requests to cancel or stream an in-progress run can be handled by any arbitrary instance.
+서비스에 더 많은 인스턴스를 추가하면 적절한 로드 밸런서 메커니즘이 앞에 배치되어 있는 한 HTTP 부하를 공유합니다. 대부분의 배포 방식에서 서비스에 대한 로드 밸런서를 자동으로 구성합니다. "Control plane 없는 셀프 호스팅" 방식에서는 로드 밸런서를 추가하는 것이 귀하의 책임입니다. 인스턴스는 상태가 없으므로 모든 로드 밸런싱 전략이 작동하며, 세션 고정성이 필요하거나 권장되지 않습니다. 서버의 모든 인스턴스는 모든 큐 인스턴스와 통신할 수 있으므로(Redis PubSub를 통해) 진행 중인 run을 취소하거나 스트리밍하는 요청은 임의의 인스턴스에서 처리할 수 있습니다.
 
-## Queue scalability
+## 큐 확장성
 
-As you add more instances to a service, they will increase run throughput linearly, as each instance is configured to handle a set number of concurrent runs (by default 10). Each attempt for each run will be handled by a single instance, with exactly-once semantics enforced through Postgres’s MVCC model (refer to section below for crash resilience details). Attempts that fail due to transient database errors are retried up to 3 times. We do not make use of long-lived transactions or locks, this enables us to make more efficient use of Postgres resources.
+서비스에 더 많은 인스턴스를 추가하면 각 인스턴스가 설정된 수의 동시 run을 처리하도록 구성되어 있으므로(기본값 10) run 처리량이 선형적으로 증가합니다. 각 run에 대한 각 시도는 단일 인스턴스에서 처리되며, Postgres의 MVCC 모델을 통해 정확히 한 번 의미 체계가 적용됩니다(충돌 복원력 세부 정보는 아래 섹션 참조). 일시적 데이터베이스 오류로 인해 실패한 시도는 최대 3번까지 재시도됩니다. 장기 실행 트랜잭션이나 잠금을 사용하지 않으므로 Postgres 리소스를 더 효율적으로 사용할 수 있습니다.
 
-## Resilience
+## 복원력
 
-While a run is being handled by a queue instance, a periodic heartbeat timestamp will be recorded in Redis by that queue worker.
+큐 인스턴스에서 run이 처리되는 동안 해당 큐 워커에 의해 정기적인 하트비트 타임스탬프가 Redis에 기록됩니다.
 
-When a graceful shutdown request is received (SIGINT) an instance enters shutdown mode, which
+정상 종료 요청(SIGINT)이 수신되면 인스턴스는 종료 모드로 전환되며, 이는 다음을 의미합니다:
 
-- stops accepting new HTTP requests
-- gives any in-progress runs a limited number of seconds to finish (if not finished it will be put back in the queue)
-- stops the instance from picking up more runs from the queue
+- 새로운 HTTP 요청 수락을 중지
+- 진행 중인 run에 제한된 시간(초) 제공(완료되지 않으면 큐에 다시 넣음)
+- 큐에서 더 많은 run을 가져오는 것을 중지
 
-If a hard shutdown occurs due to a server crash or an infrastructure failure, any runs that were in progress will be picked up by an internal sweeper task that looks for in-progress runs that have breached their heartbeat window. The sweeper runs every 2 minutes and will put the runs back in the queue for another instance to pick them up.
+서버 충돌이나 인프라 장애로 인해 하드 셧다운이 발생하면 진행 중이던 모든 run은 하트비트 윈도우를 위반한 진행 중인 run을 찾는 내부 스위퍼 작업에 의해 픽업됩니다. 스위퍼는 2분마다 실행되며 run을 다른 인스턴스가 픽업할 수 있도록 큐에 다시 넣습니다.
 
-## Postgres resilience
+## Postgres 복원력
 
-For deployment modalities where we manage the Postgres database, we have periodic backups and continuously replicated standby replicas for automatic failover. This Postgres configuration is available in the [Cloud SaaS deployment option](../concepts/langgraph_cloud.md) for [`Production` deployment types](../concepts/langgraph_control_plane.md#deployment-types) only.
+Postgres 데이터베이스를 관리하는 배포 방식의 경우, 자동 장애 조치를 위한 정기적인 백업 및 지속적으로 복제되는 대기 복제본이 있습니다. 이 Postgres 구성은 [`Production` 배포 유형](../concepts/langgraph_control_plane.md#deployment-types)의 [Cloud SaaS 배포 옵션](../concepts/langgraph_cloud.md)에서만 사용할 수 있습니다.
 
-All communication with Postgres implements retries for retry-able errors. If Postgres is momentarily unavailable, such as during a database restart, most/all traffic should continue to succeed. Prolonged failure of Postgres will render the LangGraph Server unavailable.
+Postgres와의 모든 통신은 재시도 가능한 오류에 대한 재시도를 구현합니다. 데이터베이스 재시작 중과 같이 Postgres를 일시적으로 사용할 수 없는 경우 대부분/모든 트래픽이 계속 성공해야 합니다. Postgres의 장기간 장애는 LangGraph Server를 사용할 수 없게 만듭니다.
 
-## Redis resilience
+## Redis 복원력
 
-All data that requires durable storage is stored in Postgres, not Redis. Redis is used only for ephemeral metadata, and communication between instances. Therefore we place no durability requirements on Redis.
+지속 가능한 저장이 필요한 모든 데이터는 Redis가 아닌 Postgres에 저장됩니다. Redis는 임시 메타데이터 및 인스턴스 간 통신에만 사용됩니다. 따라서 Redis에 대한 지속성 요구 사항은 없습니다.
 
-All communication with Redis implements retries for retry-able errors. If Redis is momentarily unavailable, such as during a database restart, most/all traffic should continue to succeed. Prolonged failure of Redis will render the LangGraph Server unavailable.
+Redis와의 모든 통신은 재시도 가능한 오류에 대한 재시도를 구현합니다. 데이터베이스 재시작 중과 같이 Redis를 일시적으로 사용할 수 없는 경우 대부분/모든 트래픽이 계속 성공해야 합니다. Redis의 장기간 장애는 LangGraph Server를 사용할 수 없게 만듭니다.

@@ -21,8 +21,8 @@ INPUT_CACHE_KEY_TYPE = tuple[Callable[..., Any], tuple[str, ...]]
 
 
 class ChannelRead(RunnableCallable):
-    """Implements the logic for reading state from CONFIG_KEY_READ.
-    Usable both as a runnable as well as a static method to call imperatively."""
+    """CONFIG_KEY_READ에서 상태를 읽는 로직을 구현합니다.
+    runnable로 사용하거나 명령형으로 호출할 정적 메서드로 사용할 수 있습니다."""
 
     channel: str | list[str]
 
@@ -93,9 +93,8 @@ DEFAULT_BOUND = RunnableCallable(lambda input: input)
 
 
 class PregelNode:
-    """A node in a Pregel graph. This won't be invoked as a runnable by the graph
-    itself, but instead acts as a container for the components necessary to make
-    a PregelExecutableTask for a node."""
+    """Pregel 그래프의 노드입니다. 그래프 자체에서 runnable로 호출되지 않고,
+    대신 노드에 대한 PregelExecutableTask를 만드는 데 필요한 구성 요소의 컨테이너 역할을 합니다."""
 
     channels: str | list[str]
     """The channels that will be passed as input to `bound`.

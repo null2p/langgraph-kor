@@ -1,6 +1,6 @@
-# Tools
+# 도구
 
-Many AI applications interact with users via natural language. However, some use cases require models to interface directly with external systems—such as APIs, databases, or file systems—using structured input. In these scenarios, [tool calling](../how-tos/tool-calling.md) enables models to generate requests that conform to a specified input schema.
+많은 AI 애플리케이션은 자연어를 통해 사용자와 상호작용합니다. 그러나 일부 사용 사례에서는 모델이 구조화된 입력을 사용하여 API, 데이터베이스 또는 파일 시스템과 같은 외부 시스템과 직접 인터페이스해야 합니다. 이러한 시나리오에서는 [도구 호출](../how-tos/tool-calling.md)을 통해 모델이 지정된 입력 스키마를 준수하는 요청을 생성할 수 있습니다.
 
 :::python
 **Tools** encapsulate a callable function and its input schema. These can be passed to compatible [chat models](https://python.langchain.com/docs/concepts/chat_models), allowing the model to decide whether to invoke a tool and with what arguments.
@@ -10,11 +10,11 @@ Many AI applications interact with users via natural language. However, some use
 **Tools** encapsulate a callable function and its input schema. These can be passed to compatible [chat models](https://js.langchain.com/docs/concepts/chat_models), allowing the model to decide whether to invoke a tool and with what arguments.
 :::
 
-## Tool calling
+## 도구 호출
 
 ![Diagram of a tool call by a model](./img/tool_call.png)
 
-Tool calling is typically **conditional**. Based on the user input and available tools, the model may choose to issue a tool call request. This request is returned in an `AIMessage` object, which includes a `tool_calls` field that specifies the tool name and input arguments:
+도구 호출은 일반적으로 **조건부**입니다. 사용자 입력과 사용 가능한 도구를 기반으로 모델은 도구 호출 요청을 발행할 수 있습니다. 이 요청은 도구 이름과 입력 인수를 지정하는 `tool_calls` 필드를 포함하는 `AIMessage` 객체로 반환됩니다:
 
 :::python
 
@@ -55,7 +55,7 @@ AIMessage {
 
 :::
 
-If the input is unrelated to any tool, the model returns only a natural language message:
+입력이 어떤 도구와도 관련이 없는 경우, 모델은 자연어 메시지만 반환합니다:
 
 :::python
 
@@ -73,23 +73,23 @@ await llmWithTools.invoke("Hello world!"); // { content: "Hello!" }
 
 :::
 
-Importantly, the model does not execute the tool—it only generates a request. A separate executor (such as a runtime or agent) is responsible for handling the tool call and returning the result.
+중요한 점은 모델이 도구를 실행하지 않는다는 것입니다. 모델은 요청만 생성합니다. 도구 호출을 처리하고 결과를 반환하는 것은 별도의 실행자(예: 런타임 또는 에이전트)의 책임입니다.
 
-See the [tool calling guide](../how-tos/tool-calling.md) for more details.
+자세한 내용은 [도구 호출 가이드](../how-tos/tool-calling.md)를 참조하세요.
 
-## Prebuilt tools
+## 사전 구축된 도구
 
-LangChain provides prebuilt tool integrations for common external systems including APIs, databases, file systems, and web data.
+LangChain은 API, 데이터베이스, 파일 시스템 및 웹 데이터를 포함한 일반적인 외부 시스템에 대한 사전 구축된 도구 통합을 제공합니다.
 
 :::python
-Browse the [integrations directory](https://python.langchain.com/docs/integrations/tools/) for available tools.
+사용 가능한 도구는 [통합 디렉토리](https://python.langchain.com/docs/integrations/tools/)에서 찾아보세요.
 :::
 
 :::js
-Browse the [integrations directory](https://js.langchain.com/docs/integrations/tools/) for available tools.
+사용 가능한 도구는 [통합 디렉토리](https://js.langchain.com/docs/integrations/tools/)에서 찾아보세요.
 :::
 
-Common categories:
+일반적인 카테고리:
 
 - **Search**: Bing, SerpAPI, Tavily
 - **Code execution**: Python REPL, Node.js REPL
@@ -97,10 +97,10 @@ Common categories:
 - **Web data**: Scraping and browsing
 - **APIs**: OpenWeatherMap, NewsAPI, etc.
 
-## Custom tools
+## 커스텀 도구
 
 :::python
-You can define custom tools using the `@tool` decorator or plain Python functions. For example:
+`@tool` 데코레이터 또는 일반 Python 함수를 사용하여 커스텀 도구를 정의할 수 있습니다. 예를 들어:
 
 ```python
 from langchain_core.tools import tool
@@ -114,7 +114,7 @@ def multiply(a: int, b: int) -> int:
 :::
 
 :::js
-You can define custom tools using the `tool` function. For example:
+`tool` 함수를 사용하여 커스텀 도구를 정의할 수 있습니다. 예를 들어:
 
 ```typescript
 import { tool } from "@langchain/core/tools";
@@ -137,13 +137,13 @@ const multiply = tool(
 
 :::
 
-See the [tool calling guide](../how-tos/tool-calling.md) for more details.
+자세한 내용은 [도구 호출 가이드](../how-tos/tool-calling.md)를 참조하세요.
 
-## Tool execution
+## 도구 실행
 
-While the model determines when to call a tool, execution of the tool call must be handled by a runtime component.
+모델은 도구를 호출할 시기를 결정하지만, 도구 호출의 실행은 런타임 컴포넌트에서 처리해야 합니다.
 
-LangGraph provides prebuilt components for this:
+LangGraph는 이를 위한 사전 구축된 컴포넌트를 제공합니다:
 
 :::python
 

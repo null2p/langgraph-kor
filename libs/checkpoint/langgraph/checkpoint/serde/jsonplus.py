@@ -39,12 +39,12 @@ logger = logging.getLogger(__name__)
 
 
 class JsonPlusSerializer(SerializerProtocol):
-    """Serializer that uses ormsgpack, with optional fallbacks.
+    """ormsgpack을 사용하는 시리얼라이저로, 선택적 폴백을 지원합니다.
 
-    Security note: this serializer is intended for use within the BaseCheckpointSaver
-    class and called within the Pregel loop. It should not be used on untrusted
-    python objects. If an attacker can write directly to your checkpoint database,
-    they may be able to trigger code execution when data is deserialized.
+    보안 참고사항: 이 시리얼라이저는 BaseCheckpointSaver 클래스 내에서 사용하고
+    Pregel 루프 내에서 호출하도록 의도되었습니다. 신뢰할 수 없는 파이썬 객체에는
+    사용하면 안 됩니다. 공격자가 체크포인트 데이터베이스에 직접 쓸 수 있는 경우
+    데이터가 역직렬화될 때 코드 실행을 트리거할 수 있습니다.
     """
 
     def __init__(

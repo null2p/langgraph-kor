@@ -27,15 +27,15 @@ Meta = tuple[tuple[str, ...], dict[str, Any]]
 
 
 class StreamMessagesHandler(BaseCallbackHandler, _StreamingCallbackHandler):
-    """A callback handler that implements stream_mode=messages.
+    """stream_mode=messages를 구현하는 콜백 핸들러입니다.
 
-    Collects messages from:
-    (1) chat model stream events; and
-    (2) node outputs.
+    다음에서 메시지를 수집합니다:
+    (1) 채팅 모델 스트림 이벤트; 그리고
+    (2) 노드 출력.
     """
 
     run_inline = True
-    """We want this callback to run in the main thread to avoid order/locking issues."""
+    """순서/잠금 문제를 피하기 위해 이 콜백이 메인 스레드에서 실행되기를 원합니다."""
 
     def __init__(
         self,
@@ -44,25 +44,24 @@ class StreamMessagesHandler(BaseCallbackHandler, _StreamingCallbackHandler):
         *,
         parent_ns: tuple[str, ...] | None = None,
     ) -> None:
-        """Configure the handler to stream messages from LLMs and nodes.
+        """LLM 및 노드에서 메시지를 스트리밍하도록 핸들러를 구성합니다.
 
         Args:
-            stream: A callable that takes a StreamChunk and emits it.
-            subgraphs: Whether to emit messages from subgraphs.
-            parent_ns: The namespace where the handler was created.
-                We keep track of this namespace to allow calls to subgraphs that
-                were explicitly requested as a stream with `messages` mode
-                configured.
+            stream: StreamChunk를 받아서 방출하는 callable입니다.
+            subgraphs: 서브그래프에서 메시지를 방출할지 여부입니다.
+            parent_ns: 핸들러가 생성된 네임스페이스입니다.
+                `messages` 모드로 구성된 스트림으로 명시적으로 요청된 서브그래프 호출을
+                허용하기 위해 이 네임스페이스를 추적합니다.
 
         Example:
-            parent_ns is used to handle scenarios where the subgraph is explicitly
-            streamed with `stream_mode="messages"`.
+            parent_ns는 서브그래프가 `stream_mode="messages"`로 명시적으로
+            스트리밍되는 시나리오를 처리하는 데 사용됩니다.
 
             ```python
             def parent_graph_node():
-                # This node is in the parent graph.
+                # 이 노드는 부모 그래프에 있습니다.
                 async for event in some_subgraph(..., stream_mode="messages"):
-                    do something with event # <-- these events will be emitted
+                    do something with event # <-- 이 이벤트들이 방출됩니다
                 return ...
 
             parent_graph.invoke(subgraphs=False)

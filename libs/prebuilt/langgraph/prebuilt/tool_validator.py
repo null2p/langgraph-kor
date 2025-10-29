@@ -1,8 +1,7 @@
-"""This module provides a ValidationNode class that can be used to validate tool calls
-in a langchain graph. It applies a pydantic schema to tool_calls in the models' outputs,
-and returns a ToolMessage with the validated content. If the schema is not valid, it
-returns a ToolMessage with the error message. The ValidationNode can be used in a
-StateGraph with a "messages" key. If multiple tool calls are requested, they will be run in parallel.
+"""이 모듈은 langchain 그래프에서 도구 호출을 검증하는 데 사용할 수 있는 ValidationNode 클래스를 제공합니다.
+모델 출력의 tool_calls에 pydantic 스키마를 적용하고, 검증된 콘텐츠와 함께 ToolMessage를 반환합니다.
+스키마가 유효하지 않은 경우 오류 메시지와 함께 ToolMessage를 반환합니다. ValidationNode는
+"messages" 키가 있는 StateGraph에서 사용할 수 있습니다. 여러 도구 호출이 요청되면 병렬로 실행됩니다.
 """
 
 from collections.abc import Callable, Sequence
@@ -36,31 +35,31 @@ def _default_format_error(
     call: ToolCall,
     schema: type[BaseModel] | type[BaseModelV1],
 ) -> str:
-    """Default error formatting function."""
-    return f"{repr(error)}\n\nRespond after fixing all validation errors."
+    """기본 오류 포맷 함수입니다."""
+    return f"{repr(error)}\n\n모든 검증 오류를 수정한 후 응답하세요."
 
 
 @deprecated(
-    "ValidationNode is deprecated. Please use `create_agent` from `langchain.agents` with custom tool error handling.",
+    "ValidationNode는 더 이상 사용되지 않습니다. 커스텀 도구 오류 처리와 함께 `langchain.agents`의 `create_agent`를 사용하세요.",
     category=LangGraphDeprecatedSinceV10,
 )
 class ValidationNode(RunnableCallable):
-    """A node that validates all tools requests from the last AIMessage.
+    """마지막 AIMessage의 모든 도구 요청을 검증하는 노드입니다.
 
-    It can be used either in StateGraph with a "messages" key.
+    "messages" 키가 있는 StateGraph에서 사용할 수 있습니다.
 
     !!! note
 
-        This node does not actually **run** the tools, it only validates the tool calls,
-        which is useful for extraction and other use cases where you need to generate
-        structured output that conforms to a complex schema without losing the original
-        messages and tool IDs (for use in multi-turn conversations).
+        이 노드는 실제로 도구를 **실행하지** 않으며, 도구 호출만 검증합니다.
+        이는 원본 메시지와 도구 ID를 잃지 않고 복잡한 스키마를 준수하는
+        구조화된 출력을 생성해야 하는 추출 및 기타 사용 사례에 유용합니다
+        (다중 턴 대화에서 사용).
 
     Returns:
-        (Union[Dict[str, List[ToolMessage]], Sequence[ToolMessage]]): A list of ToolMessages with the validated content or error messages.
+        (Union[Dict[str, List[ToolMessage]], Sequence[ToolMessage]]): 검증된 콘텐츠 또는 오류 메시지가 포함된 ToolMessage 목록입니다.
 
     Example:
-        ```python title="Example usage for re-prompting the model to generate a valid response:"
+        ```python title="모델이 유효한 응답을 생성하도록 재촉구하는 예제 사용법:"
         from typing import Literal, Annotated
         from typing_extensions import TypedDict
 
@@ -95,7 +94,7 @@ class ValidationNode(RunnableCallable):
 
         def should_reprompt(state: list) -> Literal["model", "__end__"]:
             for msg in state[::-1]:
-                # None of the tool calls were errors
+                # 도구 호출 중 어느 것도 오류가 아님
                 if msg.type == "ai":
                     return END
                 if msg.additional_kwargs.get("is_error"):
@@ -106,7 +105,7 @@ class ValidationNode(RunnableCallable):
 
         graph = builder.compile()
         res = graph.invoke(("user", "Select a number, any number"))
-        # Show the retry logic
+        # 재시도 로직을 표시합니다
         for msg in res:
             msg.pretty_print()
         ```
@@ -121,19 +120,17 @@ class ValidationNode(RunnableCallable):
         name: str = "validation",
         tags: list[str] | None = None,
     ) -> None:
-        """Initialize the ValidationNode.
+        """ValidationNode를 초기화합니다.
 
         Args:
-            schemas: A list of schemas to validate the tool calls with. These can be
-                any of the following:
-                - A pydantic BaseModel class
-                - A BaseTool instance (the args_schema will be used)
-                - A function (a schema will be created from the function signature)
-            format_error: A function that takes an exception, a ToolCall, and a schema
-                and returns a formatted error string. By default, it returns the
-                exception repr and a message to respond after fixing validation errors.
-            name: The name of the node.
-            tags: A list of tags to add to the node.
+            schemas: 도구 호출을 검증할 스키마 목록입니다. 다음 중 하나일 수 있습니다:
+                - pydantic BaseModel 클래스
+                - BaseTool 인스턴스 (args_schema가 사용됨)
+                - 함수 (함수 시그니처로부터 스키마가 생성됨)
+            format_error: 예외, ToolCall, 스키마를 받아 포맷된 오류 문자열을 반환하는 함수입니다.
+                기본적으로 예외 repr과 검증 오류 수정 후 응답하라는 메시지를 반환합니다.
+            name: 노드의 이름입니다.
+            tags: 노드에 추가할 태그 목록입니다.
         """
         super().__init__(self._func, None, name=name, tags=tags, trace=False)
         self._format_error = format_error or _default_format_error
@@ -167,7 +164,7 @@ class ValidationNode(RunnableCallable):
     def _get_message(
         self, input: list[AnyMessage] | dict[str, Any]
     ) -> tuple[str, AIMessage]:
-        """Extract the last AIMessage from the input."""
+        """입력에서 마지막 AIMessage를 추출합니다."""
         if isinstance(input, list):
             output_type = "list"
             messages: list = input
@@ -183,7 +180,7 @@ class ValidationNode(RunnableCallable):
     def _func(
         self, input: list[AnyMessage] | dict[str, Any], config: RunnableConfig
     ) -> Any:
-        """Validate and run tool calls synchronously."""
+        """도구 호출을 동기적으로 검증하고 실행합니다."""
         output_type, message = self._get_message(input)
 
         def run_one(call: ToolCall) -> ToolMessage:

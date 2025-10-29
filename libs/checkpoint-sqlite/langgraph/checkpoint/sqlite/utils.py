@@ -11,16 +11,16 @@ from langgraph.checkpoint.base import get_checkpoint_id
 def _metadata_predicate(
     metadata_filter: dict[str, Any],
 ) -> tuple[Sequence[str], Sequence[Any]]:
-    """Return WHERE clause predicates for (a)search() given metadata filter.
+    """메타데이터 필터가 주어졌을 때 (a)search()에 대한 WHERE 절 술어를 반환합니다.
 
-    This method returns a tuple of a string and a tuple of values. The string
-    is the parametered WHERE clause predicate (excluding the WHERE keyword):
-    "column1 = ? AND column2 IS ?". The tuple of values contains the values
-    for each of the corresponding parameters.
+    이 메서드는 문자열과 값의 튜플로 이루어진 튜플을 반환합니다. 문자열은
+    매개변수화된 WHERE 절 술어입니다(WHERE 키워드 제외):
+    "column1 = ? AND column2 IS ?". 값의 튜플에는 해당 매개변수 각각에 대한
+    값이 포함됩니다.
     """
 
     def _where_value(query_value: Any) -> tuple[str, Any]:
-        """Return tuple of operator and value for WHERE clause predicate."""
+        """WHERE 절 술어에 대한 연산자와 값의 튜플을 반환합니다."""
         if query_value is None:
             return ("IS ?", None)
         elif (
@@ -32,8 +32,8 @@ def _metadata_predicate(
         elif isinstance(query_value, bool):
             return ("= ?", 1 if query_value else 0)
         elif isinstance(query_value, dict) or isinstance(query_value, list):
-            # query value for JSON object cannot have trailing space after separators (, :)
-            # SQLite json_extract() returns JSON string without whitespace
+            # JSON 객체의 쿼리 값은 구분 기호(, :) 뒤에 공백이 없어야 함
+            # SQLite json_extract()는 공백 없이 JSON 문자열을 반환함
             return ("= ?", json.dumps(query_value, separators=(",", ":")))
         else:
             return ("= ?", str(query_value))
@@ -41,7 +41,7 @@ def _metadata_predicate(
     predicates = []
     param_values = []
 
-    # process metadata query
+    # 메타데이터 쿼리 처리
     for query_key, query_value in metadata_filter.items():
         operator, param_value = _where_value(query_value)
         predicates.append(
@@ -57,18 +57,18 @@ def search_where(
     filter: dict[str, Any] | None,
     before: RunnableConfig | None = None,
 ) -> tuple[str, Sequence[Any]]:
-    """Return WHERE clause predicates for (a)search() given metadata filter
-    and `before` config.
+    """메타데이터 필터와 `before` config가 주어졌을 때 (a)search()에 대한
+    WHERE 절 술어를 반환합니다.
 
-    This method returns a tuple of a string and a tuple of values. The string
-    is the parametered WHERE clause predicate (including the WHERE keyword):
-    "WHERE column1 = ? AND column2 IS ?". The tuple of values contains the
-    values for each of the corresponding parameters.
+    이 메서드는 문자열과 값의 튜플로 이루어진 튜플을 반환합니다. 문자열은
+    매개변수화된 WHERE 절 술어입니다(WHERE 키워드 포함):
+    "WHERE column1 = ? AND column2 IS ?". 값의 튜플에는 해당 매개변수 각각에 대한
+    값이 포함됩니다.
     """
     wheres = []
     param_values = []
 
-    # construct predicate for config filter
+    # config 필터에 대한 술어 구성
     if config is not None:
         wheres.append("thread_id = ?")
         param_values.append(config["configurable"]["thread_id"])
@@ -81,13 +81,13 @@ def search_where(
             wheres.append("checkpoint_id = ?")
             param_values.append(checkpoint_id)
 
-    # construct predicate for metadata filter
+    # 메타데이터 필터에 대한 술어 구성
     if filter:
         metadata_predicates, metadata_values = _metadata_predicate(filter)
         wheres.extend(metadata_predicates)
         param_values.extend(metadata_values)
 
-    # construct predicate for `before`
+    # `before`에 대한 술어 구성
     if before is not None:
         wheres.append("checkpoint_id < ?")
         param_values.append(get_checkpoint_id(before))

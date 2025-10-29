@@ -51,8 +51,8 @@ from langgraph.types import (
 F = TypeVar("F", concurrent.futures.Future, asyncio.Future)
 E = TypeVar("E", threading.Event, asyncio.Event)
 
-# List of filenames to exclude from exception traceback
-# Note: Frames will be removed if they are the last frame in traceback, recursively
+# 예외 traceback에서 제외할 파일 이름 목록
+# 참고: 프레임이 traceback의 마지막 프레임인 경우 재귀적으로 제거됩니다
 EXCLUDED_FRAME_FNAMES = (
     "langgraph/pregel/retry.py",
     "langgraph/pregel/runner.py",
@@ -120,9 +120,9 @@ class FuturesDict(Generic[F, E], dict[F, PregelExecutableTask | None]):
 
 
 class PregelRunner:
-    """Responsible for executing a set of Pregel tasks concurrently, committing
-    their writes, yielding control to caller when there is output to emit, and
-    interrupting other tasks if appropriate."""
+    """Pregel 태스크 집합을 동시에 실행하고, 쓰기를 커밋하며,
+    출력할 내용이 있을 때 호출자에게 제어를 양도하고,
+    적절한 경우 다른 태스크를 중단하는 역할을 합니다."""
 
     def __init__(
         self,
@@ -156,9 +156,9 @@ class PregelRunner:
             event=threading.Event(),
             future_type=concurrent.futures.Future,
         )
-        # give control back to the caller
+        # 호출자에게 제어를 반환합니다
         yield
-        # fast path if single task with no timeout and no waiter
+        # timeout과 waiter가 없는 단일 태스크인 경우 빠른 경로
         if len(tasks) == 0:
             return
         elif len(tasks) == 1 and timeout is None and get_waiter is None:
@@ -182,7 +182,7 @@ class PregelRunner:
             except Exception as exc:
                 self.commit(t, exc)
                 if reraise and futures:
-                    # will be re-raised after futures are done
+                    # future가 완료된 후에 다시 발생합니다
                     fut: concurrent.futures.Future = concurrent.futures.Future()
                     fut.set_exception(exc)
                     futures.done.add(fut)
@@ -195,14 +195,14 @@ class PregelRunner:
                             tb = tb.tb_next
                         exc.__traceback__ = tb
                     raise
-            if not futures:  # maybe `t` scheduled another task
+            if not futures:  # `t`가 다른 태스크를 스케줄했을 수 있습니다
                 return
             else:
-                tasks = ()  # don't reschedule this task
-        # add waiter task if requested
+                tasks = ()  # 이 태스크를 다시 스케줄하지 않습니다
+        # 요청된 경우 waiter 태스크를 추가합니다
         if get_waiter is not None:
             futures[get_waiter()] = None
-        # schedule tasks
+        # 태스크를 스케줄합니다
         for t in tasks:
             fut = self.submit()(  # type: ignore[misc]
                 run_with_retry,
@@ -221,9 +221,9 @@ class PregelRunner:
                 __reraise_on_exit__=reraise,
             )
             futures[fut] = t
-        # execute tasks, and wait for one to fail or all to finish.
-        # each task is independent from all other concurrent tasks
-        # yield updates/debug output as each task finishes
+        # 태스크를 실행하고, 하나가 실패하거나 모두 완료될 때까지 기다립니다.
+        # 각 태스크는 다른 모든 동시 태스크로부터 독립적입니다
+        # 각 태스크가 완료될 때마다 업데이트/디버그 출력을 yield합니다
         end_time = timeout + time.monotonic() if timeout else None
         while len(futures) > (1 if get_waiter is not None else 0):
             done, inflight = concurrent.futures.wait(
@@ -232,20 +232,20 @@ class PregelRunner:
                 timeout=(max(0, end_time - time.monotonic()) if end_time else None),
             )
             if not done:
-                break  # timed out
+                break  # 타임아웃되었습니다
             for fut in done:
                 task = futures.pop(fut)
                 if task is None:
-                    # waiter task finished, schedule another
+                    # waiter 태스크가 완료되었으므로 다른 태스크를 스케줄합니다
                     if inflight and get_waiter is not None:
                         futures[get_waiter()] = None
             else:
-                # remove references to loop vars
+                # 루프 변수에 대한 참조를 제거합니다
                 del fut, task
-            # maybe stop other tasks
+            # 다른 태스크를 중단할 수도 있습니다
             if _should_stop_others(done):
                 break
-            # give control back to the caller
+            # 호출자에게 제어를 반환합니다
             yield
         # wait for done callbacks
         futures.event.wait(
@@ -335,14 +335,14 @@ class PregelRunner:
                             tb = tb.tb_next
                         exc.__traceback__ = tb
                     raise
-            if not futures:  # maybe `t` scheduled another task
+            if not futures:  # `t`가 다른 태스크를 스케줄했을 수 있습니다
                 return
             else:
-                tasks = ()  # don't reschedule this task
-        # add waiter task if requested
+                tasks = ()  # 이 태스크를 다시 스케줄하지 않습니다
+        # 요청된 경우 waiter 태스크를 추가합니다
         if get_waiter is not None:
             futures[get_waiter()] = None
-        # schedule tasks
+        # 태스크를 스케줄합니다
         for t in tasks:
             fut = cast(
                 asyncio.Future,
@@ -369,9 +369,9 @@ class PregelRunner:
                 ),
             )
             futures[fut] = t
-        # execute tasks, and wait for one to fail or all to finish.
-        # each task is independent from all other concurrent tasks
-        # yield updates/debug output as each task finishes
+        # 태스크를 실행하고, 하나가 실패하거나 모두 완료될 때까지 기다립니다.
+        # 각 태스크는 다른 모든 동시 태스크로부터 독립적입니다
+        # 각 태스크가 완료될 때마다 업데이트/디버그 출력을 yield합니다
         end_time = timeout + loop.time() if timeout else None
         while len(futures) > (1 if get_waiter is not None else 0):
             done, inflight = await asyncio.wait(
@@ -380,20 +380,20 @@ class PregelRunner:
                 timeout=(max(0, end_time - loop.time()) if end_time else None),
             )
             if not done:
-                break  # timed out
+                break  # 타임아웃되었습니다
             for fut in done:
                 task = futures.pop(fut)
                 if task is None:
-                    # waiter task finished, schedule another
+                    # waiter 태스크가 완료되었으므로 다른 태스크를 스케줄합니다
                     if inflight and get_waiter is not None:
                         futures[get_waiter()] = None
             else:
-                # remove references to loop vars
+                # 루프 변수에 대한 참조를 제거합니다
                 del fut, task
-            # maybe stop other tasks
+            # 다른 태스크를 중단할 수도 있습니다
             if _should_stop_others(done):
                 break
-            # give control back to the caller
+            # 호출자에게 제어를 반환합니다
             yield
         # wait for done callbacks
         await asyncio.wait_for(
@@ -462,8 +462,8 @@ class PregelRunner:
 def _should_stop_others(
     done: set[F],
 ) -> bool:
-    """Check if any task failed, if so, cancel all other tasks.
-    GraphInterrupts are not considered failures."""
+    """태스크가 실패했는지 확인하고, 그렇다면 다른 모든 태스크를 취소합니다.
+    GraphInterrupt는 실패로 간주되지 않습니다."""
     for fut in done:
         if fut.cancelled():
             continue
@@ -477,7 +477,7 @@ def _should_stop_others(
 def _exception(
     fut: concurrent.futures.Future[Any] | asyncio.Future[Any],
 ) -> BaseException | None:
-    """Return the exception from a future, without raising CancelledError."""
+    """CancelledError를 발생시키지 않고 future에서 예외를 반환합니다."""
     if fut.cancelled():
         if isinstance(fut, asyncio.Future):
             return asyncio.CancelledError()
@@ -493,7 +493,7 @@ def _panic_or_proceed(
     timeout_exc_cls: type[Exception] = TimeoutError,
     panic: bool = True,
 ) -> None:
-    """Cancel remaining tasks if any failed, re-raise exception if panic is True."""
+    """실패한 태스크가 있으면 나머지 태스크를 취소하고, panic이 True이면 예외를 다시 발생시킵니다."""
     done: set[concurrent.futures.Future[Any] | asyncio.Future[Any]] = set()
     inflight: set[concurrent.futures.Future[Any] | asyncio.Future[Any]] = set()
     for fut in futs:

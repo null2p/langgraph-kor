@@ -3,79 +3,79 @@ search:
   boost: 2
 ---
 
-# LangGraph runtime
+# LangGraph 런타임
 
 :::python
-@[Pregel] implements LangGraph's runtime, managing the execution of LangGraph applications.
+@[Pregel]은 LangGraph의 런타임을 구현하여 LangGraph 애플리케이션의 실행을 관리합니다.
 
-Compiling a @[StateGraph][StateGraph] or creating an @[entrypoint][entrypoint] produces a @[Pregel] instance that can be invoked with input.
+@[StateGraph][StateGraph]를 컴파일하거나 @[entrypoint][entrypoint]를 생성하면 입력과 함께 호출할 수 있는 @[Pregel] 인스턴스가 생성됩니다.
 :::
 
 :::js
-@[Pregel] implements LangGraph's runtime, managing the execution of LangGraph applications.
+@[Pregel]은 LangGraph의 런타임을 구현하여 LangGraph 애플리케이션의 실행을 관리합니다.
 
-Compiling a @[StateGraph][StateGraph] or creating an @[entrypoint][entrypoint] produces a @[Pregel] instance that can be invoked with input.
+@[StateGraph][StateGraph]를 컴파일하거나 @[entrypoint][entrypoint]를 생성하면 입력과 함께 호출할 수 있는 @[Pregel] 인스턴스가 생성됩니다.
 :::
 
-This guide explains the runtime at a high level and provides instructions for directly implementing applications with Pregel.
+이 가이드는 런타임을 높은 수준에서 설명하고 Pregel로 애플리케이션을 직접 구현하는 지침을 제공합니다.
 
 :::python
 
-> **Note:** The @[Pregel] runtime is named after [Google's Pregel algorithm](https://research.google/pubs/pub37252/), which describes an efficient method for large-scale parallel computation using graphs.
+> **참고:** @[Pregel] 런타임은 그래프를 사용한 대규모 병렬 계산의 효율적인 방법을 설명하는 [Google's Pregel algorithm](https://research.google/pubs/pub37252/)의 이름을 따서 명명되었습니다.
 
 :::
 
 :::js
 
-> **Note:** The @[Pregel] runtime is named after [Google's Pregel algorithm](https://research.google/pubs/pub37252/), which describes an efficient method for large-scale parallel computation using graphs.
+> **참고:** @[Pregel] 런타임은 그래프를 사용한 대규모 병렬 계산의 효율적인 방법을 설명하는 [Google's Pregel algorithm](https://research.google/pubs/pub37252/)의 이름을 따서 명명되었습니다.
 
 :::
 
-## Overview
+## 개요
 
-In LangGraph, Pregel combines [**actors**](https://en.wikipedia.org/wiki/Actor_model) and **channels** into a single application. **Actors** read data from channels and write data to channels. Pregel organizes the execution of the application into multiple steps, following the **Pregel Algorithm**/**Bulk Synchronous Parallel** model.
+LangGraph에서 Pregel은 [**actors**](https://en.wikipedia.org/wiki/Actor_model)와 **channels**를 단일 애플리케이션으로 결합합니다. **Actors**는 채널에서 데이터를 읽고 채널에 데이터를 씁니다. Pregel은 **Pregel Algorithm**/**Bulk Synchronous Parallel** 모델을 따라 애플리케이션의 실행을 여러 단계로 구성합니다.
 
-Each step consists of three phases:
+각 단계는 세 가지 단계로 구성됩니다:
 
-- **Plan**: Determine which **actors** to execute in this step. For example, in the first step, select the **actors** that subscribe to the special **input** channels; in subsequent steps, select the **actors** that subscribe to channels updated in the previous step.
-- **Execution**: Execute all selected **actors** in parallel, until all complete, or one fails, or a timeout is reached. During this phase, channel updates are invisible to actors until the next step.
-- **Update**: Update the channels with the values written by the **actors** in this step.
+- **계획(Plan)**: 이 단계에서 실행할 **actors**를 결정합니다. 예를 들어, 첫 번째 단계에서는 특수 **input** 채널을 구독하는 **actors**를 선택하고, 후속 단계에서는 이전 단계에서 업데이트된 채널을 구독하는 **actors**를 선택합니다.
+- **실행(Execution)**: 모두 완료되거나, 하나가 실패하거나, 시간 초과에 도달할 때까지 선택된 모든 **actors**를 병렬로 실행합니다. 이 단계에서 채널 업데이트는 다음 단계까지 actors에게 보이지 않습니다.
+- **업데이트(Update)**: 이 단계에서 **actors**가 작성한 값으로 채널을 업데이트합니다.
 
-Repeat until no **actors** are selected for execution, or a maximum number of steps is reached.
+실행할 **actors**가 선택되지 않거나 최대 단계 수에 도달할 때까지 반복합니다.
 
 ## Actors
 
-An **actor** is a `PregelNode`. It subscribes to channels, reads data from them, and writes data to them. It can be thought of as an **actor** in the Pregel algorithm. `PregelNodes` implement LangChain's Runnable interface.
+**actor**는 `PregelNode`입니다. 채널을 구독하고, 채널에서 데이터를 읽고, 채널에 데이터를 씁니다. Pregel 알고리즘의 **actor**로 생각할 수 있습니다. `PregelNodes`는 LangChain의 Runnable 인터페이스를 구현합니다.
 
 ## Channels
 
-Channels are used to communicate between actors (PregelNodes). Each channel has a value type, an update type, and an update function – which takes a sequence of updates and modifies the stored value. Channels can be used to send data from one chain to another, or to send data from a chain to itself in a future step. LangGraph provides a number of built-in channels:
+채널은 actors(PregelNodes) 간에 통신하는 데 사용됩니다. 각 채널에는 값 타입, 업데이트 타입 및 업데이트 함수가 있으며, 이는 업데이트 시퀀스를 가져와 저장된 값을 수정합니다. 채널은 한 체인에서 다른 체인으로 데이터를 보내거나 체인에서 미래 단계의 자신에게 데이터를 보내는 데 사용할 수 있습니다. LangGraph는 여러 내장 채널을 제공합니다:
 
 :::python
 
-- @[LastValue][LastValue]: The default channel, stores the last value sent to the channel, useful for input and output values, or for sending data from one step to the next.
-- @[Topic][Topic]: A configurable PubSub Topic, useful for sending multiple values between **actors**, or for accumulating output. Can be configured to deduplicate values or to accumulate values over the course of multiple steps.
-- @[BinaryOperatorAggregate][BinaryOperatorAggregate]: stores a persistent value, updated by applying a binary operator to the current value and each update sent to the channel, useful for computing aggregates over multiple steps; e.g.,`total = BinaryOperatorAggregate(int, operator.add)`
+- @[LastValue][LastValue]: 기본 채널로, 채널에 보낸 마지막 값을 저장하며, 입력 및 출력 값에 유용하거나 한 단계에서 다음 단계로 데이터를 보내는 데 유용합니다.
+- @[Topic][Topic]: 구성 가능한 PubSub Topic으로, **actors** 간에 여러 값을 보내거나 출력을 축적하는 데 유용합니다. 값을 중복 제거하거나 여러 단계에 걸쳐 값을 축적하도록 구성할 수 있습니다.
+- @[BinaryOperatorAggregate][BinaryOperatorAggregate]: 지속적인 값을 저장하고 현재 값과 채널에 보낸 각 업데이트에 이진 연산자를 적용하여 업데이트하며, 여러 단계에 걸쳐 집계를 계산하는 데 유용합니다. 예: `total = BinaryOperatorAggregate(int, operator.add)`
   :::
 
 :::js
 
-- @[LastValue]: The default channel, stores the last value sent to the channel, useful for input and output values, or for sending data from one step to the next.
-- @[Topic]: A configurable PubSub Topic, useful for sending multiple values between **actors**, or for accumulating output. Can be configured to deduplicate values or to accumulate values over the course of multiple steps.
-- @[BinaryOperatorAggregate]: stores a persistent value, updated by applying a binary operator to the current value and each update sent to the channel, useful for computing aggregates over multiple steps; e.g.,`total = BinaryOperatorAggregate(int, operator.add)`
+- @[LastValue]: 기본 채널로, 채널에 보낸 마지막 값을 저장하며, 입력 및 출력 값에 유용하거나 한 단계에서 다음 단계로 데이터를 보내는 데 유용합니다.
+- @[Topic]: 구성 가능한 PubSub Topic으로, **actors** 간에 여러 값을 보내거나 출력을 축적하는 데 유용합니다. 값을 중복 제거하거나 여러 단계에 걸쳐 값을 축적하도록 구성할 수 있습니다.
+- @[BinaryOperatorAggregate]: 지속적인 값을 저장하고 현재 값과 채널에 보낸 각 업데이트에 이진 연산자를 적용하여 업데이트하며, 여러 단계에 걸쳐 집계를 계산하는 데 유용합니다. 예: `total = BinaryOperatorAggregate(int, operator.add)`
   :::
 
-## Examples
+## 예제
 
 :::python
-While most users will interact with Pregel through the @[StateGraph][StateGraph] API or the @[entrypoint][entrypoint] decorator, it is possible to interact with Pregel directly.
+대부분의 사용자는 @[StateGraph][StateGraph] API 또는 @[entrypoint][entrypoint] 데코레이터를 통해 Pregel과 상호 작용하지만 Pregel과 직접 상호 작용하는 것도 가능합니다.
 :::
 
 :::js
-While most users will interact with Pregel through the @[StateGraph] API or the @[entrypoint] decorator, it is possible to interact with Pregel directly.
+대부분의 사용자는 @[StateGraph] API 또는 @[entrypoint] 데코레이터를 통해 Pregel과 상호 작용하지만 Pregel과 직접 상호 작용하는 것도 가능합니다.
 :::
 
-Below are a few different examples to give you a sense of the Pregel API.
+다음은 Pregel API의 감각을 제공하는 몇 가지 다른 예제입니다.
 
 === "Single node"
 
@@ -429,9 +429,9 @@ Below are a few different examples to give you a sense of the Pregel API.
     ```
     :::
 
-## High-level API
+## 고수준 API
 
-LangGraph provides two high-level APIs for creating a Pregel application: the [StateGraph (Graph API)](./low_level.md) and the [Functional API](functional_api.md).
+LangGraph는 Pregel 애플리케이션을 생성하기 위한 두 가지 고수준 API를 제공합니다: [StateGraph (Graph API)](./low_level.md)와 [Functional API](functional_api.md)입니다.
 
 === "StateGraph (Graph API)"
 

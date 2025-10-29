@@ -24,20 +24,20 @@ class Topic(
     Generic[Value],
     BaseChannel[Sequence[Value], Value | list[Value], list[Value]],
 ):
-    """A configurable PubSub Topic.
+    """설정 가능한 PubSub 토픽입니다.
 
     Args:
-        typ: The type of the value stored in the channel.
-        accumulate: Whether to accumulate values across steps. If `False`, the channel will be emptied after each step.
+        typ: 채널에 저장된 값의 타입입니다.
+        accumulate: 단계 간에 값을 누적할지 여부입니다. `False`이면 각 단계 후에 채널이 비워집니다.
     """
 
     __slots__ = ("values", "accumulate")
 
     def __init__(self, typ: type[Value], accumulate: bool = False) -> None:
         super().__init__(typ)
-        # attrs
+        # 속성
         self.accumulate = accumulate
-        # state
+        # 상태
         self.values = list[Value]()
 
     def __eq__(self, value: object) -> bool:
@@ -45,16 +45,16 @@ class Topic(
 
     @property
     def ValueType(self) -> Any:
-        """The type of the value stored in the channel."""
+        """채널에 저장된 값의 타입입니다."""
         return Sequence[self.typ]  # type: ignore[name-defined]
 
     @property
     def UpdateType(self) -> Any:
-        """The type of the update received by the channel."""
+        """채널이 받는 업데이트의 타입입니다."""
         return self.typ | list[self.typ]  # type: ignore[name-defined]
 
     def copy(self) -> Self:
-        """Return a copy of the channel."""
+        """채널의 복사본을 반환합니다."""
         empty = self.__class__(self.typ, self.accumulate)
         empty.key = self.key
         empty.values = self.values.copy()
@@ -68,7 +68,7 @@ class Topic(
         empty.key = self.key
         if checkpoint is not MISSING:
             if isinstance(checkpoint, tuple):
-                # backwards compatibility
+                # 하위 호환성
                 empty.values = checkpoint[1]
             else:
                 empty.values = checkpoint

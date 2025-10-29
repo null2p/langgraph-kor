@@ -1,4 +1,4 @@
-## Caching
+## 캐싱
 
 ::: langgraph.cache.base
 ::: langgraph.cache.memory

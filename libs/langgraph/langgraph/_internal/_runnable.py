@@ -65,10 +65,10 @@ except ImportError:
 def _set_config_context(
     config: RunnableConfig, run: Any = None
 ) -> Token[RunnableConfig | None]:
-    """Set the child Runnable config + tracing context.
+    """자식 Runnable config + tracing context를 설정합니다.
 
     Args:
-        config: The config to set.
+        config: 설정할 config입니다.
     """
     config_token = var_child_runnable_config.set(config)
     if run is not None:
@@ -79,10 +79,10 @@ def _set_config_context(
 
 
 def _unset_config_context(token: Token[RunnableConfig | None], run: Any = None) -> None:
-    """Set the child Runnable config + tracing context.
+    """자식 Runnable config + tracing context를 해제합니다.
 
     Args:
-        token: The config token to reset.
+        token: 재설정할 config 토큰입니다.
     """
     var_child_runnable_config.reset(token)
     if run is not None:
@@ -104,10 +104,10 @@ def _unset_config_context(token: Token[RunnableConfig | None], run: Any = None) 
 def set_config_context(
     config: RunnableConfig, run: Any = None
 ) -> Generator[Context, None, None]:
-    """Set the child Runnable config + tracing context.
+    """자식 Runnable config + tracing context를 설정합니다.
 
     Args:
-        config: The config to set.
+        config: 설정할 config입니다.
     """
     ctx = copy_context()
     config_token = ctx.run(_set_config_context, config, run)
@@ -117,18 +117,18 @@ def set_config_context(
         ctx.run(_unset_config_context, config_token, run)
 
 
-# Before Python 3.11 native StrEnum is not available
+# Python 3.11 이전에는 네이티브 StrEnum을 사용할 수 없습니다
 class StrEnum(str, enum.Enum):
-    """A string enum."""
+    """문자열 enum입니다."""
 
 
-# Special type to denote any type is accepted
+# 모든 타입이 허용됨을 나타내는 특수 타입
 ANY_TYPE = object()
 
 ASYNCIO_ACCEPTS_CONTEXT = sys.version_info >= (3, 11)
 
-# List of keyword arguments that can be injected into nodes / tasks / tools at runtime.
-# A named argument may appear multiple times if it appears with distinct types.
+# 런타임에 노드/태스크/도구에 주입될 수 있는 키워드 인자 목록입니다.
+# 명명된 인자는 서로 다른 타입으로 나타나는 경우 여러 번 나타날 수 있습니다.
 KWARGS_CONFIG_KEYS: tuple[tuple[str, tuple[Any, ...], str, Any], ...] = (
     (
         "config",
@@ -139,7 +139,7 @@ KWARGS_CONFIG_KEYS: tuple[tuple[str, tuple[Any, ...], str, Any], ...] = (
             "Optional[RunnableConfig]",
             inspect.Parameter.empty,
         ),
-        # for now, use config directly, eventually, will pop off of Runtime
+        # 현재는 config를 직접 사용하며, 결국 Runtime에서 제거될 것임
         "N/A",
         inspect.Parameter.empty,
     ),
@@ -177,27 +177,28 @@ KWARGS_CONFIG_KEYS: tuple[tuple[str, tuple[Any, ...], str, Any], ...] = (
     (
         "runtime",
         (ANY_TYPE,),
-        # we never hit this block, we just inject runtime directly
+        # 이 블록에는 절대 도달하지 않으며, runtime을 직접 주입함
         "N/A",
         inspect.Parameter.empty,
     ),
 )
-"""List of kwargs that can be passed to functions, and their corresponding
-config keys, default values and type annotations.
+"""함수에 전달할 수 있는 kwargs의 목록과 해당하는
+config 키, 기본값 및 타입 어노테이션입니다.
 
-Used to configure keyword arguments that can be injected at runtime
-from the `Runtime` object as kwargs to `invoke`, `ainvoke`, `stream` and `astream`.
+`Runtime` 객체에서 `invoke`, `ainvoke`, `stream` 및 `astream`의
+kwargs로 런타임에 주입할 수 있는 키워드 인자를 구성하는 데 사용됩니다.
 
-For a keyword to be injected from the config object, the function signature
-must contain a kwarg with the same name and a matching type annotation.
+config 객체에서 키워드가 주입되려면 함수 서명에
+동일한 이름과 일치하는 타입 어노테이션을 가진 kwarg가 포함되어야 합니다.
 
-Each tuple contains:
-- the name of the kwarg in the function signature
-- the type annotation(s) for the kwarg
-- the `Runtime` attribute for fetching the value (N/A if not applicable)
+각 튜플에는 다음이 포함됩니다:
+- 함수 서명의 kwarg 이름
+- kwarg의 타입 어노테이션
+- 값을 가져올 `Runtime` 속성 (해당하지 않는 경우 N/A)
 
-This is fully internal and should be further refactored to use `get_type_hints`
-to resolve forward references and optional types formatted like BaseStore | None.
+이것은 완전히 내부용이며 BaseStore | None과 같이 형식화된
+forward reference와 optional 타입을 해결하기 위해
+`get_type_hints`를 사용하도록 추가로 리팩토링되어야 합니다.
 """
 
 VALID_KINDS = (inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY)
@@ -252,7 +253,7 @@ RunnableLike = (
 
 
 class RunnableCallable(Runnable):
-    """A much simpler version of RunnableLambda that requires sync and async functions."""
+    """동기 및 비동기 함수를 필요로 하는 훨씬 간단한 버전의 RunnableLambda입니다."""
 
     def __init__(
         self,
@@ -286,7 +287,7 @@ class RunnableCallable(Runnable):
         self.trace = trace
         self.recurse = recurse
         self.explode_args = explode_args
-        # check signature
+        # 서명 확인
         if func is None and afunc is None:
             raise ValueError("At least one of func or afunc must be provided.")
 
@@ -297,15 +298,15 @@ class RunnableCallable(Runnable):
             p = params.get(kw)
 
             if p is None or p.kind not in VALID_KINDS:
-                # If parameter is not found or is not a valid kind, skip
+                # 파라미터를 찾을 수 없거나 유효한 종류가 아니면 건너뜀
                 continue
 
             if typ != (ANY_TYPE,) and p.annotation not in typ:
-                # A specific type is required, but the function annotation does
-                # not match the expected type.
+                # 특정 타입이 필요하지만 함수 어노테이션이
+                # 예상 타입과 일치하지 않음
 
-                # If this is a config parameter with incorrect typing, emit a warning
-                # because we used to support any type but are moving towards more correct typing
+                # 이것이 잘못된 타이핑의 config 파라미터인 경우 경고를 발생시킴
+                # 이전에는 모든 타입을 지원했지만 더 정확한 타이핑으로 이동 중이기 때문
                 if kw == "config" and p.annotation != inspect.Parameter.empty:
                     warnings.warn(
                         f"The 'config' parameter should be typed as 'RunnableConfig' or "
@@ -315,7 +316,7 @@ class RunnableCallable(Runnable):
                     )
                 continue
 
-            # If the kwarg is accepted by the function, store the key / runtime attribute to inject
+            # 함수가 kwarg를 받아들이면 주입할 키 / runtime 속성을 저장
             self.func_accepts[kw] = (runtime_key, default)
 
     def __repr__(self) -> str:
@@ -347,7 +348,7 @@ class RunnableCallable(Runnable):
         runtime = config.get(CONF, {}).get(CONFIG_KEY_RUNTIME)
 
         for kw, (runtime_key, default) in self.func_accepts.items():
-            # If the kwarg is already set, use the set value
+            # kwarg가 이미 설정되어 있으면 설정된 값을 사용
             if kw in kwargs:
                 continue
 
@@ -381,14 +382,14 @@ class RunnableCallable(Runnable):
             )
             try:
                 child_config = patch_config(config, callbacks=run_manager.get_child())
-                # get the run
+                # run 가져오기
                 for h in run_manager.handlers:
                     if isinstance(h, LangChainTracer):
                         run = h.run_map.get(str(run_manager.run_id))
                         break
                 else:
                     run = None
-                # run in context
+                # 컨텍스트에서 실행
                 with set_config_context(child_config, run) as context:
                     ret = context.run(self.func, *args, **kwargs)
             except BaseException as e:
@@ -419,7 +420,7 @@ class RunnableCallable(Runnable):
         runtime = config.get(CONF, {}).get(CONFIG_KEY_RUNTIME)
 
         for kw, (runtime_key, default) in self.func_accepts.items():
-            # If the kwarg has already been set, use the set value
+            # kwarg가 이미 설정되어 있으면 설정된 값을 사용
             if kw in kwargs:
                 continue
 
@@ -479,7 +480,7 @@ class RunnableCallable(Runnable):
 def is_async_callable(
     func: Any,
 ) -> TypeGuard[Callable[..., Awaitable]]:
-    """Check if a function is async."""
+    """함수가 비동기인지 확인합니다."""
     return (
         inspect.iscoroutinefunction(func)
         or hasattr(func, "__call__")
@@ -490,7 +491,7 @@ def is_async_callable(
 def is_async_generator(
     func: Any,
 ) -> TypeGuard[Callable[..., AsyncIterator]]:
-    """Check if a function is an async generator."""
+    """함수가 비동기 제너레이터인지 확인합니다."""
     return (
         inspect.isasyncgenfunction(func)
         or hasattr(func, "__call__")
@@ -501,13 +502,13 @@ def is_async_generator(
 def coerce_to_runnable(
     thing: RunnableLike, *, name: str | None, trace: bool
 ) -> Runnable:
-    """Coerce a runnable-like object into a Runnable.
+    """runnable-like 객체를 Runnable로 강제 변환합니다.
 
     Args:
-        thing: A runnable-like object.
+        thing: runnable-like 객체입니다.
 
     Returns:
-        A Runnable.
+        Runnable입니다.
     """
     if isinstance(thing, Runnable):
         return thing
@@ -533,10 +534,9 @@ def coerce_to_runnable(
 
 
 class RunnableSeq(Runnable):
-    """Sequence of `Runnable`, where the output of each is the input of the next.
+    """각각의 출력이 다음의 입력이 되는 `Runnable`의 시퀀스입니다.
 
-    `RunnableSeq` is a simpler version of `RunnableSequence` that is internal to
-    LangGraph.
+    `RunnableSeq`는 LangGraph 내부에서 사용하는 `RunnableSequence`의 더 간단한 버전입니다.
     """
 
     def __init__(
@@ -545,14 +545,14 @@ class RunnableSeq(Runnable):
         name: str | None = None,
         trace_inputs: Callable[[Any], Any] | None = None,
     ) -> None:
-        """Create a new RunnableSeq.
+        """새로운 RunnableSeq를 생성합니다.
 
         Args:
-            steps: The steps to include in the sequence.
-            name: The name of the `Runnable`.
+            steps: 시퀀스에 포함할 단계들입니다.
+            name: `Runnable`의 이름입니다.
 
         Raises:
-            ValueError: If the sequence has less than 2 steps.
+            ValueError: 시퀀스가 2개 미만의 단계를 가진 경우.
         """
         steps_flat: list[Runnable] = []
         for step in steps:
@@ -625,38 +625,38 @@ class RunnableSeq(Runnable):
     ) -> Any:
         if config is None:
             config = ensure_config()
-        # setup callbacks and context
+        # 콜백과 컨텍스트 설정
         callback_manager = get_callback_manager_for_config(config)
-        # start the root run
+        # 루트 실행 시작
         run_manager = callback_manager.on_chain_start(
             None,
             self.trace_inputs(input) if self.trace_inputs is not None else input,
             name=config.get("run_name") or self.get_name(),
             run_id=config.pop("run_id", None),
         )
-        # invoke all steps in sequence
+        # 모든 단계를 순차적으로 실행
         try:
             for i, step in enumerate(self.steps):
-                # mark each step as a child run
+                # 각 단계를 자식 실행으로 표시
                 config = patch_config(
                     config, callbacks=run_manager.get_child(f"seq:step:{i + 1}")
                 )
-                # 1st step is the actual node,
-                # others are writers which don't need to be run in context
+                # 첫 번째 단계는 실제 노드이고,
+                # 나머지는 컨텍스트에서 실행할 필요가 없는 writer입니다
                 if i == 0:
-                    # get the run object
+                    # run 객체 가져오기
                     for h in run_manager.handlers:
                         if isinstance(h, LangChainTracer):
                             run = h.run_map.get(str(run_manager.run_id))
                             break
                     else:
                         run = None
-                    # run in context
+                    # 컨텍스트에서 실행
                     with set_config_context(config, run) as context:
                         input = context.run(step.invoke, input, config, **kwargs)
                 else:
                     input = step.invoke(input, config)
-        # finish the root run
+        # 루트 실행 종료
         except BaseException as e:
             run_manager.on_chain_error(e)
             raise
@@ -672,9 +672,9 @@ class RunnableSeq(Runnable):
     ) -> Any:
         if config is None:
             config = ensure_config()
-        # setup callbacks
+        # 콜백 설정
         callback_manager = get_async_callback_manager_for_config(config)
-        # start the root run
+        # 루트 실행 시작
         run_manager = await callback_manager.on_chain_start(
             None,
             self.trace_inputs(input) if self.trace_inputs is not None else input,
@@ -682,25 +682,25 @@ class RunnableSeq(Runnable):
             run_id=config.pop("run_id", None),
         )
 
-        # invoke all steps in sequence
+        # 모든 단계를 순차적으로 실행
         try:
             for i, step in enumerate(self.steps):
-                # mark each step as a child run
+                # 각 단계를 자식 실행으로 표시
                 config = patch_config(
                     config, callbacks=run_manager.get_child(f"seq:step:{i + 1}")
                 )
-                # 1st step is the actual node,
-                # others are writers which don't need to be run in context
+                # 첫 번째 단계는 실제 노드이고,
+                # 나머지는 컨텍스트에서 실행할 필요가 없는 writer입니다
                 if i == 0:
                     if ASYNCIO_ACCEPTS_CONTEXT:
-                        # get the run object
+                        # run 객체 가져오기
                         for h in run_manager.handlers:
                             if isinstance(h, LangChainTracer):
                                 run = h.run_map.get(str(run_manager.run_id))
                                 break
                         else:
                             run = None
-                        # run in context
+                        # 컨텍스트에서 실행
                         with set_config_context(config, run) as context:
                             input = await asyncio.create_task(
                                 step.ainvoke(input, config, **kwargs), context=context
@@ -709,7 +709,7 @@ class RunnableSeq(Runnable):
                         input = await step.ainvoke(input, config, **kwargs)
                 else:
                     input = await step.ainvoke(input, config)
-        # finish the root run
+        # 루트 실행 종료
         except BaseException as e:
             await run_manager.on_chain_error(e)
             raise
@@ -725,34 +725,34 @@ class RunnableSeq(Runnable):
     ) -> Iterator[Any]:
         if config is None:
             config = ensure_config()
-        # setup callbacks
+        # 콜백 설정
         callback_manager = get_callback_manager_for_config(config)
-        # start the root run
+        # 루트 실행 시작
         run_manager = callback_manager.on_chain_start(
             None,
             self.trace_inputs(input) if self.trace_inputs is not None else input,
             name=config.get("run_name") or self.get_name(),
             run_id=config.pop("run_id", None),
         )
-        # get the run object
+        # run 객체 가져오기
         for h in run_manager.handlers:
             if isinstance(h, LangChainTracer):
                 run = h.run_map.get(str(run_manager.run_id))
                 break
         else:
             run = None
-        # create first step config
+        # 첫 번째 단계 config 생성
         config = patch_config(
             config,
             callbacks=run_manager.get_child(f"seq:step:{1}"),
         )
-        # run all in context
+        # 모두 컨텍스트에서 실행
         with set_config_context(config, run) as context:
             try:
-                # stream the last steps
-                # transform the input stream of each step with the next
-                # steps that don't natively support transforming an input stream will
-                # buffer input in memory until all available, and then start emitting output
+                # 마지막 단계들을 스트림
+                # 각 단계의 입력 스트림을 다음 단계로 변환
+                # 입력 스트림 변환을 기본적으로 지원하지 않는 단계는
+                # 사용 가능한 모든 입력을 메모리에 버퍼링한 다음 출력을 내보냅니다
                 for idx, step in enumerate(self.steps):
                     if idx == 0:
                         iterator = step.stream(input, config, **kwargs)
@@ -762,14 +762,14 @@ class RunnableSeq(Runnable):
                             callbacks=run_manager.get_child(f"seq:step:{idx + 1}"),
                         )
                         iterator = step.transform(iterator, config)
-                # populates streamed_output in astream_log() output if needed
+                # 필요한 경우 astream_log() 출력에서 streamed_output을 채웁니다
                 if _StreamingCallbackHandler is not None:
                     for h in run_manager.handlers:
                         if isinstance(h, _StreamingCallbackHandler):
                             iterator = h.tap_output_iter(run_manager.run_id, iterator)
-                # consume into final output
+                # 최종 출력으로 소비
                 output = context.run(_consume_iter, iterator)
-                # sequence doesn't emit output, yield to mark as generator
+                # 시퀀스는 출력을 내보내지 않으므로, 제너레이터로 표시하기 위해 yield
                 yield
             except BaseException as e:
                 run_manager.on_chain_error(e)
@@ -785,33 +785,33 @@ class RunnableSeq(Runnable):
     ) -> AsyncIterator[Any]:
         if config is None:
             config = ensure_config()
-        # setup callbacks
+        # 콜백 설정
         callback_manager = get_async_callback_manager_for_config(config)
-        # start the root run
+        # 루트 실행 시작
         run_manager = await callback_manager.on_chain_start(
             None,
             self.trace_inputs(input) if self.trace_inputs is not None else input,
             name=config.get("run_name") or self.get_name(),
             run_id=config.pop("run_id", None),
         )
-        # stream the last steps
-        # transform the input stream of each step with the next
-        # steps that don't natively support transforming an input stream will
-        # buffer input in memory until all available, and then start emitting output
+        # 마지막 단계들을 스트림
+        # 각 단계의 입력 스트림을 다음 단계로 변환
+        # 입력 스트림 변환을 기본적으로 지원하지 않는 단계는
+        # 사용 가능한 모든 입력을 메모리에 버퍼링한 다음 출력을 내보냅니다
         if ASYNCIO_ACCEPTS_CONTEXT:
-            # get the run object
+            # run 객체 가져오기
             for h in run_manager.handlers:
                 if isinstance(h, LangChainTracer):
                     run = h.run_map.get(str(run_manager.run_id))
                     break
             else:
                 run = None
-            # create first step config
+            # 첫 번째 단계 config 생성
             config = patch_config(
                 config,
                 callbacks=run_manager.get_child(f"seq:step:{1}"),
             )
-            # run all in context
+            # 모두 컨텍스트에서 실행
             with set_config_context(config, run) as context:
                 try:
                     async with AsyncExitStack() as stack:
@@ -828,18 +828,18 @@ class RunnableSeq(Runnable):
                                 aiterator = step.atransform(aiterator, config)
                             if hasattr(aiterator, "aclose"):
                                 stack.push_async_callback(aiterator.aclose)
-                        # populates streamed_output in astream_log() output if needed
+                        # 필요한 경우 astream_log() 출력에서 streamed_output을 채웁니다
                         if _StreamingCallbackHandler is not None:
                             for h in run_manager.handlers:
                                 if isinstance(h, _StreamingCallbackHandler):
                                     aiterator = h.tap_output_aiter(
                                         run_manager.run_id, aiterator
                                     )
-                        # consume into final output
+                        # 최종 출력으로 소비
                         output = await asyncio.create_task(
                             _consume_aiter(aiterator), context=context
                         )
-                        # sequence doesn't emit output, yield to mark as generator
+                        # 시퀀스는 출력을 내보내지 않으므로, 제너레이터로 표시하기 위해 yield
                         yield
                 except BaseException as e:
                     await run_manager.on_chain_error(e)
@@ -860,16 +860,16 @@ class RunnableSeq(Runnable):
                             aiterator = step.atransform(aiterator, config)
                         if hasattr(aiterator, "aclose"):
                             stack.push_async_callback(aiterator.aclose)
-                    # populates streamed_output in astream_log() output if needed
+                    # 필요한 경우 astream_log() 출력에서 streamed_output을 채웁니다
                     if _StreamingCallbackHandler is not None:
                         for h in run_manager.handlers:
                             if isinstance(h, _StreamingCallbackHandler):
                                 aiterator = h.tap_output_aiter(
                                     run_manager.run_id, aiterator
                                 )
-                    # consume into final output
+                    # 최종 출력으로 소비
                     output = await _consume_aiter(aiterator)
-                    # sequence doesn't emit output, yield to mark as generator
+                    # 시퀀스는 출력을 내보내지 않으므로, 제너레이터로 표시하기 위해 yield
                     yield
             except BaseException as e:
                 await run_manager.on_chain_error(e)
@@ -879,11 +879,11 @@ class RunnableSeq(Runnable):
 
 
 def _consume_iter(it: Iterator[Any]) -> Any:
-    """Consume an iterator."""
+    """이터레이터를 소비합니다."""
     output: Any = None
     add_supported = False
     for chunk in it:
-        # collect final output
+        # 최종 출력을 수집합니다
         if output is None:
             output = chunk
         elif add_supported:
@@ -898,11 +898,11 @@ def _consume_iter(it: Iterator[Any]) -> Any:
 
 
 async def _consume_aiter(it: AsyncIterator[Any]) -> Any:
-    """Consume an async iterator."""
+    """비동기 이터레이터를 소비합니다."""
     output: Any = None
     add_supported = False
     async for chunk in it:
-        # collect final output
+        # 최종 출력을 수집합니다
         if add_supported:
             try:
                 output = output + chunk

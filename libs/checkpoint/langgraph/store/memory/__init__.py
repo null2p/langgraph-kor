@@ -1,7 +1,7 @@
-"""In-memory dictionary-backed store with optional vector search.
+"""선택적 벡터 검색을 지원하는 메모리 내 딕셔너리 기반 저장소입니다.
 
 !!! example "Examples"
-    Basic key-value storage:
+    기본 키-값 저장소:
     ```python
     from langgraph.store.memory import InMemoryStore
 
@@ -10,7 +10,7 @@
     item = store.get(("users", "123"), "prefs")
     ```
 
-    Vector search using LangChain embeddings:
+    LangChain 임베딩을 사용한 벡터 검색:
     ```python
     from langchain.embeddings import init_embeddings
     from langgraph.store.memory import InMemoryStore
@@ -22,15 +22,15 @@
         }
     )
 
-    # Store documents
+    # 문서 저장
     store.put(("docs",), "doc1", {"text": "Python tutorial"})
     store.put(("docs",), "doc2", {"text": "TypeScript guide"})
 
-    # Search by similarity
+    # 유사도로 검색
     results = store.search(("docs",), query="python programming")
     ```
 
-    Vector search using OpenAI SDK directly:
+    OpenAI SDK를 직접 사용한 벡터 검색:
     ```python
     from openai import OpenAI
     from langgraph.store.memory import InMemoryStore
@@ -51,15 +51,15 @@
         }
     )
 
-    # Store documents
+    # 문서 저장
     store.put(("docs",), "doc1", {"text": "Python tutorial"})
     store.put(("docs",), "doc2", {"text": "TypeScript guide"})
 
-    # Search by similarity
+    # 유사도로 검색
     results = store.search(("docs",), query="python programming")
     ```
 
-    Async vector search using OpenAI SDK:
+    OpenAI SDK를 사용한 비동기 벡터 검색:
     ```python
     from openai import AsyncOpenAI
     from langgraph.store.memory import InMemoryStore
@@ -80,20 +80,20 @@
         }
     )
 
-    # Store documents
+    # 문서 저장
     await store.aput(("docs",), "doc1", {"text": "Python tutorial"})
     await store.aput(("docs",), "doc2", {"text": "TypeScript guide"})
 
-    # Search by similarity
+    # 유사도로 검색
     results = await store.asearch(("docs",), query="python programming")
     ```
 
 Warning:
-    This store keeps all data in memory. Data is lost when the process exits.
-    For persistence, use a database-backed store like PostgresStore.
+    이 스토어는 모든 데이터를 메모리에 보관합니다. 프로세스가 종료되면 데이터가 손실됩니다.
+    영속성을 위해서는 PostgresStore와 같은 데이터베이스 기반 스토어를 사용하십시오.
 
 Tip:
-    For vector search, install numpy for better performance:
+    벡터 검색을 위해 더 나은 성능을 위해 numpy를 설치하십시오:
     ```bash
     pip install numpy
     ```
@@ -134,15 +134,15 @@ logger = logging.getLogger(__name__)
 
 
 class InMemoryStore(BaseStore):
-    """In-memory dictionary-backed store with optional vector search.
+    """선택적 벡터 검색을 지원하는 메모리 내 딕셔너리 기반 스토어입니다.
 
-    !!! example "Examples"
-        Basic key-value storage:
+    !!! example "예제"
+        기본 키-값 저장소:
             store = InMemoryStore()
             store.put(("users", "123"), "prefs", {"theme": "dark"})
             item = store.get(("users", "123"), "prefs")
 
-        Vector search with embeddings:
+        임베딩을 사용한 벡터 검색:
             from langchain.embeddings import init_embeddings
             store = InMemoryStore(index={
                 "dims": 1536,
@@ -150,24 +150,24 @@ class InMemoryStore(BaseStore):
                 "fields": ["text"],
             })
 
-            # Store documents
+            # 문서 저장
             store.put(("docs",), "doc1", {"text": "Python tutorial"})
             store.put(("docs",), "doc2", {"text": "TypeScript guide"})
 
-            # Search by similarity
+            # 유사도로 검색
             results = store.search(("docs",), query="python programming")
 
     Note:
-        Semantic search is disabled by default. You can enable it by providing an `index` configuration
-        when creating the store. Without this configuration, all `index` arguments passed to
-        `put` or `aput`will have no effect.
+        의미 검색은 기본적으로 비활성화되어 있습니다. 스토어를 생성할 때 `index` 설정을
+        제공하여 활성화할 수 있습니다. 이 설정이 없으면 `put` 또는 `aput`에 전달된
+        모든 `index` 인수는 효과가 없습니다.
 
     Warning:
-        This store keeps all data in memory. Data is lost when the process exits.
-        For persistence, use a database-backed store like PostgresStore.
+        이 스토어는 모든 데이터를 메모리에 보관합니다. 프로세스가 종료되면 데이터가 손실됩니다.
+        영속성을 위해서는 PostgresStore와 같은 데이터베이스 기반 스토어를 사용하십시오.
 
     Tip:
-        For vector search, install numpy for better performance:
+        벡터 검색을 위해 더 나은 성능을 위해 numpy를 설치하십시오:
         ```bash
         pip install numpy
         ```
@@ -181,8 +181,8 @@ class InMemoryStore(BaseStore):
     )
 
     def __init__(self, *, index: IndexConfig | None = None) -> None:
-        # Both _data and _vectors are wrapped in the In-memory API
-        # Do not change their names
+        # _data와 _vectors는 모두 In-memory API에 래핑됩니다
+        # 이름을 변경하지 마십시오
         self._data: dict[tuple[str, ...], dict[str, Item]] = defaultdict(dict)
         # [ns][key][path]
         self._vectors: dict[tuple[str, ...], dict[str, dict[str, list[float]]]] = (
@@ -204,8 +204,8 @@ class InMemoryStore(BaseStore):
             self.embeddings = None
 
     def batch(self, ops: Iterable[Op]) -> list[Result]:
-        # The batch/abatch methods are treated as internal.
-        # Users should access via put/search/get/list_namespaces/etc.
+        # batch/abatch 메서드는 내부용으로 처리됩니다.
+        # 사용자는 put/search/get/list_namespaces 등을 통해 액세스해야 합니다.
         results, put_ops, search_ops = self._prepare_ops(ops)
         if search_ops:
             queryinmem_store = self._embed_search_queries(search_ops)
@@ -219,8 +219,8 @@ class InMemoryStore(BaseStore):
         return results
 
     async def abatch(self, ops: Iterable[Op]) -> list[Result]:
-        # The batch/abatch methods are treated as internal.
-        # Users should access via put/search/get/list_namespaces/etc.
+        # batch/abatch 메서드는 내부용으로 처리됩니다.
+        # 사용자는 put/search/get/list_namespaces 등을 통해 액세스해야 합니다.
         results, put_ops, search_ops = self._prepare_ops(ops)
         if search_ops:
             queryinmem_store = await self._aembed_search_queries(search_ops)
@@ -233,10 +233,10 @@ class InMemoryStore(BaseStore):
         self._apply_put_ops(put_ops)
         return results
 
-    # Helpers
+    # 헬퍼 메서드
 
     def _filter_items(self, op: SearchOp) -> list[tuple[Item, list[list[float]]]]:
-        """Filter items by namespace and filter function, return items with their embeddings."""
+        """네임스페이스와 필터 함수로 항목을 필터링하고, 임베딩과 함께 항목을 반환합니다."""
         namespace_prefix = op.namespace_prefix
 
         def filter_func(item: Item) -> bool:
@@ -305,7 +305,7 @@ class InMemoryStore(BaseStore):
         queryinmem_store: dict[str, list[float]],
         results: list[Result],
     ) -> None:
-        """Perform batch similarity search for multiple queries."""
+        """여러 쿼리에 대한 배치 유사도 검색을 수행합니다."""
         for i, (op, candidates) in ops.items():
             if not candidates:
                 results[i] = []
@@ -327,7 +327,7 @@ class InMemoryStore(BaseStore):
                     key=lambda x: x[0],
                     reverse=True,
                 )
-                # max pooling
+                # 최대 풀링
                 seen: set[tuple[tuple[str, ...], str]] = set()
                 kept: list[tuple[float | None, Item]] = []
                 for score, item in sorted_results:
@@ -343,8 +343,8 @@ class InMemoryStore(BaseStore):
 
                     kept.append((score, item))
                 if scoreless and len(kept) < op.limit:
-                    # Corner case: if we request more items than what we have embedded,
-                    # fill the rest with non-scored items
+                    # 코너 케이스: 임베딩된 것보다 더 많은 항목을 요청하는 경우,
+                    # 나머지를 점수가 없는 항목으로 채웁니다
                     kept.extend(
                         (None, item) for item in scoreless[: op.limit - len(kept)]
                     )
@@ -460,7 +460,7 @@ class InMemoryStore(BaseStore):
     def _handle_list_namespaces(self, op: ListNamespacesOp) -> list[tuple[str, ...]]:
         all_namespaces = list(
             self._data.keys()
-        )  # Avoid collection size changing while iterating
+        )  # 반복 중 컬렉션 크기 변경 방지
         namespaces = all_namespaces
         if op.match_conditions:
             namespaces = [
@@ -492,8 +492,8 @@ def _check_numpy() -> bool:
 
 def _cosine_similarity(X: list[float], Y: list[list[float]]) -> list[float]:
     """
-    Compute cosine similarity between a vector X and a matrix Y.
-    Lazy import numpy for efficiency.
+    벡터 X와 행렬 Y 간의 코사인 유사도를 계산합니다.
+    효율성을 위해 numpy를 지연 임포트합니다.
     """
     if not Y:
         return []
@@ -505,7 +505,7 @@ def _cosine_similarity(X: list[float], Y: list[list[float]]) -> list[float]:
         X_norm = np.linalg.norm(X_arr)
         Y_norm = np.linalg.norm(Y_arr, axis=1)
 
-        # Avoid division by zero
+        # 0으로 나누기 방지
         mask = Y_norm != 0
         similarities = np.zeros_like(Y_norm)
         similarities[mask] = np.dot(Y_arr[mask], X_arr) / (Y_norm[mask] * X_norm)
@@ -523,7 +523,7 @@ def _cosine_similarity(X: list[float], Y: list[list[float]]) -> list[float]:
 
 
 def _does_match(match_condition: MatchCondition, key: tuple[str, ...]) -> bool:
-    """Whether a namespace key matches a match condition."""
+    """네임스페이스 키가 매치 조건과 일치하는지 확인합니다."""
     match_type = match_condition.match_type
     path = match_condition.path
 
@@ -533,14 +533,14 @@ def _does_match(match_condition: MatchCondition, key: tuple[str, ...]) -> bool:
     if match_type == "prefix":
         for k_elem, p_elem in zip(key, path, strict=False):
             if p_elem == "*":
-                continue  # Wildcard matches any element
+                continue  # 와일드카드는 모든 요소와 매치됩니다
             if k_elem != p_elem:
                 return False
         return True
     elif match_type == "suffix":
         for k_elem, p_elem in zip(reversed(key), reversed(path), strict=False):
             if p_elem == "*":
-                continue  # Wildcard matches any element
+                continue  # 와일드카드는 모든 요소와 매치됩니다
             if k_elem != p_elem:
                 return False
         return True
@@ -549,7 +549,7 @@ def _does_match(match_condition: MatchCondition, key: tuple[str, ...]) -> bool:
 
 
 def _compare_values(item_value: Any, filter_value: Any) -> bool:
-    """Compare values in a JSONB-like way, handling nested objects."""
+    """중첩된 객체를 처리하면서 JSONB 방식으로 값을 비교합니다."""
     if isinstance(filter_value, dict):
         if any(k.startswith("$") for k in filter_value):
             return all(
@@ -575,7 +575,7 @@ def _compare_values(item_value: Any, filter_value: Any) -> bool:
 
 
 def _apply_operator(value: Any, operator: str, op_value: Any) -> bool:
-    """Apply a comparison operator, matching PostgreSQL's JSONB behavior."""
+    """PostgreSQL의 JSONB 동작과 일치하는 비교 연산자를 적용합니다."""
     if operator == "$eq":
         return value == op_value
     elif operator == "$gt":

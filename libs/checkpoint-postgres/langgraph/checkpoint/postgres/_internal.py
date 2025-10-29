@@ -1,4 +1,4 @@
-"""Shared utility functions for the Postgres checkpoint & storage classes."""
+"""Postgres 체크포인트 및 저장소 클래스를 위한 공유 유틸리티 함수입니다."""
 
 from collections.abc import Iterator
 from contextlib import contextmanager

@@ -33,9 +33,9 @@ async def arun(graph: Pregel, input: dict):
 
 
 async def arun_first_event_latency(graph: Pregel, input: dict) -> None:
-    """Latency for the first event.
+    """첫 번째 이벤트에 대한 지연 시간.
 
-    Run the graph until the first event is processed and then stop.
+    첫 번째 이벤트가 처리될 때까지 그래프를 실행한 후 중지합니다.
     """
     stream = graph.astream(
         input,
@@ -70,9 +70,9 @@ def run(graph: Pregel, input: dict):
 
 
 def run_first_event_latency(graph: Pregel, input: dict) -> None:
-    """Latency for the first event.
+    """첫 번째 이벤트에 대한 지연 시간.
 
-    Run the graph until the first event is processed and then stop.
+    첫 번째 이벤트가 처리될 때까지 그래프를 실행한 후 중지합니다.
     """
     stream = graph.stream(
         input,
@@ -91,7 +91,7 @@ def run_first_event_latency(graph: Pregel, input: dict) -> None:
 
 
 def compile_graph(graph: StateGraph) -> None:
-    """Compile the graph."""
+    """그래프를 컴파일합니다."""
     graph.compile()
 
 
@@ -356,13 +356,13 @@ benchmarks = (
         "sequential_10",
         create_sequential(10).compile(),
         create_sequential(10).compile(),
-        {"messages": []},  # Empty list of messages
+        {"messages": []},  # 빈 메시지 리스트
     ),
     (
         "sequential_1000",
         create_sequential(1000).compile(),
         create_sequential(1000).compile(),
-        {"messages": []},  # Empty list of messages
+        {"messages": []},  # 빈 메시지 리스트
     ),
     (
         "pydantic_state_25x300",
@@ -465,21 +465,21 @@ benchmarks = (
 
 r = Runner()
 
-# Full graph run time
+# 전체 그래프 실행 시간
 for name, agraph, graph, input in benchmarks:
     r.bench_async_func(name, arun, agraph, input, loop_factory=new_event_loop)
     if graph is not None:
         r.bench_func(name + "_sync", run, graph, input)
 
 
-# Pick a handful of graphs to measure the first event latency.
-# At the moment, limiting just due to the size of the annotation on github.
+# 첫 번째 이벤트 지연 시간을 측정할 몇 가지 그래프를 선택합니다.
+# 현재는 GitHub의 어노테이션 크기 때문에 제한하고 있습니다.
 GRAPHS_FOR_1st_EVENT_LATENCY = (
     "sequential_1000",
     "pydantic_state_25x300",
 )
 
-# First event latency
+# 첫 번째 이벤트 지연 시간
 for name, agraph, graph, input in benchmarks:
     if graph not in GRAPHS_FOR_1st_EVENT_LATENCY:
         continue
@@ -495,7 +495,7 @@ for name, agraph, graph, input in benchmarks:
             name + "_first_event_latency_sync", run_first_event_latency, graph, input
         )
 
-# Graph compilation times
+# 그래프 컴파일 시간
 compilation_benchmarks = (
     (
         "sequential_1000",

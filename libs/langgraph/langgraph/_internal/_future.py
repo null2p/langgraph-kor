@@ -17,8 +17,8 @@ EAGER_NOT_SUPPORTED = sys.version_info < (3, 12)
 
 
 def _get_loop(fut: asyncio.Future) -> asyncio.AbstractEventLoop:
-    # Tries to call Future.get_loop() if it's available.
-    # Otherwise fallbacks to using the old '_loop' property.
+    # 가능한 경우 Future.get_loop()을 호출하려고 시도합니다.
+    # 그렇지 않으면 이전 '_loop' 속성을 사용합니다.
     try:
         get_loop = fut.get_loop
     except AttributeError:
@@ -44,7 +44,7 @@ def _set_concurrent_future_state(
     concurrent: concurrent.futures.Future,
     source: AnyFuture,
 ) -> None:
-    """Copy state from a future to a concurrent.futures.Future."""
+    """future의 상태를 concurrent.futures.Future로 복사합니다."""
     assert source.done()
     if source.cancelled():
         concurrent.cancel()
@@ -59,9 +59,9 @@ def _set_concurrent_future_state(
 
 
 def _copy_future_state(source: AnyFuture, dest: asyncio.Future) -> None:
-    """Internal helper to copy state from another Future.
+    """다른 Future에서 상태를 복사하는 내부 헬퍼입니다.
 
-    The other Future may be a concurrent.futures.Future.
+    다른 Future는 concurrent.futures.Future일 수 있습니다.
     """
     if dest.done():
         return
@@ -80,11 +80,11 @@ def _copy_future_state(source: AnyFuture, dest: asyncio.Future) -> None:
 
 
 def _chain_future(source: AnyFuture, destination: AnyFuture) -> None:
-    """Chain two futures so that when one completes, so does the other.
+    """두 future를 연결하여 하나가 완료되면 다른 하나도 완료되도록 합니다.
 
-    The result (or exception) of source will be copied to destination.
-    If destination is cancelled, source gets cancelled too.
-    Compatible with both asyncio.Future and concurrent.futures.Future.
+    source의 결과(또는 예외)가 destination으로 복사됩니다.
+    destination이 취소되면 source도 취소됩니다.
+    asyncio.Future와 concurrent.futures.Future 모두와 호환됩니다.
     """
     if not asyncio.isfuture(source) and not isinstance(
         source, concurrent.futures.Future
@@ -125,7 +125,7 @@ def _chain_future(source: AnyFuture, destination: AnyFuture) -> None:
 
 
 def chain_future(source: AnyFuture, destination: AnyFuture) -> AnyFuture:
-    # adapted from asyncio.run_coroutine_threadsafe
+    # asyncio.run_coroutine_threadsafe에서 적응했습니다
     try:
         _chain_future(source, destination)
         return destination
@@ -178,10 +178,10 @@ def _ensure_future(
 
 @types.coroutine
 def _wrap_awaitable(awaitable: Awaitable[T]) -> Generator[None, None, T]:
-    """Helper for asyncio.ensure_future().
+    """asyncio.ensure_future()를 위한 헬퍼입니다.
 
-    Wraps awaitable (an object with __await__) into a coroutine
-    that will later be wrapped in a Task by ensure_future().
+    awaitable(__await__이 있는 객체)을 코루틴으로 래핑하여
+    나중에 ensure_future()에 의해 Task로 래핑됩니다.
     """
     return (yield from awaitable.__await__())
 
@@ -194,9 +194,9 @@ def run_coroutine_threadsafe(
     name: str | None = None,
     context: contextvars.Context | None = None,
 ) -> asyncio.Future[T]:
-    """Submit a coroutine object to a given event loop.
+    """주어진 이벤트 루프에 코루틴 객체를 제출합니다.
 
-    Return an asyncio.Future to access the result.
+    결과에 접근하기 위한 asyncio.Future를 반환합니다.
     """
 
     if asyncio._get_running_loop() is loop:

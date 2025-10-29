@@ -16,11 +16,11 @@ from langgraph.checkpoint.sqlite.utils import _metadata_predicate, search_where
 class TestSqliteSaver:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
-        # objects for test setup
+        # 테스트 설정을 위한 객체
         self.config_1: RunnableConfig = {
             "configurable": {
                 "thread_id": "thread-1",
-                # for backwards compatibility testing
+                # 하위 호환성 테스트를 위함
                 "checkpoint_id": "1",
                 "checkpoint_ns": "",
             }
@@ -77,20 +77,20 @@ class TestSqliteSaver:
 
     def test_search(self) -> None:
         with SqliteSaver.from_conn_string(":memory:") as saver:
-            # set up test
-            # save checkpoints
+            # 테스트 설정
+            # 체크포인트 저장
             saver.put(self.config_1, self.chkpnt_1, self.metadata_1, {})
             saver.put(self.config_2, self.chkpnt_2, self.metadata_2, {})
             saver.put(self.config_3, self.chkpnt_3, self.metadata_3, {})
 
-            # call method / assertions
-            query_1 = {"source": "input"}  # search by 1 key
+            # 메서드 호출 / 어설션
+            query_1 = {"source": "input"}  # 1개의 키로 검색
             query_2 = {
                 "step": 1,
                 "writes": {"foo": "bar"},
-            }  # search by multiple keys
-            query_3: dict[str, Any] = {}  # search by no keys, return all checkpoints
-            query_4 = {"source": "update", "step": 1}  # no match
+            }  # 여러 키로 검색
+            query_3: dict[str, Any] = {}  # 키 없이 검색, 모든 체크포인트 반환
+            query_4 = {"source": "update", "step": 1}  # 일치하는 항목 없음
 
             search_results_1 = list(saver.list(None, filter=query_1))
             assert len(search_results_1) == 1
@@ -106,7 +106,7 @@ class TestSqliteSaver:
             search_results_4 = list(saver.list(None, filter=query_4))
             assert len(search_results_4) == 0
 
-            # search by config (defaults to checkpoints across all namespaces)
+            # config로 검색 (기본적으로 모든 네임스페이스의 체크포인트 검색)
             search_results_5 = list(
                 saver.list({"configurable": {"thread_id": "thread-2"}})
             )
@@ -116,12 +116,12 @@ class TestSqliteSaver:
                 search_results_5[1].config["configurable"]["checkpoint_ns"],
             } == {"", "inner"}
 
-            # search with before param
+            # before 매개변수로 검색
             search_results_6 = list(saver.list(None, before=search_results_5[1].config))
             assert len(search_results_6) == 1
             assert search_results_6[0].config["configurable"]["thread_id"] == "thread-1"
 
-            # search with limit param
+            # limit 매개변수로 검색
             search_results_7 = list(
                 saver.list({"configurable": {"thread_id": "thread-2"}}, limit=1)
             )
@@ -129,7 +129,7 @@ class TestSqliteSaver:
             assert search_results_7[0].config["configurable"]["thread_id"] == "thread-2"
 
     def test_search_where(self) -> None:
-        # call method / assertions
+        # 메서드 호출 / 어설션
         expected_predicate_1 = "WHERE json_extract(CAST(metadata AS TEXT), '$.source') = ? AND json_extract(CAST(metadata AS TEXT), '$.step') = ? AND json_extract(CAST(metadata AS TEXT), '$.writes') = ? AND json_extract(CAST(metadata AS TEXT), '$.score') = ? AND checkpoint_id < ?"
         expected_param_values_1 = ["input", 2, "{}", 1, "1"]
         assert search_where(
@@ -140,7 +140,7 @@ class TestSqliteSaver:
         )
 
     def test_metadata_predicate(self) -> None:
-        # call method / assertions
+        # 메서드 호출 / 어설션
         expected_predicate_1 = [
             "json_extract(CAST(metadata AS TEXT), '$.source') = ?",
             "json_extract(CAST(metadata AS TEXT), '$.step') = ?",
@@ -174,7 +174,7 @@ class TestSqliteSaver:
 
     async def test_informative_async_errors(self) -> None:
         with SqliteSaver.from_conn_string(":memory:") as saver:
-            # call method / assertions
+            # 메서드 호출 / 어설션
             with pytest.raises(NotImplementedError, match="AsyncSqliteSaver"):
                 await saver.aget(self.config_1)
             with pytest.raises(NotImplementedError, match="AsyncSqliteSaver"):

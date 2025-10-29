@@ -1,17 +1,17 @@
-# Rebuild Graph at Runtime
+# 런타임에 그래프 재빌드
 
-You might need to rebuild your graph with a different configuration for a new run. For example, you might need to use a different graph state or graph structure depending on the config. This guide shows how you can do this.
+새 실행을 위해 다른 구성으로 그래프를 재빌드해야 할 수 있습니다. 예를 들어, config에 따라 다른 그래프 state 또는 그래프 구조를 사용해야 할 수 있습니다. 이 가이드는 이를 수행하는 방법을 보여줍니다.
 
 !!! note "Note"
-    In most cases, customizing behavior based on the config should be handled by a single graph where each node can read a config and change its behavior based on it
+    대부분의 경우 config를 기반으로 동작을 커스터마이징하는 것은 각 노드가 config를 읽고 이를 기반으로 동작을 변경할 수 있는 단일 그래프에서 처리해야 합니다
 
 ## Prerequisites
 
-Make sure to check out [this how-to guide](./setup.md) on setting up your app for deployment first.
+먼저 배포를 위한 앱 설정에 대한 [이 how-to 가이드](./setup.md)를 확인하세요.
 
 ## Define graphs
 
-Let's say you have an app with a simple graph that calls an LLM and returns the response to the user. The app file directory looks like the following:
+LLM을 호출하고 사용자에게 응답을 반환하는 간단한 그래프가 있는 앱이 있다고 가정해 봅시다. 앱 파일 디렉토리는 다음과 같습니다:
 
 ```
 my-app/
@@ -20,11 +20,11 @@ my-app/
 |-- openai_agent.py     # code for your graph
 ```
 
-where the graph is defined in `openai_agent.py`. 
+여기서 그래프는 `openai_agent.py`에 정의되어 있습니다.
 
 ### No rebuild
 
-In the standard LangGraph API configuration, the server uses the compiled graph instance that's defined at the top level of `openai_agent.py`, which looks like the following:
+표준 LangGraph API 구성에서 서버는 `openai_agent.py`의 최상위 레벨에 정의된 컴파일된 그래프 인스턴스를 사용하며, 다음과 같습니다:
 
 ```python
 from langchain_openai import ChatOpenAI
@@ -41,7 +41,7 @@ graph_workflow.add_edge(START, "agent")
 agent = graph_workflow.compile()
 ```
 
-To make the server aware of your graph, you need to specify a path to the variable that contains the `CompiledStateGraph` instance in your LangGraph API configuration (`langgraph.json`), e.g.:
+서버가 그래프를 인식하도록 하려면 LangGraph API 구성(`langgraph.json`)에서 `CompiledStateGraph` 인스턴스를 포함하는 변수의 경로를 지정해야 합니다. 예:
 
 ```
 {
@@ -55,7 +55,7 @@ To make the server aware of your graph, you need to specify a path to the variab
 
 ### Rebuild
 
-To make your graph rebuild on each new run with custom configuration, you need to rewrite `openai_agent.py` to instead provide a _function_ that takes a config and returns a graph (or compiled graph) instance. Let's say we want to return our existing graph for user ID '1', and a tool-calling agent for other users. We can modify `openai_agent.py` as follows:
+커스텀 구성으로 새 실행마다 그래프를 재빌드하려면 `openai_agent.py`를 다시 작성하여 config를 받아 그래프(또는 컴파일된 그래프) 인스턴스를 반환하는 _함수_를 제공해야 합니다. 사용자 ID '1'에 대해서는 기존 그래프를 반환하고 다른 사용자에 대해서는 도구 호출 에이전트를 반환하려고 한다고 가정해 봅시다. 다음과 같이 `openai_agent.py`를 수정할 수 있습니다:
 
 ```python
 from typing import Annotated
@@ -132,7 +132,7 @@ def make_graph(config: RunnableConfig):
         return make_alternative_graph()
 ```
 
-Finally, you need to specify the path to your graph-making function (`make_graph`) in `langgraph.json`:
+마지막으로 `langgraph.json`에서 그래프 생성 함수(`make_graph`)의 경로를 지정해야 합니다:
 
 ```
 {
@@ -144,4 +144,4 @@ Finally, you need to specify the path to your graph-making function (`make_graph
 }
 ```
 
-See more info on LangGraph API configuration file [here](../reference/cli.md#configuration-file)
+LangGraph API 구성 파일에 대한 자세한 정보는 [여기](../reference/cli.md#configuration-file)를 참조하세요.

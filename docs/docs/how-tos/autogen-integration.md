@@ -1,23 +1,23 @@
-# How to integrate LangGraph with AutoGen, CrewAI, and other frameworks
+# LangGraph를 AutoGen, CrewAI 및 기타 프레임워크와 통합하는 방법
 
-This guide shows how to integrate AutoGen agents with LangGraph to leverage features like persistence, streaming, and memory, and then deploy the integrated solution to LangGraph Platform for scalable production use. In this guide we show how to build a LangGraph chatbot that integrates with AutoGen, but you can follow the same approach with other frameworks.
+이 가이드는 AutoGen 에이전트를 LangGraph와 통합하여 지속성, 스트리밍 및 메모리와 같은 기능을 활용하고, 통합된 솔루션을 LangGraph Platform에 배포하여 확장 가능한 프로덕션 사용을 하는 방법을 보여줍니다. 이 가이드에서는 AutoGen과 통합되는 LangGraph 챗봇을 구축하는 방법을 보여주지만, 다른 프레임워크와도 동일한 접근 방식을 따를 수 있습니다.
 
-Integrating AutoGen with LangGraph provides several benefits:
+AutoGen을 LangGraph와 통합하면 여러 이점이 있습니다:
 
-- Enhanced features: Add [persistence](../concepts/persistence.md), [streaming](../concepts/streaming.md), [short and long-term memory](../concepts/memory.md) and more to your AutoGen agents.
-- Multi-agent systems: Build [multi-agent systems](../concepts/multi_agent.md) where individual agents are built with different frameworks.
-- Production deployment: Deploy your integrated solution to [LangGraph Platform](../concepts/langgraph_platform.md) for scalable production use.
+- 향상된 기능: AutoGen 에이전트에 [지속성](../concepts/persistence.md), [스트리밍](../concepts/streaming.md), [단기 및 장기 메모리](../concepts/memory.md) 등을 추가합니다.
+- 다중 에이전트 시스템: 개별 에이전트가 서로 다른 프레임워크로 구축된 [다중 에이전트 시스템](../concepts/multi_agent.md)을 구축합니다.
+- 프로덕션 배포: 통합 솔루션을 [LangGraph Platform](../concepts/langgraph_platform.md)에 배포하여 확장 가능한 프로덕션 사용을 합니다.
 
-## Prerequisites
+## 사전 요구 사항
 
 - Python 3.9+
 - Autogen: `pip install autogen`
 - LangGraph: `pip install langgraph`
-- OpenAI API key
+- OpenAI API 키
 
-## Setup
+## 설정
 
-Set your your environment:
+환경을 설정합니다:
 
 ```python
 import getpass
@@ -32,9 +32,9 @@ def _set_env(var: str):
 _set_env("OPENAI_API_KEY")
 ```
 
-## 1. Define AutoGen agent
+## 1. AutoGen 에이전트 정의
 
-Create an AutoGen agent that can execute code. This example is adapted from AutoGen's [official tutorials](https://github.com/microsoft/autogen/blob/0.2/notebook/agentchat_web_info.ipynb):
+코드를 실행할 수 있는 AutoGen 에이전트를 생성합니다. 이 예제는 AutoGen의 [공식 튜토리얼](https://github.com/microsoft/autogen/blob/0.2/notebook/agentchat_web_info.ipynb)에서 적용되었습니다:
 
 ```python
 import autogen
@@ -68,9 +68,9 @@ user_proxy = autogen.UserProxyAgent(
 )
 ```
 
-## 2. Create the graph
+## 2. 그래프 생성
 
-We will now create a LangGraph chatbot graph that calls AutoGen agent.
+이제 AutoGen 에이전트를 호출하는 LangGraph 챗봇 그래프를 생성합니다.
 
 ```python
 from langchain_core.messages import convert_to_openai_messages
@@ -120,9 +120,9 @@ display(Image(graph.get_graph().draw_mermaid_png()))
 
 ![Graph](./assets/autogen-output.png)
 
-## 3. Test the graph locally
+## 3. 로컬에서 그래프 테스트
 
-Before deploying to LangGraph Platform, you can test the graph locally:
+LangGraph Platform에 배포하기 전에 로컬에서 그래프를 테스트할 수 있습니다:
 
 ```python
 # pass the thread ID to persist agent outputs for future interactions
@@ -162,7 +162,7 @@ To find numbers between 10 and 30 in the Fibonacci sequence, we can generate the
 ...
 ```
 
-Since we're leveraging LangGraph's [persistence](https://langchain-ai.github.io/langgraph/concepts/persistence/) features we can now continue the conversation using the same thread ID -- LangGraph will automatically pass previous history to the AutoGen agent:
+LangGraph의 [지속성](https://langchain-ai.github.io/langgraph/concepts/persistence/) 기능을 활용하고 있으므로 이제 동일한 thread ID를 사용하여 대화를 계속할 수 있습니다. LangGraph는 이전 히스토리를 자동으로 AutoGen 에이전트에 전달합니다:
 
 ```python
 for chunk in graph.stream(
@@ -208,17 +208,17 @@ TERMINATE
 
 --------------------------------------------------------------------------------
 {'call_autogen_agent': {'messages': {'role': 'assistant', 'content': 'The last number in the Fibonacci sequence between 10 and 30 is 21. Multiplying 21 by 3 gives:\n\n21 * 3 = 63\n\nTERMINATE'}}}
-``` 
+```
 
-## 4. Prepare for deployment
+## 4. 배포 준비
 
-To deploy to LangGraph Platform, create a file structure like the following:
+LangGraph Platform에 배포하려면 다음과 같은 파일 구조를 생성합니다:
 
 ```
 my-autogen-agent/
-├── agent.py          # Your main agent code
-├── requirements.txt  # Python dependencies
-└── langgraph.json   # LangGraph configuration
+├── agent.py          # 메인 에이전트 코드
+├── requirements.txt  # Python 의존성
+└── langgraph.json   # LangGraph 구성
 ```
 
 === "agent.py"
@@ -260,7 +260,7 @@ my-autogen-agent/
     )
 
     def call_autogen_agent(state: MessagesState):
-        """Node function that calls the AutoGen agent"""
+        """AutoGen 에이전트를 호출하는 노드 함수"""
         messages = convert_to_openai_messages(state["messages"])
         last_message = messages[-1]
         carryover = messages[:-1] if len(messages) > 1 else []
@@ -274,7 +274,7 @@ my-autogen-agent/
         final_content = response.chat_history[-1]["content"]
         return {"messages": {"role": "assistant", "content": final_content}}
 
-    # Create and compile the graph
+    # 그래프 생성 및 컴파일
     def create_graph():
         checkpointer = InMemorySaver()
         builder = StateGraph(MessagesState)
@@ -282,7 +282,7 @@ my-autogen-agent/
         builder.add_edge(START, "autogen")
         return builder.compile(checkpointer=checkpointer)
 
-    # Export the graph for LangGraph Platform
+    # LangGraph Platform을 위한 그래프 내보내기
     graph = create_graph()
     ```
 
@@ -308,14 +308,14 @@ my-autogen-agent/
     ```
 
 
-## 5. Deploy to LangGraph Platform
+## 5. LangGraph Platform에 배포
 
-Deploy the graph with the LangGraph Platform CLI:
+LangGraph Platform CLI를 사용하여 그래프를 배포합니다:
 
 ```
 pip install -U langgraph-cli
 ```
 
 ```
-langgraph deploy --config langgraph.json 
+langgraph deploy --config langgraph.json
 ```

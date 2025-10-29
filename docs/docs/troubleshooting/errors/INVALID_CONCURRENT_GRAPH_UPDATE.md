@@ -1,10 +1,8 @@
 # INVALID_CONCURRENT_GRAPH_UPDATE
 
-A LangGraph [`StateGraph`](https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.state.StateGraph) received concurrent updates to its state from multiple nodes to a state property that doesn't
-support it.
+LangGraph [`StateGraph`](https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.state.StateGraph)가 여러 노드로부터 동시 상태 업데이트를 받았으나, 해당 상태 속성이 이를 지원하지 않습니다.
 
-One way this can occur is if you are using a [fanout](https://langchain-ai.github.io/langgraph/how-tos/map-reduce/)
-or other parallel execution in your graph and you have defined a graph like this:
+이러한 현상이 발생할 수 있는 한 가지 방법은 그래프에서 [fanout](https://langchain-ai.github.io/langgraph/how-tos/map-reduce/) 또는 기타 병렬 실행을 사용하고 있으며 다음과 같이 그래프를 정의한 경우입니다:
 
 :::python
 
@@ -55,18 +53,16 @@ const graph = builder.compile();
 :::
 
 :::python
-If a node in the above graph returns `{ "some_key": "some_string_value" }`, this will overwrite the state value for `"some_key"` with `"some_string_value"`.
-However, if multiple nodes in e.g. a fanout within a single step return values for `"some_key"`, the graph will throw this error because
-there is uncertainty around how to update the internal state.
+위 그래프의 노드가 `{ "some_key": "some_string_value" }`를 반환하면 `"some_key"`의 상태 값을 `"some_string_value"`로 덮어씁니다.
+그러나 단일 단계 내의 fanout에서 여러 노드가 `"some_key"`에 대한 값을 반환하는 경우, 내부 상태를 업데이트하는 방법에 대한 불확실성이 있기 때문에 그래프가 이 에러를 발생시킵니다.
 :::
 
 :::js
-If a node in the above graph returns `{ someKey: "some_string_value" }`, this will overwrite the state value for `someKey` with `"some_string_value"`.
-However, if multiple nodes in e.g. a fanout within a single step return values for `someKey`, the graph will throw this error because
-there is uncertainty around how to update the internal state.
+위 그래프의 노드가 `{ someKey: "some_string_value" }`를 반환하면 `someKey`의 상태 값을 `"some_string_value"`로 덮어씁니다.
+그러나 단일 단계 내의 fanout에서 여러 노드가 `someKey`에 대한 값을 반환하는 경우, 내부 상태를 업데이트하는 방법에 대한 불확실성이 있기 때문에 그래프가 이 에러를 발생시킵니다.
 :::
 
-To get around this, you can define a reducer that combines multiple values:
+이를 해결하려면 여러 값을 결합하는 reducer를 정의할 수 있습니다:
 
 :::python
 
@@ -75,7 +71,7 @@ import operator
 from typing import Annotated
 
 class State(TypedDict):
-    # The operator.add reducer fn makes this append-only
+    # operator.add reducer fn은 이것을 append-only로 만듭니다
     some_key: Annotated[list, operator.add]
 ```
 
@@ -99,10 +95,10 @@ const State = z.object({
 
 :::
 
-This will allow you to define logic that handles the same key returned from multiple nodes executed in parallel.
+이를 통해 병렬로 실행되는 여러 노드에서 반환된 동일한 키를 처리하는 로직을 정의할 수 있습니다.
 
-## Troubleshooting
+## 트러블슈팅
 
-The following may help resolve this error:
+다음 사항이 이 에러를 해결하는 데 도움이 될 수 있습니다:
 
-- If your graph executes nodes in parallel, make sure you have defined relevant state keys with a reducer.
+- 그래프가 병렬로 노드를 실행하는 경우, 관련 상태 키를 reducer와 함께 정의했는지 확인하세요.

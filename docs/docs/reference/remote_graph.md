@@ -1,4 +1,4 @@
-# RemoteGraph
+# 원격 그래프
 
 ::: langgraph.pregel.remote
     options:

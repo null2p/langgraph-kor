@@ -1,4 +1,4 @@
-# LangGraph Supervisor
+# LangGraph 슈퍼바이저
 
 ::: langgraph_supervisor.supervisor
     options:

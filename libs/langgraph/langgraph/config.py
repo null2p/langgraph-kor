@@ -30,33 +30,33 @@ def get_config() -> RunnableConfig:
 
 
 def get_store() -> BaseStore:
-    """Access LangGraph store from inside a graph node or entrypoint task at runtime.
+    """런타임에 그래프 노드 또는 엔트리포인트 작업 내부에서 LangGraph 스토어에 액세스합니다.
 
-    Can be called from inside any [StateGraph][langgraph.graph.StateGraph] node or
-    functional API [task][langgraph.func.task], as long as the StateGraph or the [entrypoint][langgraph.func.entrypoint]
-    was initialized with a store, e.g.:
+    StateGraph 또는 [entrypoint][langgraph.func.entrypoint]가 스토어로 초기화된 경우,
+    모든 [StateGraph][langgraph.graph.StateGraph] 노드 또는
+    함수형 API [task][langgraph.func.task] 내부에서 호출할 수 있습니다. 예:
 
     ```python
-    # with StateGraph
+    # StateGraph와 함께 사용
     graph = (
         StateGraph(...)
         ...
         .compile(store=store)
     )
 
-    # or with entrypoint
+    # 또는 entrypoint와 함께 사용
     @entrypoint(store=store)
     def workflow(inputs):
         ...
     ```
 
-    !!! warning "Async with Python < 3.11"
+    !!! warning "Python < 3.11과 비동기"
 
-        If you are using Python < 3.11 and are running LangGraph asynchronously,
-        `get_store()` won't work since it uses [contextvar](https://docs.python.org/3/library/contextvars.html) propagation (only available in [Python >= 3.11](https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task)).
+        Python < 3.11을 사용하고 LangGraph를 비동기적으로 실행하는 경우,
+        `get_store()`는 [contextvar](https://docs.python.org/3/library/contextvars.html) 전파([Python >= 3.11](https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task)에서만 사용 가능)를 사용하므로 작동하지 않습니다.
 
 
-    Example: Using with StateGraph
+    예제: StateGraph와 함께 사용
         ```python
         from typing_extensions import TypedDict
         from langgraph.graph import StateGraph, START
@@ -91,7 +91,7 @@ def get_store() -> BaseStore:
         {"foo": 3}
         ```
 
-    Example: Using with functional API
+    예제: 함수형 API와 함께 사용
         ```python
         from langgraph.func import entrypoint, task
         from langgraph.store.memory import InMemoryStore
@@ -124,17 +124,17 @@ def get_store() -> BaseStore:
 
 
 def get_stream_writer() -> StreamWriter:
-    """Access LangGraph [StreamWriter][langgraph.types.StreamWriter] from inside a graph node or entrypoint task at runtime.
+    """런타임에 그래프 노드 또는 엔트리포인트 작업 내부에서 LangGraph [StreamWriter][langgraph.types.StreamWriter]에 액세스합니다.
 
-    Can be called from inside any [StateGraph][langgraph.graph.StateGraph] node or
-    functional API [task][langgraph.func.task].
+    모든 [StateGraph][langgraph.graph.StateGraph] 노드 또는
+    함수형 API [task][langgraph.func.task] 내부에서 호출할 수 있습니다.
 
-    !!! warning "Async with Python < 3.11"
+    !!! warning "Python < 3.11과 비동기"
 
-        If you are using Python < 3.11 and are running LangGraph asynchronously,
-        `get_stream_writer()` won't work since it uses [contextvar](https://docs.python.org/3/library/contextvars.html) propagation (only available in [Python >= 3.11](https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task)).
+        Python < 3.11을 사용하고 LangGraph를 비동기적으로 실행하는 경우,
+        `get_stream_writer()`는 [contextvar](https://docs.python.org/3/library/contextvars.html) 전파([Python >= 3.11](https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task)에서만 사용 가능)를 사용하므로 작동하지 않습니다.
 
-    Example: Using with StateGraph
+    예제: StateGraph와 함께 사용
         ```python
         from typing_extensions import TypedDict
         from langgraph.graph import StateGraph, START
@@ -166,7 +166,7 @@ def get_stream_writer() -> StreamWriter:
         {"custom_data": "Hello!"}
         ```
 
-    Example: Using with functional API
+    예제: 함수형 API와 함께 사용
         ```python
         from langgraph.func import entrypoint, task
         from langgraph.config import get_stream_writer

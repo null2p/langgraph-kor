@@ -37,7 +37,7 @@ class APIError(httpx.HTTPStatusError, LangGraphError):
 
         if isinstance(body, dict):
             b = cast(dict[str, Any], body)
-            # Best-effort extraction of common fields if present
+            # 존재하는 경우 공통 필드의 최선을 다한 추출
             code_val = b.get("code")
             self.code = code_val if isinstance(code_val, str) else None
             param_val = b.get("param")
@@ -62,7 +62,7 @@ class APIResponseValidationError(APIError):
         message: str | None = None,
     ) -> None:
         super().__init__(
-            message or "Data returned by API invalid for expected schema.",
+            message or "API에서 반환된 데이터가 예상 스키마에 대해 유효하지 않습니다.",
             response,
             body=body,
         )
@@ -86,14 +86,14 @@ class APIStatusError(APIError):
 
 class APIConnectionError(APIError):
     def __init__(
-        self, *, message: str = "Connection error.", request: httpx.Request
+        self, *, message: str = "연결 오류.", request: httpx.Request
     ) -> None:
         super().__init__(message, request, body=None)
 
 
 class APITimeoutError(APIConnectionError):
     def __init__(self, request: httpx.Request) -> None:
-        super().__init__(message="Request timed out.", request=request)
+        super().__init__(message="요청 시간 초과.", request=request)
 
 
 class BadRequestError(APIStatusError):
@@ -135,7 +135,7 @@ def _extract_error_message(body: object | None, fallback: str) -> str:
             val = b.get(key)
             if isinstance(val, str) and val:
                 return val
-        # Sometimes errors are structured like {"error": {"message": "..."}}
+        # 때때로 오류는 {"error": {"message": "..."}}와 같이 구조화됩니다
         err = b.get("error")
         if isinstance(err, dict):
             e = cast(dict[str, Any], err)
@@ -180,7 +180,7 @@ def _decode_error_body(r: httpx.Response) -> object | None:
 
 def _map_status_error(response: httpx.Response, body: object | None) -> APIStatusError:
     status = response.status_code
-    reason = response.reason_phrase or "HTTP Error"
+    reason = response.reason_phrase or "HTTP 오류"
     message = _extract_error_message(body, f"{status} {reason}")
     if status == 400:
         return BadRequestError(message, response=response, body=body)
@@ -206,9 +206,9 @@ async def _araise_for_status_typed(r: httpx.Response) -> None:
         return
     body = await _adecode_error_body(r)
     err = _map_status_error(r, body)
-    # Log for older Python versions without Exception notes
+    # Exception notes가 없는 이전 Python 버전을 위한 로그
     if not (sys.version_info >= (3, 11)):
-        logger.error(f"Error from langgraph-api: {getattr(err, 'message', '')}")
+        logger.error(f"langgraph-api 오류: {getattr(err, 'message', '')}")
     raise err
 
 
@@ -218,5 +218,5 @@ def _raise_for_status_typed(r: httpx.Response) -> None:
     body = _decode_error_body(r)
     err = _map_status_error(r, body)
     if not (sys.version_info >= (3, 11)):
-        logger.error(f"Error from langgraph-api: {getattr(err, 'message', '')}")
+        logger.error(f"langgraph-api 오류: {getattr(err, 'message', '')}")
     raise err

@@ -43,21 +43,21 @@ def create_error_message(*, message: str, error_code: ErrorCode) -> str:
 
 
 class GraphRecursionError(RecursionError):
-    """Raised when the graph has exhausted the maximum number of steps.
+    """그래프가 최대 단계 수를 초과했을 때 발생합니다.
 
-    This prevents infinite loops. To increase the maximum number of steps,
-    run your graph with a config specifying a higher `recursion_limit`.
+    이는 무한 루프를 방지합니다. 최대 단계 수를 늘리려면,
+    더 높은 `recursion_limit`를 지정한 config로 그래프를 실행하세요.
 
-    Troubleshooting guides:
+    문제 해결 가이드:
 
     - [`GRAPH_RECURSION_LIMIT`](https://docs.langchain.com/oss/python/langgraph/GRAPH_RECURSION_LIMIT)
 
-    Examples:
+    예제:
 
         graph = builder.compile()
         graph.invoke(
             {"messages": [("user", "Hello, world!")]},
-            # The config is the second positional argument
+            # config는 두 번째 위치 인자입니다
             {"recursion_limit": 1000},
         )
     """
@@ -66,9 +66,9 @@ class GraphRecursionError(RecursionError):
 
 
 class InvalidUpdateError(Exception):
-    """Raised when attempting to update a channel with an invalid set of updates.
+    """유효하지 않은 업데이트 세트로 채널을 업데이트하려고 할 때 발생합니다.
 
-    Troubleshooting guides:
+    문제 해결 가이드:
 
     - [`INVALID_CONCURRENT_GRAPH_UPDATE`](https://docs.langchain.com/oss/python/langgraph/INVALID_CONCURRENT_GRAPH_UPDATE)
     - [`INVALID_GRAPH_NODE_RETURN_VALUE`](https://docs.langchain.com/oss/python/langgraph/INVALID_GRAPH_NODE_RETURN_VALUE)
@@ -82,8 +82,8 @@ class GraphBubbleUp(Exception):
 
 
 class GraphInterrupt(GraphBubbleUp):
-    """Raised when a subgraph is interrupted, suppressed by the root graph.
-    Never raised directly, or surfaced to the user."""
+    """서브그래프가 중단되어 루트 그래프에 의해 억제될 때 발생합니다.
+    직접 발생하거나 사용자에게 노출되지 않습니다."""
 
     def __init__(self, interrupts: Sequence[Interrupt] = ()) -> None:
         super().__init__(interrupts)
@@ -94,7 +94,7 @@ class GraphInterrupt(GraphBubbleUp):
     category=None,
 )
 class NodeInterrupt(GraphInterrupt):
-    """Raised by a node to interrupt execution."""
+    """노드가 실행을 중단하기 위해 발생시킵니다."""
 
     def __init__(self, value: Any, id: str | None = None) -> None:
         warn(
@@ -116,12 +116,12 @@ class ParentCommand(GraphBubbleUp):
 
 
 class EmptyInputError(Exception):
-    """Raised when graph receives an empty input."""
+    """그래프가 빈 입력을 받았을 때 발생합니다."""
 
     pass
 
 
 class TaskNotFound(Exception):
-    """Raised when the executor is unable to find a task (for distributed mode)."""
+    """실행기가 작업을 찾을 수 없을 때 발생합니다 (분산 모드용)."""
 
     pass

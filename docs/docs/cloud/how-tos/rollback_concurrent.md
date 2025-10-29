@@ -1,13 +1,13 @@
-# How to use the Rollback option
+# Rollback 옵션 사용 방법
 
 
-This guide assumes knowledge of what double-texting is, which you can learn about in the [double-texting conceptual guide](../../concepts/double_texting.md).
+이 가이드는 더블 텍스팅이 무엇인지에 대한 지식을 가정하며, [더블 텍스팅 개념 가이드](../../concepts/double_texting.md)에서 이에 대해 배울 수 있습니다.
 
-The guide covers the `rollback` option for double texting, which interrupts the prior run of the graph and starts a new one with the double-text. This option is very similar to the `interrupt` option, but in this case the first run is completely deleted from the database and cannot be restarted. Below is a quick example of using the `rollback` option.
+이 가이드는 더블 텍스팅을 위한 `rollback` 옵션을 다루며, 이는 그래프의 이전 실행을 중단하고 더블 텍스트로 새 실행을 시작합니다. 이 옵션은 `interrupt` 옵션과 매우 유사하지만, 이 경우 첫 번째 실행이 데이터베이스에서 완전히 삭제되어 재시작할 수 없습니다. 다음은 `rollback` 옵션 사용의 간단한 예제입니다.
 
-## Setup
+## 설정
 
-First, we will define a quick helper function for printing out JS and CURL model outputs (you can skip this if using Python):
+먼저 JS 및 CURL 모델 출력을 출력하기 위한 간단한 헬퍼 함수를 정의합니다(Python을 사용하는 경우 건너뛸 수 있습니다):
 
 === "Javascript"
 
@@ -46,7 +46,7 @@ First, we will define a quick helper function for printing out JS and CURL model
     }
     ```
 
-Now, let's import our required packages and instantiate our client, assistant, and thread.
+이제 필요한 패키지를 가져오고 클라이언트, 어시스턴트 및 스레드를 인스턴스화합니다.
 
 === "Python"
 
@@ -83,9 +83,9 @@ Now, let's import our required packages and instantiate our client, assistant, a
       --data '{}'
     ```
 
-## Create runs
+## 실행 생성
 
-Now let's run a thread with the multitask parameter set to "rollback":
+이제 멀티태스크 파라미터를 "rollback"으로 설정하여 스레드를 실행해 보겠습니다:
 
 === "Python"
 
@@ -149,9 +149,9 @@ Now let's run a thread with the multitask parameter set to "rollback":
     --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/<RUN_ID>/join
     ```
 
-## View run results
+## 실행 결과 보기
 
-We can see that the thread has data only from the second run
+스레드에 두 번째 실행의 데이터만 있음을 확인할 수 있습니다
 
 === "Python"
 
@@ -184,7 +184,7 @@ We can see that the thread has data only from the second run
     done
     ```
 
-Output:
+출력:
 
     ================================ Human Message =================================
     
@@ -206,7 +206,7 @@ Output:
     The weather API results show that the current weather in New York City is sunny with a temperature of around 85°F (29°C). The wind is light at around 2-3 mph from the south-southeast. Overall it looks like a nice sunny summer day in NYC.
 
 
-Verify that the original, rolled back run was deleted
+롤백된 원래 실행이 삭제되었는지 확인합니다
 
 === "Python"
 
@@ -227,7 +227,7 @@ Verify that the original, rolled back run was deleted
     }
     ```
 
-Output:
+출력:
 
     Original run was correctly deleted
 

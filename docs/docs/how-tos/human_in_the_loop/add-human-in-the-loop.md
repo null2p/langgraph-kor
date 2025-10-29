@@ -9,35 +9,35 @@ hide:
   - tags
 ---
 
-# Enable human intervention
+# 사람 개입 활성화
 
-To review, edit, and approve tool calls in an agent or workflow, use interrupts to pause a graph and wait for human input. Interrupts use LangGraph's [persistence](../../concepts/persistence.md) layer, which saves the graph state, to indefinitely pause graph execution until you resume.
+에이전트 또는 워크플로우에서 도구 호출을 검토하고 편집하고 승인하려면 인터럽트를 사용하여 그래프를 일시 중지하고 사람의 입력을 기다립니다. 인터럽트는 그래프 상태를 저장하는 LangGraph의 [영속성](../../concepts/persistence.md) 레이어를 사용하여 재개할 때까지 그래프 실행을 무기한 일시 중지합니다.
 
 !!! info
 
-    For more information about human-in-the-loop workflows, see the [Human-in-the-Loop](../../concepts/human_in_the_loop.md) conceptual guide.
+    human-in-the-loop 워크플로우에 대한 자세한 내용은 [Human-in-the-Loop](../../concepts/human_in_the_loop.md) 개념 가이드를 참조하세요.
 
-## Pause using `interrupt`
+## `interrupt`를 사용하여 일시 중지
 
 :::python
-[Dynamic interrupts](../../concepts/human_in_the_loop.md#key-capabilities) (also known as dynamic breakpoints) are triggered based on the current state of the graph. You can set dynamic interrupts by calling @[`interrupt` function][interrupt] in the appropriate place. The graph will pause, which allows for human intervention, and then resumes the graph with their input. It's useful for tasks like approvals, edits, or gathering additional context.
+[동적 인터럽트](../../concepts/human_in_the_loop.md#key-capabilities) (동적 브레이크포인트라고도 함)는 그래프의 현재 상태를 기반으로 트리거됩니다. 적절한 위치에서 @[`interrupt` 함수][interrupt]를 호출하여 동적 인터럽트를 설정할 수 있습니다. 그래프가 일시 중지되어 사람의 개입이 가능하고, 사람의 입력으로 그래프를 재개합니다. 승인, 편집 또는 추가 컨텍스트 수집과 같은 작업에 유용합니다.
 
 !!! note
 
-    As of v1.0, `interrupt` is the recommended way to pause a graph. `NodeInterrupt` is deprecated and will be removed in v2.0.
+    v1.0부터 `interrupt`가 그래프를 일시 중지하는 권장 방법입니다. `NodeInterrupt`는 더 이상 사용되지 않으며 v2.0에서 제거됩니다.
 
 :::
 
 :::js
-[Dynamic interrupts](../../concepts/human_in_the_loop.md#key-capabilities) (also known as dynamic breakpoints) are triggered based on the current state of the graph. You can set dynamic interrupts by calling @[`interrupt` function][interrupt] in the appropriate place. The graph will pause, which allows for human intervention, and then resumes the graph with their input. It's useful for tasks like approvals, edits, or gathering additional context.
+[동적 인터럽트](../../concepts/human_in_the_loop.md#key-capabilities) (동적 브레이크포인트라고도 함)는 그래프의 현재 상태를 기반으로 트리거됩니다. 적절한 위치에서 @[`interrupt` 함수][interrupt]를 호출하여 동적 인터럽트를 설정할 수 있습니다. 그래프가 일시 중지되어 사람의 개입이 가능하고, 사람의 입력으로 그래프를 재개합니다. 승인, 편집 또는 추가 컨텍스트 수집과 같은 작업에 유용합니다.
 :::
 
-To use `interrupt` in your graph, you need to:
+그래프에서 `interrupt`를 사용하려면 다음이 필요합니다:
 
-1. [**Specify a checkpointer**](../../concepts/persistence.md#checkpoints) to save the graph state after each step.
-2. **Call `interrupt()`** in the appropriate place. See the [Common Patterns](#common-patterns) section for examples.
-3. **Run the graph** with a [**thread ID**](../../concepts/persistence.md#threads) until the `interrupt` is hit.
-4. **Resume execution** using `invoke`/`stream` (see [**The `Command` primitive**](#resume-using-the-command-primitive)).
+1. 각 단계 후 그래프 상태를 저장하기 위해 [**체크포인터 지정**](../../concepts/persistence.md#checkpoints)
+2. 적절한 위치에서 **`interrupt()` 호출**. 예제는 [일반 패턴](#common-patterns) 섹션을 참조하세요.
+3. `interrupt`에 도달할 때까지 [**스레드 ID**](../../concepts/persistence.md#threads)로 **그래프 실행**
+4. `invoke`/`stream`을 사용하여 **실행 재개** ([**`Command` 프리미티브**](#resume-using-the-command-primitive) 참조)
 
 :::python
 

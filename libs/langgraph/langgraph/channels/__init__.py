@@ -11,9 +11,9 @@ from langgraph.channels.topic import Topic
 from langgraph.channels.untracked_value import UntrackedValue
 
 __all__ = (
-    # base
+    # 기본
     "BaseChannel",
-    # value types
+    # 값 타입들
     "AnyValue",
     "LastValue",
     "LastValueAfterFinish",
@@ -22,6 +22,6 @@ __all__ = (
     "BinaryOperatorAggregate",
     "NamedBarrierValue",
     "NamedBarrierValueAfterFinish",
-    # topics
+    # 토픽
     "Topic",
 )

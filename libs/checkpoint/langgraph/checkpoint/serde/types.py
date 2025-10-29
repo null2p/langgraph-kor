@@ -20,7 +20,7 @@ C = TypeVar("C")
 
 
 class ChannelProtocol(Protocol[Value, Update, C]):
-    # Mirrors langgraph.channels.base.BaseChannel
+    # langgraph.channels.base.BaseChannel을 미러링합니다
     @property
     def ValueType(self) -> Any: ...
 
@@ -40,7 +40,7 @@ class ChannelProtocol(Protocol[Value, Update, C]):
 
 @runtime_checkable
 class SendProtocol(Protocol):
-    # Mirrors langgraph.constants.Send
+    # langgraph.constants.Send를 미러링합니다
     node: str
     arg: Any
 

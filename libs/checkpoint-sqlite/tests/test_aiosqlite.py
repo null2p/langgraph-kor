@@ -15,7 +15,7 @@ from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 class TestAsyncSqliteSaver:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
-        # objects for test setup
+        # 테스트 설정을 위한 객체
         self.config_1: RunnableConfig = {
             "configurable": {
                 "thread_id": "thread-1",
@@ -79,14 +79,14 @@ class TestAsyncSqliteSaver:
             await saver.aput(self.config_2, self.chkpnt_2, self.metadata_2, {})
             await saver.aput(self.config_3, self.chkpnt_3, self.metadata_3, {})
 
-            # call method / assertions
-            query_1 = {"source": "input"}  # search by 1 key
+            # 메서드 호출 / 어설션
+            query_1 = {"source": "input"}  # 1개의 키로 검색
             query_2 = {
                 "step": 1,
                 "writes": {"foo": "bar"},
-            }  # search by multiple keys
-            query_3: dict[str, Any] = {}  # search by no keys, return all checkpoints
-            query_4 = {"source": "update", "step": 1}  # no match
+            }  # 여러 키로 검색
+            query_3: dict[str, Any] = {}  # 키 없이 검색, 모든 체크포인트 반환
+            query_4 = {"source": "update", "step": 1}  # 일치하는 항목 없음
 
             search_results_1 = [c async for c in saver.alist(None, filter=query_1)]
             assert len(search_results_1) == 1
@@ -102,7 +102,7 @@ class TestAsyncSqliteSaver:
             search_results_4 = [c async for c in saver.alist(None, filter=query_4)]
             assert len(search_results_4) == 0
 
-            # search by config (defaults to checkpoints across all namespaces)
+            # config로 검색 (기본적으로 모든 네임스페이스의 체크포인트 검색)
             search_results_5 = [
                 c
                 async for c in saver.alist({"configurable": {"thread_id": "thread-2"}})
@@ -113,4 +113,4 @@ class TestAsyncSqliteSaver:
                 search_results_5[1].config["configurable"]["checkpoint_ns"],
             } == {"", "inner"}
 
-            # TODO: test before and limit params
+            # TODO: before 및 limit 매개변수 테스트

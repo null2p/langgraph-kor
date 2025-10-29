@@ -26,11 +26,11 @@ from langgraph.checkpoint.postgres import _internal
 from langgraph.checkpoint.postgres.base import BasePostgresSaver
 from langgraph.checkpoint.postgres.shallow import ShallowPostgresSaver
 
-Conn = _internal.Conn  # For backward compatibility
+Conn = _internal.Conn  # 하위 호환성을 위해
 
 
 class PostgresSaver(BasePostgresSaver):
-    """Checkpointer that stores checkpoints in a Postgres database."""
+    """Postgres 데이터베이스에 체크포인트를 저장하는 체크포인터입니다."""
 
     lock: threading.Lock
 
@@ -56,14 +56,14 @@ class PostgresSaver(BasePostgresSaver):
     def from_conn_string(
         cls, conn_string: str, *, pipeline: bool = False
     ) -> Iterator[PostgresSaver]:
-        """Create a new PostgresSaver instance from a connection string.
+        """연결 문자열에서 새 PostgresSaver 인스턴스를 생성합니다.
 
         Args:
-            conn_string: The Postgres connection info string.
-            pipeline: whether to use Pipeline
+            conn_string: Postgres 연결 정보 문자열입니다.
+            pipeline: Pipeline 사용 여부입니다.
 
         Returns:
-            PostgresSaver: A new PostgresSaver instance.
+            PostgresSaver: 새 PostgresSaver 인스턴스입니다.
         """
         with Connection.connect(
             conn_string, autocommit=True, prepare_threshold=0, row_factory=dict_row
@@ -75,11 +75,11 @@ class PostgresSaver(BasePostgresSaver):
                 yield cls(conn)
 
     def setup(self) -> None:
-        """Set up the checkpoint database asynchronously.
+        """체크포인트 데이터베이스를 비동기적으로 설정합니다.
 
-        This method creates the necessary tables in the Postgres database if they don't
-        already exist and runs database migrations. It MUST be called directly by the user
-        the first time checkpointer is used.
+        이 메서드는 Postgres 데이터베이스에 필요한 테이블이 존재하지 않으면 생성하고
+        데이터베이스 마이그레이션을 실행합니다. 체크포인터를 처음 사용할 때 사용자가
+        직접 호출해야 합니다.
         """
         with self._cursor() as cur:
             cur.execute(self.MIGRATIONS[0])
@@ -109,25 +109,25 @@ class PostgresSaver(BasePostgresSaver):
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> Iterator[CheckpointTuple]:
-        """List checkpoints from the database.
+        """데이터베이스에서 체크포인트를 나열합니다.
 
-        This method retrieves a list of checkpoint tuples from the Postgres database based
-        on the provided config. The checkpoints are ordered by checkpoint ID in descending order (newest first).
+        이 메서드는 제공된 구성을 기반으로 Postgres 데이터베이스에서 체크포인트 튜플 목록을
+        검색합니다. 체크포인트는 체크포인트 ID의 내림차순으로 정렬됩니다(최신 항목이 먼저).
 
         Args:
-            config: The config to use for listing the checkpoints.
-            filter: Additional filtering criteria for metadata.
-            before: If provided, only checkpoints before the specified checkpoint ID are returned.
-            limit: The maximum number of checkpoints to return.
+            config: 체크포인트를 나열하는 데 사용할 구성입니다.
+            filter: 메타데이터에 대한 추가 필터링 기준입니다.
+            before: 제공된 경우, 지정된 체크포인트 ID 이전의 체크포인트만 반환됩니다.
+            limit: 반환할 최대 체크포인트 수입니다.
 
         Yields:
-            An iterator of checkpoint tuples.
+            체크포인트 튜플의 반복자입니다.
 
         Examples:
             >>> from langgraph.checkpoint.postgres import PostgresSaver
             >>> DB_URI = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
             >>> with PostgresSaver.from_conn_string(DB_URI) as memory:
-            ... # Run a graph, then list the checkpoints
+            ... # 그래프를 실행한 다음 체크포인트를 나열합니다
             >>>     config = {"configurable": {"thread_id": "1"}}
             >>>     checkpoints = list(memory.list(config, limit=2))
             >>> print(checkpoints)
@@ -136,7 +136,7 @@ class PostgresSaver(BasePostgresSaver):
             >>> config = {"configurable": {"thread_id": "1"}}
             >>> before = {"configurable": {"checkpoint_id": "1ef4f797-8335-6428-8001-8a1503f9b875"}}
             >>> with PostgresSaver.from_conn_string(DB_URI) as memory:
-            ... # Run a graph, then list the checkpoints
+            ... # 그래프를 실행한 다음 체크포인트를 나열합니다
             >>>     checkpoints = list(memory.list(config, before=before))
             >>> print(checkpoints)
             [CheckpointTuple(...), ...]
@@ -145,13 +145,13 @@ class PostgresSaver(BasePostgresSaver):
         query = self.SELECT_SQL + where + " ORDER BY checkpoint_id DESC"
         if limit:
             query += f" LIMIT {limit}"
-        # if we change this to use .stream() we need to make sure to close the cursor
+        # .stream()을 사용하도록 변경하면 커서를 닫아야 합니다
         with self._cursor() as cur:
             cur.execute(query, args)
             values = cur.fetchall()
             if not values:
                 return
-            # migrate pending sends if necessary
+            # 필요한 경우 보류 중인 전송 마이그레이션
             if to_migrate := [
                 v
                 for v in values
@@ -180,18 +180,18 @@ class PostgresSaver(BasePostgresSaver):
                 yield self._load_checkpoint_tuple(value)
 
     def get_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
-        """Get a checkpoint tuple from the database.
+        """데이터베이스에서 체크포인트 튜플을 가져옵니다.
 
-        This method retrieves a checkpoint tuple from the Postgres database based on the
-        provided config. If the config contains a `checkpoint_id` key, the checkpoint with
-        the matching thread ID and timestamp is retrieved. Otherwise, the latest checkpoint
-        for the given thread ID is retrieved.
+        이 메서드는 제공된 구성을 기반으로 Postgres 데이터베이스에서 체크포인트 튜플을
+        검색합니다. 구성에 `checkpoint_id` 키가 포함된 경우, 일치하는 스레드 ID와 타임스탬프를
+        가진 체크포인트가 검색됩니다. 그렇지 않으면 주어진 스레드 ID에 대한 최신 체크포인트가
+        검색됩니다.
 
         Args:
-            config: The config to use for retrieving the checkpoint.
+            config: 체크포인트를 검색하는 데 사용할 구성입니다.
 
         Returns:
-            The retrieved checkpoint tuple, or None if no matching checkpoint was found.
+            검색된 체크포인트 튜플, 또는 일치하는 체크포인트가 없으면 None입니다.
 
         Examples:
 
@@ -233,7 +233,7 @@ class PostgresSaver(BasePostgresSaver):
             if value is None:
                 return None
 
-            # migrate pending sends if necessary
+            # 필요한 경우 보류 중인 전송 마이그레이션
             if value["checkpoint"]["v"] < 4 and value["parent_checkpoint_id"]:
                 cur.execute(
                     self.SELECT_PENDING_SENDS_SQL,
@@ -257,19 +257,19 @@ class PostgresSaver(BasePostgresSaver):
         metadata: CheckpointMetadata,
         new_versions: ChannelVersions,
     ) -> RunnableConfig:
-        """Save a checkpoint to the database.
+        """데이터베이스에 체크포인트를 저장합니다.
 
-        This method saves a checkpoint to the Postgres database. The checkpoint is associated
-        with the provided config and its parent config (if any).
+        이 메서드는 Postgres 데이터베이스에 체크포인트를 저장합니다. 체크포인트는
+        제공된 구성 및 해당 부모 구성(있는 경우)과 연결됩니다.
 
         Args:
-            config: The config to associate with the checkpoint.
-            checkpoint: The checkpoint to save.
-            metadata: Additional metadata to save with the checkpoint.
-            new_versions: New channel versions as of this write.
+            config: 체크포인트와 연결할 구성입니다.
+            checkpoint: 저장할 체크포인트입니다.
+            metadata: 체크포인트와 함께 저장할 추가 메타데이터입니다.
+            new_versions: 이 쓰기 시점의 새 채널 버전입니다.
 
         Returns:
-            RunnableConfig: Updated configuration after storing the checkpoint.
+            RunnableConfig: 체크포인트 저장 후 업데이트된 구성입니다.
 
         Examples:
 
@@ -296,8 +296,8 @@ class PostgresSaver(BasePostgresSaver):
             }
         }
 
-        # inline primitive values in checkpoint table
-        # others are stored in blobs table
+        # 체크포인트 테이블에 원시 값을 인라인으로 저장
+        # 나머지는 blobs 테이블에 저장
         blob_values = {}
         for k, v in checkpoint["channel_values"].items():
             if v is None or isinstance(v, (str, int, float, bool)):
@@ -338,14 +338,14 @@ class PostgresSaver(BasePostgresSaver):
         task_id: str,
         task_path: str = "",
     ) -> None:
-        """Store intermediate writes linked to a checkpoint.
+        """체크포인트에 연결된 중간 쓰기를 저장합니다.
 
-        This method saves intermediate writes associated with a checkpoint to the Postgres database.
+        이 메서드는 체크포인트와 연결된 중간 쓰기를 Postgres 데이터베이스에 저장합니다.
 
         Args:
-            config: Configuration of the related checkpoint.
-            writes: List of writes to store.
-            task_id: Identifier for the task creating the writes.
+            config: 관련 체크포인트의 구성입니다.
+            writes: 저장할 쓰기 목록입니다.
+            task_id: 쓰기를 생성하는 작업의 식별자입니다.
         """
         query = (
             self.UPSERT_CHECKPOINT_WRITES_SQL
@@ -366,10 +366,10 @@ class PostgresSaver(BasePostgresSaver):
             )
 
     def delete_thread(self, thread_id: str) -> None:
-        """Delete all checkpoints and writes associated with a thread ID.
+        """스레드 ID와 연결된 모든 체크포인트 및 쓰기를 삭제합니다.
 
         Args:
-            thread_id: The thread ID to delete.
+            thread_id: 삭제할 스레드 ID입니다.
 
         Returns:
             None
@@ -390,18 +390,17 @@ class PostgresSaver(BasePostgresSaver):
 
     @contextmanager
     def _cursor(self, *, pipeline: bool = False) -> Iterator[Cursor[DictRow]]:
-        """Create a database cursor as a context manager.
+        """컨텍스트 관리자로 데이터베이스 커서를 생성합니다.
 
         Args:
-            pipeline: whether to use pipeline for the DB operations inside the context manager.
-                Will be applied regardless of whether the PostgresSaver instance was initialized with a pipeline.
-                If pipeline mode is not supported, will fall back to using transaction context manager.
+            pipeline: 컨텍스트 관리자 내부의 DB 작업에 파이프라인을 사용할지 여부입니다.
+                PostgresSaver 인스턴스가 파이프라인으로 초기화되었는지 여부에 관계없이 적용됩니다.
+                파이프라인 모드가 지원되지 않으면 트랜잭션 컨텍스트 관리자를 사용하도록 대체합니다.
         """
         with self.lock, _internal.get_connection(self.conn) as conn:
             if self.pipe:
-                # a connection in pipeline mode can be used concurrently
-                # in multiple threads/coroutines, but only one cursor can be
-                # used at a time
+                # 파이프라인 모드의 연결은 여러 스레드/코루틴에서 동시에 사용할 수 있지만,
+                # 한 번에 하나의 커서만 사용할 수 있습니다
                 try:
                     with conn.cursor(binary=True, row_factory=dict_row) as cur:
                         yield cur
@@ -409,8 +408,8 @@ class PostgresSaver(BasePostgresSaver):
                     if pipeline:
                         self.pipe.sync()
             elif pipeline:
-                # a connection not in pipeline mode can only be used by one
-                # thread/coroutine at a time, so we acquire a lock
+                # 파이프라인 모드가 아닌 연결은 한 번에 하나의 스레드/코루틴만 사용할 수 있으므로
+                # 잠금을 획득합니다
                 if self.supports_pipeline:
                     with (
                         conn.pipeline(),
@@ -418,7 +417,7 @@ class PostgresSaver(BasePostgresSaver):
                     ):
                         yield cur
                 else:
-                    # Use connection's transaction context manager when pipeline mode not supported
+                    # 파이프라인 모드가 지원되지 않을 때 연결의 트랜잭션 컨텍스트 관리자 사용
                     with (
                         conn.transaction(),
                         conn.cursor(binary=True, row_factory=dict_row) as cur,
@@ -430,15 +429,14 @@ class PostgresSaver(BasePostgresSaver):
 
     def _load_checkpoint_tuple(self, value: DictRow) -> CheckpointTuple:
         """
-        Convert a database row into a CheckpointTuple object.
+        데이터베이스 행을 CheckpointTuple 객체로 변환합니다.
 
         Args:
-            value: A row from the database containing checkpoint data.
+            value: 체크포인트 데이터를 포함하는 데이터베이스 행입니다.
 
         Returns:
-            CheckpointTuple: A structured representation of the checkpoint,
-            including its configuration, metadata, parent checkpoint (if any),
-            and pending writes.
+            CheckpointTuple: 구성, 메타데이터, 부모 체크포인트(있는 경우) 및
+            보류 중인 쓰기를 포함하는 체크포인트의 구조화된 표현입니다.
         """
         return CheckpointTuple(
             {

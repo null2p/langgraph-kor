@@ -1,18 +1,18 @@
-# Subgraphs
+# 서브그래프
 
-A subgraph is a [graph](./low_level.md#graphs) that is used as a [node](./low_level.md#nodes) in another graph — this is the concept of encapsulation applied to LangGraph. Subgraphs allow you to build complex systems with multiple components that are themselves graphs.
+서브그래프는 다른 그래프에서 [노드](./low_level.md#nodes)로 사용되는 [그래프](./low_level.md#graphs)입니다 — 이는 LangGraph에 적용된 캡슐화 개념입니다. 서브그래프를 사용하면 자체적으로 그래프인 여러 컴포넌트가 있는 복잡한 시스템을 구축할 수 있습니다.
 
 ![Subgraph](./img/subgraph.png)
 
-Some reasons for using subgraphs are:
+서브그래프를 사용하는 이유는 다음과 같습니다:
 
-- building [multi-agent systems](./multi_agent.md)
-- when you want to reuse a set of nodes in multiple graphs
-- when you want different teams to work on different parts of the graph independently, you can define each part as a subgraph, and as long as the subgraph interface (the input and output schemas) is respected, the parent graph can be built without knowing any details of the subgraph
+- [다중 에이전트 시스템](./multi_agent.md) 구축
+- 여러 그래프에서 노드 세트를 재사용하려는 경우
+- 서로 다른 팀이 그래프의 서로 다른 부분을 독립적으로 작업하도록 하려는 경우, 각 부분을 서브그래프로 정의할 수 있으며, 서브그래프 인터페이스(입력 및 출력 스키마)가 존중되는 한 부모 그래프는 서브그래프의 세부 정보를 알지 못해도 구축할 수 있습니다
 
-The main question when adding subgraphs is how the parent graph and subgraph communicate, i.e. how they pass the [state](./low_level.md#state) between each other during the graph execution. There are two scenarios:
+서브그래프를 추가할 때 주요 질문은 부모 그래프와 서브그래프가 어떻게 통신하는가, 즉 그래프 실행 중에 서로 간에 [상태](./low_level.md#state)를 어떻게 전달하는가입니다. 두 가지 시나리오가 있습니다:
 
-- parent and subgraph have **shared state keys** in their state [schemas](./low_level.md#state). In this case, you can [include the subgraph as a node in the parent graph](../how-tos/subgraph.ipynb#shared-state-schemas)
+- 부모 그래프와 서브그래프가 상태 [스키마](./low_level.md#state)에 **공유 상태 키**를 가지는 경우. 이 경우 [서브그래프를 부모 그래프의 노드로 포함](../how-tos/subgraph.ipynb#shared-state-schemas)할 수 있습니다
 
   :::python
 
@@ -75,7 +75,7 @@ The main question when adding subgraphs is how the parent graph and subgraph com
 
   :::
 
-- parent graph and subgraph have **different schemas** (no shared state keys in their state [schemas](./low_level.md#state)). In this case, you have to [call the subgraph from inside a node in the parent graph](../how-tos/subgraph.ipynb#different-state-schemas): this is useful when the parent graph and the subgraph have different state schemas and you need to transform state before or after calling the subgraph
+- 부모 그래프와 서브그래프가 **다른 스키마**를 가지는 경우 (상태 [스키마](./low_level.md#state)에 공유 상태 키가 없음). 이 경우 [부모 그래프의 노드 내부에서 서브그래프를 호출](../how-tos/subgraph.ipynb#different-state-schemas)해야 합니다: 이는 부모 그래프와 서브그래프가 서로 다른 상태 스키마를 가지고 있고 서브그래프를 호출하기 전이나 후에 상태를 변환해야 할 때 유용합니다
 
   :::python
 

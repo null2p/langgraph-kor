@@ -32,13 +32,13 @@ DEFAULT_RECURSION_LIMIT = int(getenv("LANGGRAPH_DEFAULT_RECURSION_LIMIT", "25"))
 
 
 def recast_checkpoint_ns(ns: str) -> str:
-    """Remove task IDs from checkpoint namespace.
+    """체크포인트 네임스페이스에서 태스크 ID를 제거합니다.
 
     Args:
-        ns: The checkpoint namespace with task IDs.
+        ns: 태스크 ID가 포함된 체크포인트 네임스페이스입니다.
 
     Returns:
-        str: The checkpoint namespace without task IDs.
+        str: 태스크 ID가 없는 체크포인트 네임스페이스입니다.
     """
     return NS_SEP.join(
         part.split(NS_END)[0] for part in ns.split(NS_SEP) if not part.isdigit()
@@ -77,17 +77,17 @@ def patch_checkpoint_map(
 
 
 def merge_configs(*configs: RunnableConfig | None) -> RunnableConfig:
-    """Merge multiple configs into one.
+    """여러 config를 하나로 병합합니다.
 
     Args:
-        *configs: The configs to merge.
+        *configs: 병합할 config들입니다.
 
     Returns:
-        RunnableConfig: The merged config.
+        RunnableConfig: 병합된 config입니다.
     """
     base: RunnableConfig = {}
-    # Even though the keys aren't literals, this is correct
-    # because both dicts are the same type
+    # 키가 리터럴이 아니더라도, 두 dict가 같은 타입이므로
+    # 이것은 올바릅니다
     for config in configs:
         if config is None:
             continue
@@ -111,21 +111,21 @@ def merge_configs(*configs: RunnableConfig | None) -> RunnableConfig:
                     base[key] = value
             elif key == "callbacks":
                 base_callbacks = base.get("callbacks")
-                # callbacks can be either None, list[handler] or manager
-                # so merging two callbacks values has 6 cases
+                # callbacks는 None, list[handler] 또는 manager일 수 있으므로
+                # 두 callbacks 값을 병합하는 경우의 수는 6가지입니다
                 if isinstance(value, list):
                     if base_callbacks is None:
                         base["callbacks"] = value.copy()
                     elif isinstance(base_callbacks, list):
                         base["callbacks"] = base_callbacks + value
                     else:
-                        # base_callbacks is a manager
+                        # base_callbacks는 manager입니다
                         mngr = base_callbacks.copy()
                         for callback in value:
                             mngr.add_handler(callback, inherit=True)
                         base["callbacks"] = mngr
                 elif isinstance(value, BaseCallbackManager):
-                    # value is a manager
+                    # value는 manager입니다
                     if base_callbacks is None:
                         base["callbacks"] = value.copy()
                     elif isinstance(base_callbacks, list):
@@ -134,7 +134,7 @@ def merge_configs(*configs: RunnableConfig | None) -> RunnableConfig:
                             mngr.add_handler(callback, inherit=True)
                         base["callbacks"] = mngr
                     else:
-                        # base_callbacks is also a manager
+                        # base_callbacks도 manager입니다
                         base["callbacks"] = base_callbacks.merge(value)
                 else:
                     raise NotImplementedError
@@ -157,23 +157,23 @@ def patch_config(
     run_name: str | None = None,
     configurable: dict[str, Any] | None = None,
 ) -> RunnableConfig:
-    """Patch a config with new values.
+    """새로운 값으로 config를 패치합니다.
 
     Args:
-        config: The config to patch.
-        callbacks: The callbacks to set.
-        recursion_limit: The recursion limit to set.
-        max_concurrency: The max number of concurrent steps to run, which also applies to parallelized steps.
-        run_name: The run name to set.
-        configurable: The configurable to set.
+        config: 패치할 config입니다.
+        callbacks: 설정할 callbacks입니다.
+        recursion_limit: 설정할 재귀 제한입니다.
+        max_concurrency: 실행할 동시 단계의 최대 수로, 병렬화된 단계에도 적용됩니다.
+        run_name: 설정할 run 이름입니다.
+        configurable: 설정할 configurable입니다.
 
     Returns:
-        RunnableConfig: The patched config.
+        RunnableConfig: 패치된 config입니다.
     """
     config = config.copy() if config is not None else {}
     if callbacks is not None:
-        # If we're replacing callbacks, we need to unset run_name
-        # As that should apply only to the same run as the original callbacks
+        # callbacks를 교체하는 경우 run_name을 제거해야 합니다
+        # 이는 원래 callbacks와 동일한 run에만 적용되어야 하기 때문입니다
         config["callbacks"] = callbacks
         if "run_name" in config:
             del config["run_name"]
@@ -193,23 +193,23 @@ def patch_config(
 def get_callback_manager_for_config(
     config: RunnableConfig, tags: Sequence[str] | None = None
 ) -> CallbackManager:
-    """Get a callback manager for a config.
+    """config를 위한 callback manager를 가져옵니다.
 
     Args:
-        config: The config.
+        config: config입니다.
 
     Returns:
-        CallbackManager: The callback manager.
+        CallbackManager: callback manager입니다.
     """
     from langchain_core.callbacks.manager import CallbackManager
 
-    # merge tags
+    # tags를 병합합니다
     all_tags = config.get("tags")
     if all_tags is not None and tags is not None:
         all_tags = [*all_tags, *tags]
     elif tags is not None:
         all_tags = list(tags)
-    # use existing callbacks if they exist
+    # 기존 callbacks가 있으면 사용합니다
     if (callbacks := config.get("callbacks")) and isinstance(
         callbacks, CallbackManager
     ):
@@ -219,7 +219,7 @@ def get_callback_manager_for_config(
             callbacks.add_metadata(metadata)
         return callbacks
     else:
-        # otherwise create a new manager
+        # 그렇지 않으면 새 manager를 생성합니다
         return CallbackManager.configure(
             inheritable_callbacks=config.get("callbacks"),
             inheritable_tags=all_tags,
@@ -231,23 +231,23 @@ def get_async_callback_manager_for_config(
     config: RunnableConfig,
     tags: Sequence[str] | None = None,
 ) -> AsyncCallbackManager:
-    """Get an async callback manager for a config.
+    """config를 위한 비동기 callback manager를 가져옵니다.
 
     Args:
-        config: The config.
+        config: config입니다.
 
     Returns:
-        AsyncCallbackManager: The async callback manager.
+        AsyncCallbackManager: 비동기 callback manager입니다.
     """
     from langchain_core.callbacks.manager import AsyncCallbackManager
 
-    # merge tags
+    # tags를 병합합니다
     all_tags = config.get("tags")
     if all_tags is not None and tags is not None:
         all_tags = [*all_tags, *tags]
     elif tags is not None:
         all_tags = list(tags)
-    # use existing callbacks if they exist
+    # 기존 callbacks가 있으면 사용합니다
     if (callbacks := config.get("callbacks")) and isinstance(
         callbacks, AsyncCallbackManager
     ):
@@ -257,7 +257,7 @@ def get_async_callback_manager_for_config(
             callbacks.add_metadata(metadata)
         return callbacks
     else:
-        # otherwise create a new manager
+        # 그렇지 않으면 새 manager를 생성합니다
         return AsyncCallbackManager.configure(
             inheritable_callbacks=config.get("callbacks"),
             inheritable_tags=all_tags,
@@ -273,13 +273,13 @@ def _is_not_empty(value: Any) -> bool:
 
 
 def ensure_config(*configs: RunnableConfig | None) -> RunnableConfig:
-    """Return a config with all keys, merging any provided configs.
+    """모든 키를 포함하는 config를 반환하며, 제공된 config들을 병합합니다.
 
     Args:
-        *configs: Configs to merge before ensuring defaults.
+        *configs: 기본값을 보장하기 전에 병합할 config들입니다.
 
     Returns:
-        RunnableConfig: The merged and ensured config.
+        RunnableConfig: 병합되고 보장된 config입니다.
     """
     empty = RunnableConfig(
         tags=[],

@@ -3,48 +3,48 @@ search:
   boost: 2
 ---
 
-# Functional API concepts
+# Functional API 개념
 
-## Overview
+## 개요
 
-The **Functional API** allows you to add LangGraph's key features — [persistence](./persistence.md), [memory](../how-tos/memory/add-memory.md), [human-in-the-loop](./human_in_the_loop.md), and [streaming](./streaming.md) — to your applications with minimal changes to your existing code.
+**Functional API**를 사용하면 기존 코드를 최소한으로 변경하면서 LangGraph의 주요 기능인 [지속성](./persistence.md), [메모리](../how-tos/memory/add-memory.md), [human-in-the-loop](./human_in_the_loop.md), [스트리밍](./streaming.md)을 애플리케이션에 추가할 수 있습니다.
 
-It is designed to integrate these features into existing code that may use standard language primitives for branching and control flow, such as `if` statements, `for` loops, and function calls. Unlike many data orchestration frameworks that require restructuring code into an explicit pipeline or DAG, the Functional API allows you to incorporate these capabilities without enforcing a rigid execution model.
+`if` 문, `for` 루프, 함수 호출과 같은 표준 언어 프리미티브를 사용하는 기존 코드에 이러한 기능을 통합하도록 설계되었습니다. 코드를 명시적인 파이프라인이나 DAG로 재구성해야 하는 많은 데이터 오케스트레이션 프레임워크와 달리, Functional API를 사용하면 엄격한 실행 모델을 강제하지 않고 이러한 기능을 통합할 수 있습니다.
 
-The Functional API uses two key building blocks:
+Functional API는 두 가지 주요 빌딩 블록을 사용합니다:
 
 :::python
 
-- **`@entrypoint`** – Marks a function as the starting point of a workflow, encapsulating logic and managing execution flow, including handling long-running tasks and interrupts.
-- **`@task`** – Represents a discrete unit of work, such as an API call or data processing step, that can be executed asynchronously within an entrypoint. Tasks return a future-like object that can be awaited or resolved synchronously.  
+- **`@entrypoint`** – 워크플로의 시작점으로 함수를 표시하여 로직을 캡슐화하고 장기 실행 작업 및 중단 처리를 포함한 실행 흐름을 관리합니다.
+- **`@task`** – API 호출 또는 데이터 처리 단계와 같은 개별 작업 단위를 나타내며, entrypoint 내에서 비동기적으로 실행할 수 있습니다. Task는 대기하거나 동기적으로 해결할 수 있는 future와 유사한 객체를 반환합니다.
   :::
 
 :::js
 
-- **`entrypoint`** – An entrypoint encapsulates workflow logic and manages execution flow, including handling long-running tasks and interrupts.
-- **`task`** – Represents a discrete unit of work, such as an API call or data processing step, that can be executed asynchronously within an entrypoint. Tasks return a future-like object that can be awaited or resolved synchronously.  
+- **`entrypoint`** – entrypoint는 워크플로 로직을 캡슐화하고 장기 실행 작업 및 중단 처리를 포함한 실행 흐름을 관리합니다.
+- **`task`** – API 호출 또는 데이터 처리 단계와 같은 개별 작업 단위를 나타내며, entrypoint 내에서 비동기적으로 실행할 수 있습니다. Task는 대기하거나 동기적으로 해결할 수 있는 future와 유사한 객체를 반환합니다.
   :::
 
-This provides a minimal abstraction for building workflows with state management and streaming.
+이는 상태 관리 및 스트리밍을 사용하여 워크플로를 구축하기 위한 최소한의 추상화를 제공합니다.
 
 !!! tip
 
-    For information on how to use the functional API, see [Use Functional API](../how-tos/use-functional-api.md).
+    Functional API 사용 방법에 대한 정보는 [Functional API 사용](../how-tos/use-functional-api.md)을 참조하세요.
 
 ## Functional API vs. Graph API
 
-For users who prefer a more declarative approach, LangGraph's [Graph API](./low_level.md) allows you to define workflows using a Graph paradigm. Both APIs share the same underlying runtime, so you can use them together in the same application.
+더 선언적인 접근 방식을 선호하는 사용자를 위해 LangGraph의 [Graph API](./low_level.md)를 사용하면 그래프 패러다임을 사용하여 워크플로를 정의할 수 있습니다. 두 API는 동일한 기본 런타임을 공유하므로 동일한 애플리케이션에서 함께 사용할 수 있습니다.
 
-Here are some key differences:
+주요 차이점은 다음과 같습니다:
 
-- **Control flow**: The Functional API does not require thinking about graph structure. You can use standard Python constructs to define workflows. This will usually trim the amount of code you need to write.
-- **Short-term memory**: The **GraphAPI** requires declaring a [**State**](./low_level.md#state) and may require defining [**reducers**](./low_level.md#reducers) to manage updates to the graph state. `@entrypoint` and `@tasks` do not require explicit state management as their state is scoped to the function and is not shared across functions.
-- **Checkpointing**: Both APIs generate and use checkpoints. In the **Graph API** a new checkpoint is generated after every [superstep](./low_level.md). In the **Functional API**, when tasks are executed, their results are saved to an existing checkpoint associated with the given entrypoint instead of creating a new checkpoint.
-- **Visualization**: The Graph API makes it easy to visualize the workflow as a graph which can be useful for debugging, understanding the workflow, and sharing with others. The Functional API does not support visualization as the graph is dynamically generated during runtime.
+- **제어 흐름**: Functional API는 그래프 구조에 대해 생각할 필요가 없습니다. 표준 Python 구조를 사용하여 워크플로를 정의할 수 있습니다. 이렇게 하면 일반적으로 작성해야 하는 코드의 양이 줄어듭니다.
+- **단기 메모리**: **GraphAPI**는 [**State**](./low_level.md#state)를 선언해야 하며 그래프 상태에 대한 업데이트를 관리하기 위해 [**reducers**](./low_level.md#reducers)를 정의해야 할 수 있습니다. `@entrypoint`와 `@tasks`는 상태가 함수로 범위가 지정되고 함수 간에 공유되지 않으므로 명시적인 상태 관리가 필요하지 않습니다.
+- **체크포인팅**: 두 API 모두 체크포인트를 생성하고 사용합니다. **Graph API**에서는 모든 [superstep](./low_level.md) 후에 새 체크포인트가 생성됩니다. **Functional API**에서는 task가 실행될 때 결과가 새 체크포인트를 생성하는 대신 주어진 entrypoint와 연결된 기존 체크포인트에 저장됩니다.
+- **시각화**: Graph API를 사용하면 워크플로를 그래프로 시각화하기 쉬우며, 이는 디버깅, 워크플로 이해 및 다른 사람과 공유하는 데 유용할 수 있습니다. Functional API는 그래프가 런타임 중에 동적으로 생성되므로 시각화를 지원하지 않습니다.
 
-## Example
+## 예제
 
-Below we demonstrate a simple application that writes an essay and [interrupts](human_in_the_loop.md) to request human review.
+아래에서는 에세이를 작성하고 사람의 검토를 요청하기 위해 [중단](human_in_the_loop.md)하는 간단한 애플리케이션을 보여줍니다.
 
 :::python
 
@@ -116,11 +116,11 @@ const workflow = entrypoint(
 
 :::
 
-??? example "Detailed Explanation"
+??? example "상세 설명"
 
-    This workflow will write an essay about the topic "cat" and then pause to get a review from a human. The workflow can be interrupted for an indefinite amount of time until a review is provided.
+    이 워크플로는 주제 "cat"에 대한 에세이를 작성한 다음 사람의 검토를 받기 위해 일시 중지됩니다. 워크플로는 검토가 제공될 때까지 무기한으로 중단될 수 있습니다.
 
-    When the workflow is resumed, it executes from the very start, but because the result of the `writeEssay` task was already saved, the task result will be loaded from the checkpoint instead of being recomputed.
+    워크플로가 재개되면 처음부터 실행되지만, `writeEssay` task의 결과가 이미 저장되어 있으므로 task 결과는 다시 계산되지 않고 체크포인트에서 로드됩니다.
 
     :::python
     ```python
@@ -176,7 +176,7 @@ const workflow = entrypoint(
     # > }
     ```
 
-    An essay has been written and is ready for review. Once the review is provided, we can resume the workflow:
+    에세이가 작성되었고 검토 준비가 되었습니다. 검토가 제공되면 워크플로를 재개할 수 있습니다:
 
     ```python
     from langgraph.types import Command
@@ -193,7 +193,7 @@ const workflow = entrypoint(
     {'workflow': {'essay': 'An essay about topic: cat', 'is_approved': False}}
     ```
 
-    The workflow has been completed and the review has been added to the essay.
+    워크플로가 완료되었고 검토가 에세이에 추가되었습니다.
     :::
 
     :::js
@@ -253,7 +253,7 @@ const workflow = entrypoint(
     }
     ```
 
-    An essay has been written and is ready for review. Once the review is provided, we can resume the workflow:
+    에세이가 작성되었고 검토 준비가 되었습니다. 검토가 제공되면 워크플로를 재개할 수 있습니다:
 
     ```typescript
     import { Command } from "@langchain/langgraph";
@@ -271,29 +271,29 @@ const workflow = entrypoint(
     { workflow: { essay: 'An essay about topic: cat', isApproved: true } }
     ```
 
-    The workflow has been completed and the review has been added to the essay.
+    워크플로가 완료되었고 검토가 에세이에 추가되었습니다.
     :::
 
 ## Entrypoint
 
 :::python
-The @[`@entrypoint`][entrypoint] decorator can be used to create a workflow from a function. It encapsulates workflow logic and manages execution flow, including handling _long-running tasks_ and [interrupts](./human_in_the_loop.md).
+@[`@entrypoint`][entrypoint] 데코레이터를 사용하여 함수에서 워크플로를 만들 수 있습니다. 워크플로 로직을 캡슐화하고 _장기 실행 작업_ 및 [중단](./human_in_the_loop.md) 처리를 포함한 실행 흐름을 관리합니다.
 :::
 
 :::js
-The @[`entrypoint`][entrypoint] function can be used to create a workflow from a function. It encapsulates workflow logic and manages execution flow, including handling _long-running tasks_ and [interrupts](./human_in_the_loop.md).
+@[`entrypoint`][entrypoint] 함수를 사용하여 함수에서 워크플로를 만들 수 있습니다. 워크플로 로직을 캡슐화하고 _장기 실행 작업_ 및 [중단](./human_in_the_loop.md) 처리를 포함한 실행 흐름을 관리합니다.
 :::
 
-### Definition
+### 정의
 
 :::python
-An **entrypoint** is defined by decorating a function with the `@entrypoint` decorator.
+**entrypoint**는 `@entrypoint` 데코레이터로 함수를 데코레이트하여 정의됩니다.
 
-The function **must accept a single positional argument**, which serves as the workflow input. If you need to pass multiple pieces of data, use a dictionary as the input type for the first argument.
+함수는 **단일 위치 인수를 받아야 하며**, 이는 워크플로 입력 역할을 합니다. 여러 데이터를 전달해야 하는 경우 첫 번째 인수의 입력 타입으로 딕셔너리를 사용하세요.
 
-Decorating a function with an `entrypoint` produces a @[`Pregel`][Pregel.stream] instance which helps to manage the execution of the workflow (e.g., handles streaming, resumption, and checkpointing).
+`entrypoint`로 함수를 데코레이트하면 @[`Pregel`][Pregel.stream] 인스턴스가 생성되어 워크플로 실행을 관리하는 데 도움이 됩니다(예: 스트리밍, 재개 및 체크포인팅 처리).
 
-You will usually want to pass a **checkpointer** to the `@entrypoint` decorator to enable persistence and use features like **human-in-the-loop**.
+일반적으로 **checkpointer**를 `@entrypoint` 데코레이터에 전달하여 지속성을 활성화하고 **human-in-the-loop**과 같은 기능을 사용하고 싶을 것입니다.
 
 === "Sync"
 
@@ -324,13 +324,13 @@ You will usually want to pass a **checkpointer** to the `@entrypoint` decorator 
 :::
 
 :::js
-An **entrypoint** is defined by calling the `entrypoint` function with configuration and a function.
+**entrypoint**는 구성과 함수를 사용하여 `entrypoint` 함수를 호출하여 정의됩니다.
 
-The function **must accept a single positional argument**, which serves as the workflow input. If you need to pass multiple pieces of data, use an object as the input type for the first argument.
+함수는 **단일 위치 인수를 받아야 하며**, 이는 워크플로 입력 역할을 합니다. 여러 데이터를 전달해야 하는 경우 첫 번째 인수의 입력 타입으로 객체를 사용하세요.
 
-Creating an entrypoint with a function produces a workflow instance which helps to manage the execution of the workflow (e.g., handles streaming, resumption, and checkpointing).
+함수로 entrypoint를 생성하면 워크플로 실행을 관리하는 데 도움이 되는 워크플로 인스턴스가 생성됩니다(예: 스트리밍, 재개 및 체크포인팅 처리).
 
-You will often want to pass a **checkpointer** to the `entrypoint` function to enable persistence and use features like **human-in-the-loop**.
+**human-in-the-loop**과 같은 기능을 사용하고 지속성을 활성화하려면 종종 **checkpointer**를 `entrypoint` 함수에 전달하고 싶을 것입니다.
 
 ```typescript
 import { entrypoint } from "@langchain/langgraph";
@@ -347,28 +347,28 @@ const myWorkflow = entrypoint(
 
 :::
 
-!!! important "Serialization"
+!!! important "직렬화"
 
-    The **inputs** and **outputs** of entrypoints must be JSON-serializable to support checkpointing. Please see the [serialization](#serialization) section for more details.
+    entrypoint의 **입력**과 **출력**은 체크포인팅을 지원하기 위해 JSON 직렬화 가능해야 합니다. 자세한 내용은 [직렬화](#serialization) 섹션을 참조하세요.
 
 :::python
 
-### Injectable parameters
+### 주입 가능한 파라미터
 
-When declaring an `entrypoint`, you can request access to additional parameters that will be injected automatically at run time. These parameters include:
+`entrypoint`를 선언할 때 런타임에 자동으로 주입될 추가 파라미터에 대한 액세스를 요청할 수 있습니다. 이러한 파라미터에는 다음이 포함됩니다:
 
-| Parameter    | Description                                                                                                                                                        |
+| 파라미터 | 설명 |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **previous** | Access the state associated with the previous `checkpoint` for the given thread. See [short-term-memory](#short-term-memory).                                      |
-| **store**    | An instance of [BaseStore][langgraph.store.base.BaseStore]. Useful for [long-term memory](../how-tos/use-functional-api.md#long-term-memory).                      |
-| **writer**   | Use to access the StreamWriter when working with Async Python < 3.11. See [streaming with functional API for details](../how-tos/use-functional-api.md#streaming). |
-| **config**   | For accessing run time configuration. See [RunnableConfig](https://python.langchain.com/docs/concepts/runnables/#runnableconfig) for information.                  |
+| **previous** | 주어진 thread에 대한 이전 `checkpoint`와 연결된 상태에 액세스합니다. [단기 메모리](#short-term-memory)를 참조하세요. |
+| **store** | [BaseStore][langgraph.store.base.BaseStore]의 인스턴스입니다. [장기 메모리](../how-tos/use-functional-api.md#long-term-memory)에 유용합니다. |
+| **writer** | Async Python < 3.11에서 작업할 때 StreamWriter에 액세스하는 데 사용합니다. 자세한 내용은 [Functional API를 사용한 스트리밍](../how-tos/use-functional-api.md#streaming)을 참조하세요. |
+| **config** | 런타임 구성에 액세스하는 데 사용합니다. 정보는 [RunnableConfig](https://python.langchain.com/docs/concepts/runnables/#runnableconfig)를 참조하세요. |
 
 !!! important
 
-    Declare the parameters with the appropriate name and type annotation.
+    적절한 이름과 타입 주석으로 파라미터를 선언하세요.
 
-??? example "Requesting Injectable Parameters"
+??? example "주입 가능한 파라미터 요청"
 
     ```python
     from langchain_core.runnables import RunnableConfig
@@ -394,10 +394,10 @@ When declaring an `entrypoint`, you can request access to additional parameters 
 
 :::
 
-### Executing
+### 실행
 
 :::python
-Using the [`@entrypoint`](#entrypoint) yields a @[`Pregel`][Pregel.stream] object that can be executed using the `invoke`, `ainvoke`, `stream`, and `astream` methods.
+[`@entrypoint`](#entrypoint)를 사용하면 `invoke`, `ainvoke`, `stream`, `astream` 메서드를 사용하여 실행할 수 있는 @[`Pregel`][Pregel.stream] 객체가 생성됩니다.
 
 === "Invoke"
 
@@ -450,7 +450,7 @@ Using the [`@entrypoint`](#entrypoint) yields a @[`Pregel`][Pregel.stream] objec
 :::
 
 :::js
-Using the [`entrypoint`](#entrypoint) function will return an object that can be executed using the `invoke` and `stream` methods.
+[`entrypoint`](#entrypoint) 함수를 사용하면 `invoke` 및 `stream` 메서드를 사용하여 실행할 수 있는 객체가 반환됩니다.
 
 === "Invoke"
 
@@ -479,10 +479,10 @@ Using the [`entrypoint`](#entrypoint) function will return an object that can be
 
 :::
 
-### Resuming
+### 재개
 
 :::python
-Resuming an execution after an @[interrupt][interrupt] can be done by passing a **resume** value to the @[Command] primitive.
+@[interrupt][interrupt] 후 실행을 재개하는 것은 @[Command] 프리미티브에 **resume** 값을 전달하여 수행할 수 있습니다.
 
 === "Invoke"
 
@@ -545,7 +545,7 @@ Resuming an execution after an @[interrupt][interrupt] can be done by passing a 
 :::
 
 :::js
-Resuming an execution after an @[interrupt][interrupt] can be done by passing a **resume** value to the @[`Command`][Command] primitive.
+@[interrupt][interrupt] 후 실행을 재개하는 것은 @[`Command`][Command] 프리미티브에 **resume** 값을 전달하여 수행할 수 있습니다.
 
 === "Invoke"
 
@@ -586,11 +586,11 @@ Resuming an execution after an @[interrupt][interrupt] can be done by passing a 
 
 :::python
 
-**Resuming after an error**
+**오류 후 재개**
 
-To resume after an error, run the `entrypoint` with a `None` and the same **thread id** (config).
+오류 후 재개하려면 `None`과 동일한 **thread id** (config)로 `entrypoint`를 실행하세요.
 
-This assumes that the underlying **error** has been resolved and execution can proceed successfully.
+이는 기본 **오류**가 해결되었고 실행이 성공적으로 진행될 수 있다고 가정합니다.
 
 === "Invoke"
 
@@ -650,11 +650,11 @@ This assumes that the underlying **error** has been resolved and execution can p
 
 :::js
 
-**Resuming after an error**
+**오류 후 재개**
 
-To resume after an error, run the `entrypoint` with `null` and the same **thread id** (config).
+오류 후 재개하려면 `null`과 동일한 **thread id** (config)로 `entrypoint`를 실행하세요.
 
-This assumes that the underlying **error** has been resolved and execution can proceed successfully.
+이는 기본 **오류**가 해결되었고 실행이 성공적으로 진행될 수 있다고 가정합니다.
 
 === "Invoke"
 
@@ -684,14 +684,14 @@ This assumes that the underlying **error** has been resolved and execution can p
 
 :::
 
-### Short-term memory
+### 단기 메모리
 
-When an `entrypoint` is defined with a `checkpointer`, it stores information between successive invocations on the same **thread id** in [checkpoints](persistence.md#checkpoints).
+`entrypoint`가 `checkpointer`로 정의되면 [체크포인트](persistence.md#checkpoints)에서 동일한 **thread id**에 대한 연속 호출 간에 정보를 저장합니다.
 
 :::python
-This allows accessing the state from the previous invocation using the `previous` parameter.
+이를 통해 `previous` 파라미터를 사용하여 이전 호출의 상태에 액세스할 수 있습니다.
 
-By default, the `previous` parameter is the return value of the previous invocation.
+기본적으로 `previous` 파라미터는 이전 호출의 반환 값입니다.
 
 ```python
 @entrypoint(checkpointer=checkpointer)
@@ -712,9 +712,9 @@ my_workflow.invoke(2, config)  # 3 (previous was 1 from the previous invocation)
 :::
 
 :::js
-This allows accessing the state from the previous invocation using the `getPreviousState` function.
+이를 통해 `getPreviousState` 함수를 사용하여 이전 호출의 상태에 액세스할 수 있습니다.
 
-By default, the `getPreviousState` function returns the return value of the previous invocation.
+기본적으로 `getPreviousState` 함수는 이전 호출의 반환 값을 반환합니다.
 
 ```typescript
 import { entrypoint, getPreviousState } from "@langchain/langgraph";
@@ -742,9 +742,9 @@ await myWorkflow.invoke(2, config); // 3 (previous was 1 from the previous invoc
 #### `entrypoint.final`
 
 :::python
-@[`entrypoint.final`][entrypoint.final] is a special primitive that can be returned from an entrypoint and allows **decoupling** the value that is **saved in the checkpoint** from the **return value of the entrypoint**.
+@[`entrypoint.final`][entrypoint.final]은 entrypoint에서 반환할 수 있는 특수 프리미티브로, **체크포인트에 저장되는 값**과 **entrypoint의 반환 값**을 **분리**할 수 있습니다.
 
-The first value is the return value of the entrypoint, and the second value is the value that will be saved in the checkpoint. The type annotation is `entrypoint.final[return_type, save_type]`.
+첫 번째 값은 entrypoint의 반환 값이고, 두 번째 값은 체크포인트에 저장될 값입니다. 타입 주석은 `entrypoint.final[return_type, save_type]`입니다.
 
 ```python
 @entrypoint(checkpointer=checkpointer)
@@ -768,9 +768,9 @@ my_workflow.invoke(1, config)  # 6 (previous was 3 * 2 from the previous invocat
 :::
 
 :::js
-@[`entrypoint.final`][entrypoint.final] is a special primitive that can be returned from an entrypoint and allows **decoupling** the value that is **saved in the checkpoint** from the **return value of the entrypoint**.
+@[`entrypoint.final`][entrypoint.final]은 entrypoint에서 반환할 수 있는 특수 프리미티브로, **체크포인트에 저장되는 값**과 **entrypoint의 반환 값**을 **분리**할 수 있습니다.
 
-The first value is the return value of the entrypoint, and the second value is the value that will be saved in the checkpoint.
+첫 번째 값은 entrypoint의 반환 값이고, 두 번째 값은 체크포인트에 저장될 값입니다.
 
 ```typescript
 import { entrypoint, getPreviousState } from "@langchain/langgraph";
@@ -803,15 +803,15 @@ await myWorkflow.invoke(1, config); // 6 (previous was 3 * 2 from the previous i
 
 ## Task
 
-A **task** represents a discrete unit of work, such as an API call or data processing step. It has two key characteristics:
+**task**는 API 호출 또는 데이터 처리 단계와 같은 개별 작업 단위를 나타냅니다. 두 가지 주요 특성이 있습니다:
 
-- **Asynchronous Execution**: Tasks are designed to be executed asynchronously, allowing multiple operations to run concurrently without blocking.
-- **Checkpointing**: Task results are saved to a checkpoint, enabling resumption of the workflow from the last saved state. (See [persistence](persistence.md) for more details).
+- **비동기 실행**: Task는 비동기적으로 실행되도록 설계되어 여러 작업이 차단 없이 동시에 실행될 수 있습니다.
+- **체크포인팅**: Task 결과는 체크포인트에 저장되어 마지막으로 저장된 상태에서 워크플로를 재개할 수 있습니다. (자세한 내용은 [지속성](persistence.md)을 참조하세요).
 
-### Definition
+### 정의
 
 :::python
-Tasks are defined using the `@task` decorator, which wraps a regular Python function.
+Task는 일반 Python 함수를 래핑하는 `@task` 데코레이터를 사용하여 정의됩니다.
 
 ```python
 from langgraph.func import task
@@ -826,7 +826,7 @@ def slow_computation(input_value):
 :::
 
 :::js
-Tasks are defined using the `task` function, which wraps a regular function.
+Task는 일반 함수를 래핑하는 `task` 함수를 사용하여 정의됩니다.
 
 ```typescript
 import { task } from "@langchain/langgraph";
@@ -839,20 +839,20 @@ const slowComputation = task("slowComputation", async (inputValue: any) => {
 
 :::
 
-!!! important "Serialization"
+!!! important "직렬화"
 
-    The **outputs** of tasks must be JSON-serializable to support checkpointing.
+    task의 **출력**은 체크포인팅을 지원하기 위해 JSON 직렬화 가능해야 합니다.
 
-### Execution
+### 실행
 
-**Tasks** can only be called from within an **entrypoint**, another **task**, or a [state graph node](./low_level.md#nodes).
+**Task**는 **entrypoint**, 다른 **task** 또는 [state graph node](./low_level.md#nodes) 내에서만 호출할 수 있습니다.
 
-Tasks _cannot_ be called directly from the main application code.
+Task는 메인 애플리케이션 코드에서 직접 호출할 수 _없습니다_.
 
 :::python
-When you call a **task**, it returns _immediately_ with a future object. A future is a placeholder for a result that will be available later.
+**task**를 호출하면 future 객체와 함께 _즉시_ 반환됩니다. future는 나중에 사용 가능한 결과에 대한 자리 표시자입니다.
 
-To obtain the result of a **task**, you can either wait for it synchronously (using `result()`) or await it asynchronously (using `await`).
+**task**의 결과를 얻으려면 동기적으로 대기(`result()` 사용)하거나 비동기적으로 대기(`await` 사용)할 수 있습니다.
 
 === "Synchronous Invocation"
 
@@ -874,7 +874,7 @@ To obtain the result of a **task**, you can either wait for it synchronously (us
 :::
 
 :::js
-When you call a **task**, it returns a Promise that can be awaited.
+**task**를 호출하면 대기할 수 있는 Promise가 반환됩니다.
 
 ```typescript
 const myWorkflow = entrypoint(
@@ -887,56 +887,56 @@ const myWorkflow = entrypoint(
 
 :::
 
-## When to use a task
+## Task를 사용해야 하는 경우
 
-**Tasks** are useful in the following scenarios:
+**Task**는 다음 시나리오에서 유용합니다:
 
-- **Checkpointing**: When you need to save the result of a long-running operation to a checkpoint, so you don't need to recompute it when resuming the workflow.
-- **Human-in-the-loop**: If you're building a workflow that requires human intervention, you MUST use **tasks** to encapsulate any randomness (e.g., API calls) to ensure that the workflow can be resumed correctly. See the [determinism](#determinism) section for more details.
-- **Parallel Execution**: For I/O-bound tasks, **tasks** enable parallel execution, allowing multiple operations to run concurrently without blocking (e.g., calling multiple APIs).
-- **Observability**: Wrapping operations in **tasks** provides a way to track the progress of the workflow and monitor the execution of individual operations using [LangSmith](https://docs.smith.langchain.com/).
-- **Retryable Work**: When work needs to be retried to handle failures or inconsistencies, **tasks** provide a way to encapsulate and manage the retry logic.
+- **체크포인팅**: 워크플로를 재개할 때 다시 계산할 필요가 없도록 장기 실행 작업의 결과를 체크포인트에 저장해야 할 때.
+- **Human-in-the-loop**: 사람의 개입이 필요한 워크플로를 구축하는 경우, 워크플로가 올바르게 재개될 수 있도록 임의성(예: API 호출)을 캡슐화하기 위해 **task**를 사용해야 합니다. 자세한 내용은 [결정론](#determinism) 섹션을 참조하세요.
+- **병렬 실행**: I/O 바운드 작업의 경우 **task**는 차단 없이 여러 작업을 동시에 실행할 수 있는 병렬 실행을 가능하게 합니다(예: 여러 API 호출).
+- **관찰 가능성**: **task**에서 작업을 래핑하면 워크플로의 진행 상황을 추적하고 [LangSmith](https://docs.smith.langchain.com/)를 사용하여 개별 작업의 실행을 모니터링할 수 있습니다.
+- **재시도 가능한 작업**: 실패 또는 불일치를 처리하기 위해 작업을 재시도해야 할 때 **task**는 재시도 로직을 캡슐화하고 관리하는 방법을 제공합니다.
 
-## Serialization
+## 직렬화
 
-There are two key aspects to serialization in LangGraph:
+LangGraph의 직렬화에는 두 가지 주요 측면이 있습니다:
 
-1. `entrypoint` inputs and outputs must be JSON-serializable.
-2. `task` outputs must be JSON-serializable.
+1. `entrypoint` 입력과 출력은 JSON 직렬화 가능해야 합니다.
+2. `task` 출력은 JSON 직렬화 가능해야 합니다.
 
 :::python
-These requirements are necessary for enabling checkpointing and workflow resumption. Use python primitives like dictionaries, lists, strings, numbers, and booleans to ensure that your inputs and outputs are serializable.
+이러한 요구 사항은 체크포인팅 및 워크플로 재개를 활성화하는 데 필요합니다. 입력과 출력이 직렬화 가능한지 확인하려면 딕셔너리, 리스트, 문자열, 숫자, 불린과 같은 Python 프리미티브를 사용하세요.
 :::
 
 :::js
-These requirements are necessary for enabling checkpointing and workflow resumption. Use primitives like objects, arrays, strings, numbers, and booleans to ensure that your inputs and outputs are serializable.
+이러한 요구 사항은 체크포인팅 및 워크플로 재개를 활성화하는 데 필요합니다. 입력과 출력이 직렬화 가능한지 확인하려면 객체, 배열, 문자열, 숫자, 불린과 같은 프리미티브를 사용하세요.
 :::
 
-Serialization ensures that workflow state, such as task results and intermediate values, can be reliably saved and restored. This is critical for enabling human-in-the-loop interactions, fault tolerance, and parallel execution.
+직렬화는 task 결과 및 중간 값과 같은 워크플로 상태를 안정적으로 저장하고 복원할 수 있도록 합니다. 이는 human-in-the-loop 상호작용, 내결함성 및 병렬 실행을 활성화하는 데 중요합니다.
 
-Providing non-serializable inputs or outputs will result in a runtime error when a workflow is configured with a checkpointer.
+직렬화할 수 없는 입력 또는 출력을 제공하면 워크플로가 checkpointer로 구성될 때 런타임 오류가 발생합니다.
 
-## Determinism
+## 결정론
 
-To utilize features like **human-in-the-loop**, any randomness should be encapsulated inside of **tasks**. This guarantees that when execution is halted (e.g., for human in the loop) and then resumed, it will follow the same _sequence of steps_, even if **task** results are non-deterministic.
+**human-in-the-loop**과 같은 기능을 활용하려면 임의성을 **task** 내부에 캡슐화해야 합니다. 이렇게 하면 실행이 중지되고(예: human-in-the-loop을 위해) 재개될 때 **task** 결과가 비결정론적이더라도 동일한 _단계 시퀀스_를 따르는 것이 보장됩니다.
 
-LangGraph achieves this behavior by persisting **task** and [**subgraph**](./subgraphs.md) results as they execute. A well-designed workflow ensures that resuming execution follows the _same sequence of steps_, allowing previously computed results to be retrieved correctly without having to re-execute them. This is particularly useful for long-running **tasks** or **tasks** with non-deterministic results, as it avoids repeating previously done work and allows resuming from essentially the same.
+LangGraph는 실행 중에 **task** 및 [**subgraph**](./subgraphs.md) 결과를 유지하여 이 동작을 달성합니다. 잘 설계된 워크플로는 실행 재개 시 _동일한 단계 시퀀스_를 따르도록 하여 이전에 계산된 결과를 다시 실행하지 않고 올바르게 검색할 수 있습니다. 이는 장기 실행 **task** 또는 비결정론적 결과가 있는 **task**에 특히 유용하며, 이전에 수행한 작업을 반복하지 않고 본질적으로 동일한 위치에서 재개할 수 있습니다.
 
-While different runs of a workflow can produce different results, resuming a **specific** run should always follow the same sequence of recorded steps. This allows LangGraph to efficiently look up **task** and **subgraph** results that were executed prior to the graph being interrupted and avoid recomputing them.
+워크플로의 다른 실행은 다른 결과를 생성할 수 있지만, **특정** 실행을 재개하면 항상 동일한 기록된 단계 시퀀스를 따라야 합니다. 이를 통해 LangGraph는 그래프가 중단되기 전에 실행된 **task** 및 **subgraph** 결과를 효율적으로 조회하고 다시 계산하지 않을 수 있습니다.
 
-## Idempotency
+## 멱등성
 
-Idempotency ensures that running the same operation multiple times produces the same result. This helps prevent duplicate API calls and redundant processing if a step is rerun due to a failure. Always place API calls inside **tasks** functions for checkpointing, and design them to be idempotent in case of re-execution. Re-execution can occur if a **task** starts, but does not complete successfully. Then, if the workflow is resumed, the **task** will run again. Use idempotency keys or verify existing results to avoid duplication.
+멱등성은 동일한 작업을 여러 번 실행해도 동일한 결과가 생성되도록 합니다. 이는 실패로 인해 단계가 다시 실행되는 경우 중복 API 호출 및 중복 처리를 방지하는 데 도움이 됩니다. 체크포인팅을 위해 항상 **task** 함수 내부에 API 호출을 배치하고, 재실행의 경우를 대비하여 멱등성을 갖도록 설계하세요. **task**가 시작되었지만 성공적으로 완료되지 않은 경우 재실행이 발생할 수 있습니다. 그런 다음 워크플로가 재개되면 **task**가 다시 실행됩니다. 중복을 방지하려면 멱등성 키를 사용하거나 기존 결과를 확인하세요.
 
-## Common Pitfalls
+## 일반적인 함정
 
-### Handling side effects
+### 부작용 처리
 
-Encapsulate side effects (e.g., writing to a file, sending an email) in tasks to ensure they are not executed multiple times when resuming a workflow.
+부작용(예: 파일에 쓰기, 이메일 보내기)을 task에 캡슐화하여 워크플로를 재개할 때 여러 번 실행되지 않도록 하세요.
 
 === "Incorrect"
 
-    In this example, a side effect (writing to a file) is directly included in the workflow, so it will be executed a second time when resuming the workflow.
+    이 예제에서는 부작용(파일에 쓰기)이 워크플로에 직접 포함되어 있으므로 워크플로를 재개할 때 두 번째로 실행됩니다.
 
     :::python
     ```python
@@ -973,7 +973,7 @@ Encapsulate side effects (e.g., writing to a file, sending an email) in tasks to
 
 === "Correct"
 
-    In this example, the side effect is encapsulated in a task, ensuring consistent execution upon resumption.
+    이 예제에서는 부작용이 task에 캡슐화되어 재개 시 일관된 실행을 보장합니다.
 
     :::python
     ```python
@@ -1016,28 +1016,28 @@ Encapsulate side effects (e.g., writing to a file, sending an email) in tasks to
     ```
     :::
 
-### Non-deterministic control flow
+### 비결정론적 제어 흐름
 
-Operations that might give different results each time (like getting current time or random numbers) should be encapsulated in tasks to ensure that on resume, the same result is returned.
+매번 다른 결과를 제공할 수 있는 작업(현재 시간 가져오기 또는 난수 생성과 같은)은 재개 시 동일한 결과가 반환되도록 task에 캡슐화해야 합니다.
 
-- In a task: Get random number (5) → interrupt → resume → (returns 5 again) → ...
-- Not in a task: Get random number (5) → interrupt → resume → get new random number (7) → ...
+- task에서: 난수 가져오기 (5) → 중단 → 재개 → (5를 다시 반환) → ...
+- task가 아닌 경우: 난수 가져오기 (5) → 중단 → 재개 → 새 난수 가져오기 (7) → ...
 
 :::python
-This is especially important when using **human-in-the-loop** workflows with multiple interrupts calls. LangGraph keeps a list of resume values for each task/entrypoint. When an interrupt is encountered, it's matched with the corresponding resume value. This matching is strictly **index-based**, so the order of the resume values should match the order of the interrupts.
+이는 여러 interrupt 호출이 있는 **human-in-the-loop** 워크플로를 사용할 때 특히 중요합니다. LangGraph는 각 task/entrypoint에 대한 resume 값 목록을 유지합니다. interrupt가 발생하면 해당 resume 값과 일치합니다. 이 일치는 엄격하게 **인덱스 기반**이므로 resume 값의 순서는 interrupt의 순서와 일치해야 합니다.
 :::
 
 :::js
-This is especially important when using **human-in-the-loop** workflows with multiple interrupt calls. LangGraph keeps a list of resume values for each task/entrypoint. When an interrupt is encountered, it's matched with the corresponding resume value. This matching is strictly **index-based**, so the order of the resume values should match the order of the interrupts.
+이는 여러 interrupt 호출이 있는 **human-in-the-loop** 워크플로를 사용할 때 특히 중요합니다. LangGraph는 각 task/entrypoint에 대한 resume 값 목록을 유지합니다. interrupt가 발생하면 해당 resume 값과 일치합니다. 이 일치는 엄격하게 **인덱스 기반**이므로 resume 값의 순서는 interrupt의 순서와 일치해야 합니다.
 :::
 
-If order of execution is not maintained when resuming, one `interrupt` call may be matched with the wrong `resume` value, leading to incorrect results.
+재개 시 실행 순서가 유지되지 않으면 하나의 `interrupt` 호출이 잘못된 `resume` 값과 일치하여 잘못된 결과가 발생할 수 있습니다.
 
-Please read the section on [determinism](#determinism) for more details.
+자세한 내용은 [결정론](#determinism) 섹션을 읽어보세요.
 
 === "Incorrect"
 
-    In this example, the workflow uses the current time to determine which task to execute. This is non-deterministic because the result of the workflow depends on the time at which it is executed.
+    이 예제에서 워크플로는 현재 시간을 사용하여 실행할 task를 결정합니다. 워크플로의 결과가 실행 시간에 따라 달라지므로 이는 비결정론적입니다.
 
     :::python
     ```python
@@ -1093,7 +1093,7 @@ Please read the section on [determinism](#determinism) for more details.
 === "Correct"
 
     :::python
-    In this example, the workflow uses the input `t0` to determine which task to execute. This is deterministic because the result of the workflow depends only on the input.
+    이 예제에서 워크플로는 입력 `t0`를 사용하여 실행할 task를 결정합니다. 워크플로의 결과가 입력에만 의존하므로 이는 결정론적입니다.
 
     ```python
     import time
@@ -1129,7 +1129,7 @@ Please read the section on [determinism](#determinism) for more details.
     :::
 
     :::js
-    In this example, the workflow uses the input `t0` to determine which task to execute. This is deterministic because the result of the workflow depends only on the input.
+    이 예제에서 워크플로는 입력 `t0`를 사용하여 실행할 task를 결정합니다. 워크플로의 결과가 입력에만 의존하므로 이는 결정론적입니다.
 
     ```typescript
     import { entrypoint, task, interrupt } from "@langchain/langgraph";

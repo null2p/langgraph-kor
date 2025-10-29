@@ -1,13 +1,13 @@
-# Add and manage memory
+# 메모리 추가 및 관리
 
-AI applications need [memory](../../concepts/memory.md) to share context across multiple interactions. In LangGraph, you can add two types of memory:
+AI 애플리케이션은 여러 상호작용 간에 컨텍스트를 공유하기 위해 [메모리](../../concepts/memory.md)가 필요합니다. LangGraph에서는 두 가지 유형의 메모리를 추가할 수 있습니다:
 
-- [Add short-term memory](#add-short-term-memory) as a part of your agent's [state](../../concepts/low_level.md#state) to enable multi-turn conversations.
-- [Add long-term memory](#add-long-term-memory) to store user-specific or application-level data across sessions.
+- 멀티 턴 대화를 활성화하기 위해 에이전트의 [상태](../../concepts/low_level.md#state)의 일부로 [단기 메모리 추가](#add-short-term-memory)하기.
+- 세션 간에 사용자별 또는 애플리케이션 레벨 데이터를 저장하기 위해 [장기 메모리 추가](#add-long-term-memory)하기.
 
-## Add short-term memory
+## 단기 메모리 추가
 
-**Short-term** memory (thread-level [persistence](../../concepts/persistence.md)) enables agents to track multi-turn conversations. To add short-term memory:
+**단기** 메모리(스레드 레벨 [영속성](../../concepts/persistence.md))는 에이전트가 멀티 턴 대화를 추적할 수 있게 합니다. 단기 메모리를 추가하려면:
 
 :::python
 
@@ -50,9 +50,9 @@ await graph.invoke(
 
 :::
 
-### Use in production
+### 프로덕션에서 사용
 
-In production, use a checkpointer backed by a database:
+프로덕션에서는 데이터베이스로 백업되는 checkpointer를 사용하세요:
 
 :::python
 
@@ -765,7 +765,7 @@ await agent.invoke(
 
 :::
 
-## Add long-term memory
+## 장기 메모리 추가
 
 Use long-term memory to store user-specific or application-specific data across conversations.
 
@@ -1706,7 +1706,7 @@ const items = await store.search(["user_123", "memories"], {
 
 See [this guide](../../cloud/deployment/semantic_search.md) for more information on how to use semantic search with LangGraph memory store.
 
-## Manage short-term memory
+## 단기 메모리 관리
 
 With [short-term memory](#add-short-term-memory) enabled, long conversations can exceed the LLM's context window. Common solutions are:
 
@@ -2795,7 +2795,7 @@ await checkpointer.deleteThread(threadId);
 
 :::python
 
-## Prebuilt memory tools
+## 사전 빌드된 메모리 도구
 
 **LangMem** is a LangChain-maintained library that offers tools for managing long-term memories in your agent. See the [LangMem documentation](https://langchain-ai.github.io/langmem/) for usage examples.
 

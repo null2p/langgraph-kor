@@ -3,60 +3,60 @@ search:
   boost: 2
 ---
 
-# Application Structure
+# 애플리케이션 구조
 
-## Overview
+## 개요
 
-A LangGraph application consists of one or more graphs, a configuration file (`langgraph.json`), a file that specifies dependencies, and an optional `.env` file that specifies environment variables.
+LangGraph 애플리케이션은 하나 이상의 그래프, 구성 파일(`langgraph.json`), 의존성을 지정하는 파일, 그리고 환경 변수를 지정하는 선택적 `.env` 파일로 구성됩니다.
 
-This guide shows a typical structure of an application and shows how the required information to deploy an application using the LangGraph Platform is specified.
+이 가이드는 애플리케이션의 일반적인 구조를 보여주고 LangGraph Platform을 사용하여 애플리케이션을 배포하는 데 필요한 정보를 지정하는 방법을 보여줍니다.
 
-## Key Concepts
+## 핵심 개념
 
-To deploy using the LangGraph Platform, the following information should be provided:
+LangGraph Platform을 사용하여 배포하려면 다음 정보를 제공해야 합니다:
 
-1. A [LangGraph configuration file](#configuration-file-concepts) (`langgraph.json`) that specifies the dependencies, graphs, and environment variables to use for the application.
-2. The [graphs](#graphs) that implement the logic of the application.
-3. A file that specifies [dependencies](#dependencies) required to run the application.
-4. [Environment variables](#environment-variables) that are required for the application to run.
+1. 애플리케이션에 사용할 의존성, 그래프 및 환경 변수를 지정하는 [LangGraph 구성 파일](#configuration-file-concepts)(`langgraph.json`)
+2. 애플리케이션의 로직을 구현하는 [그래프](#graphs)
+3. 애플리케이션 실행에 필요한 [의존성](#dependencies)을 지정하는 파일
+4. 애플리케이션 실행에 필요한 [환경 변수](#environment-variables)
 
-## File Structure
+## 파일 구조
 
-Below are examples of directory structures for applications:
+다음은 애플리케이션의 디렉토리 구조 예시입니다:
 
 :::python
 === "Python (requirements.txt)"
 
     ```plaintext
     my-app/
-    ├── my_agent # all project code lies within here
-    │   ├── utils # utilities for your graph
+    ├── my_agent # 모든 프로젝트 코드가 여기에 있습니다
+    │   ├── utils # 그래프를 위한 유틸리티
     │   │   ├── __init__.py
-    │   │   ├── tools.py # tools for your graph
-    │   │   ├── nodes.py # node functions for your graph
-    │   │   └── state.py # state definition of your graph
+    │   │   ├── tools.py # 그래프를 위한 도구
+    │   │   ├── nodes.py # 그래프를 위한 노드 함수
+    │   │   └── state.py # 그래프의 상태 정의
     │   ├── __init__.py
-    │   └── agent.py # code for constructing your graph
-    ├── .env # environment variables
-    ├── requirements.txt # package dependencies
-    └── langgraph.json # configuration file for LangGraph
+    │   └── agent.py # 그래프를 구성하는 코드
+    ├── .env # 환경 변수
+    ├── requirements.txt # 패키지 의존성
+    └── langgraph.json # LangGraph 구성 파일
     ```
 
 === "Python (pyproject.toml)"
 
     ```plaintext
     my-app/
-    ├── my_agent # all project code lies within here
-    │   ├── utils # utilities for your graph
+    ├── my_agent # 모든 프로젝트 코드가 여기에 있습니다
+    │   ├── utils # 그래프를 위한 유틸리티
     │   │   ├── __init__.py
-    │   │   ├── tools.py # tools for your graph
-    │   │   ├── nodes.py # node functions for your graph
-    │   │   └── state.py # state definition of your graph
+    │   │   ├── tools.py # 그래프를 위한 도구
+    │   │   ├── nodes.py # 그래프를 위한 노드 함수
+    │   │   └── state.py # 그래프의 상태 정의
     │   ├── __init__.py
-    │   └── agent.py # code for constructing your graph
-    ├── .env # environment variables
-    ├── langgraph.json  # configuration file for LangGraph
-    └── pyproject.toml # dependencies for your project
+    │   └── agent.py # 그래프를 구성하는 코드
+    ├── .env # 환경 변수
+    ├── langgraph.json  # LangGraph 구성 파일
+    └── pyproject.toml # 프로젝트 의존성
     ```
 
 :::
@@ -65,40 +65,40 @@ Below are examples of directory structures for applications:
 
 ```plaintext
 my-app/
-├── src # all project code lies within here
-│   ├── utils # optional utilities for your graph
-│   │   ├── tools.ts # tools for your graph
-│   │   ├── nodes.ts # node functions for your graph
-│   │   └── state.ts # state definition of your graph
-│   └── agent.ts # code for constructing your graph
-├── package.json # package dependencies
-├── .env # environment variables
-└── langgraph.json # configuration file for LangGraph
+├── src # 모든 프로젝트 코드가 여기에 있습니다
+│   ├── utils # 그래프를 위한 선택적 유틸리티
+│   │   ├── tools.ts # 그래프를 위한 도구
+│   │   ├── nodes.ts # 그래프를 위한 노드 함수
+│   │   └── state.ts # 그래프의 상태 정의
+│   └── agent.ts # 그래프를 구성하는 코드
+├── package.json # 패키지 의존성
+├── .env # 환경 변수
+└── langgraph.json # LangGraph 구성 파일
 ```
 
 :::
 
 !!! note
 
-    The directory structure of a LangGraph application can vary depending on the programming language and the package manager used.
+    LangGraph 애플리케이션의 디렉토리 구조는 사용하는 프로그래밍 언어와 패키지 관리자에 따라 다를 수 있습니다.
 
-## Configuration File {#configuration-file-concepts}
+## 구성 파일 {#configuration-file-concepts}
 
-The `langgraph.json` file is a JSON file that specifies the dependencies, graphs, environment variables, and other settings required to deploy a LangGraph application.
+`langgraph.json` 파일은 LangGraph 애플리케이션을 배포하는 데 필요한 의존성, 그래프, 환경 변수 및 기타 설정을 지정하는 JSON 파일입니다.
 
-See the [LangGraph configuration file reference](../cloud/reference/cli.md#configuration-file) for details on all supported keys in the JSON file.
+JSON 파일에서 지원되는 모든 키에 대한 자세한 내용은 [LangGraph 구성 파일 참조](../cloud/reference/cli.md#configuration-file)를 참조하세요.
 
 !!! tip
 
-    The [LangGraph CLI](./langgraph_cli.md) defaults to using the configuration file `langgraph.json` in the current directory.
+    [LangGraph CLI](./langgraph_cli.md)는 기본적으로 현재 디렉토리의 구성 파일 `langgraph.json`을 사용합니다.
 
-### Examples
+### 예시
 
 :::python
 
-- The dependencies involve a custom local package and the `langchain_openai` package.
-- A single graph will be loaded from the file `./your_package/your_file.py` with the variable `variable`.
-- The environment variables are loaded from the `.env` file.
+- 의존성에는 사용자 정의 로컬 패키지와 `langchain_openai` 패키지가 포함됩니다.
+- 단일 그래프는 `variable` 변수를 사용하여 `./your_package/your_file.py` 파일에서 로드됩니다.
+- 환경 변수는 `.env` 파일에서 로드됩니다.
 
 ```json
 {
@@ -114,9 +114,9 @@ See the [LangGraph configuration file reference](../cloud/reference/cli.md#confi
 
 :::js
 
-- The dependencies will be loaded from a dependency file in the local directory (e.g., `package.json`).
-- A single graph will be loaded from the file `./your_package/your_file.js` with the function `agent`.
-- The environment variable `OPENAI_API_KEY` is set inline.
+- 의존성은 로컬 디렉토리의 의존성 파일(예: `package.json`)에서 로드됩니다.
+- 단일 그래프는 `agent` 함수를 사용하여 `./your_package/your_file.js` 파일에서 로드됩니다.
+- 환경 변수 `OPENAI_API_KEY`는 인라인으로 설정됩니다.
 
 ```json
 {
@@ -132,39 +132,39 @@ See the [LangGraph configuration file reference](../cloud/reference/cli.md#confi
 
 :::
 
-## Dependencies
+## 의존성
 
 :::python
-A LangGraph application may depend on other Python packages.
+LangGraph 애플리케이션은 다른 Python 패키지에 의존할 수 있습니다.
 :::
 
 :::js
-A LangGraph application may depend on other TypeScript/JavaScript libraries.
+LangGraph 애플리케이션은 다른 TypeScript/JavaScript 라이브러리에 의존할 수 있습니다.
 :::
 
-You will generally need to specify the following information for dependencies to be set up correctly:
+의존성이 올바르게 설정되려면 일반적으로 다음 정보를 지정해야 합니다:
 
 :::python
 
-1. A file in the directory that specifies the dependencies (e.g. `requirements.txt`, `pyproject.toml`, or `package.json`).
+1. 의존성을 지정하는 디렉토리 내의 파일 (예: `requirements.txt`, `pyproject.toml` 또는 `package.json`)
    :::
 
 :::js
 
-1. A file in the directory that specifies the dependencies (e.g. `package.json`).
+1. 의존성을 지정하는 디렉토리 내의 파일 (예: `package.json`)
    :::
 
-2. A `dependencies` key in the [LangGraph configuration file](#configuration-file-concepts) that specifies the dependencies required to run the LangGraph application.
-3. Any additional binaries or system libraries can be specified using `dockerfile_lines` key in the [LangGraph configuration file](#configuration-file-concepts).
+2. LangGraph 애플리케이션 실행에 필요한 의존성을 지정하는 [LangGraph 구성 파일](#configuration-file-concepts)의 `dependencies` 키
+3. 추가 바이너리 또는 시스템 라이브러리는 [LangGraph 구성 파일](#configuration-file-concepts)의 `dockerfile_lines` 키를 사용하여 지정할 수 있습니다.
 
-## Graphs
+## 그래프
 
-Use the `graphs` key in the [LangGraph configuration file](#configuration-file-concepts) to specify which graphs will be available in the deployed LangGraph application.
+배포된 LangGraph 애플리케이션에서 사용할 수 있는 그래프를 지정하려면 [LangGraph 구성 파일](#configuration-file-concepts)의 `graphs` 키를 사용합니다.
 
-You can specify one or more graphs in the configuration file. Each graph is identified by a name (which should be unique) and a path for either: (1) the compiled graph or (2) a function that makes a graph is defined.
+구성 파일에서 하나 이상의 그래프를 지정할 수 있습니다. 각 그래프는 이름(고유해야 함)과 다음 중 하나에 대한 경로로 식별됩니다: (1) 컴파일된 그래프 또는 (2) 그래프를 생성하는 함수가 정의된 경로
 
-## Environment Variables
+## 환경 변수
 
-If you're working with a deployed LangGraph application locally, you can configure environment variables in the `env` key of the [LangGraph configuration file](#configuration-file-concepts).
+로컬에서 배포된 LangGraph 애플리케이션으로 작업하는 경우 [LangGraph 구성 파일](#configuration-file-concepts)의 `env` 키에서 환경 변수를 구성할 수 있습니다.
 
-For a production deployment, you will typically want to configure the environment variables in the deployment environment.
+프로덕션 배포의 경우 일반적으로 배포 환경에서 환경 변수를 구성하려고 할 것입니다.

@@ -1,14 +1,14 @@
-# Customize state
+# 상태 사용자 정의
 
-In this tutorial, you will add additional fields to the state to define complex behavior without relying on the message list. The chatbot will use its search tool to find specific information and forward them to a human for review.
+이 튜토리얼에서는 메시지 목록에 의존하지 않고 복잡한 동작을 정의하기 위해 상태에 추가 필드를 추가합니다. 챗봇은 검색 도구를 사용하여 특정 정보를 찾고 사람에게 검토를 위해 전달합니다.
 
 !!! note
 
-    This tutorial builds on [Add human-in-the-loop controls](./4-human-in-the-loop.md).
+    이 튜토리얼은 [사람이 개입하는 제어 추가](./4-human-in-the-loop.md)를 기반으로 합니다.
 
-## 1. Add keys to the state
+## 1. 상태에 키 추가
 
-Update the chatbot to research the birthday of an entity by adding `name` and `birthday` keys to the state:
+상태에 `name` 및 `birthday` 키를 추가하여 엔티티의 생일을 조사하도록 챗봇을 업데이트합니다:
 
 :::python
 
@@ -47,13 +47,13 @@ const State = z.object({
 
 :::
 
-Adding this information to the state makes it easily accessible by other graph nodes (like a downstream node that stores or processes the information), as well as the graph's persistence layer.
+이 정보를 상태에 추가하면 다른 그래프 노드(정보를 저장하거나 처리하는 다운스트림 노드 등)와 그래프의 지속성 레이어에서 쉽게 액세스할 수 있습니다.
 
-## 2. Update the state inside the tool
+## 2. 도구 내부에서 상태 업데이트
 
 :::python
 
-Now, populate the state keys inside of the `human_assistance` tool. This allows a human to review the information before it is stored in the state. Use [`Command`](../../concepts/low_level.md#using-inside-tools) to issue a state update from inside the tool.
+이제 `human_assistance` 도구 내부에서 상태 키를 채웁니다. 이를 통해 사람이 상태에 저장되기 전에 정보를 검토할 수 있습니다. 도구 내부에서 상태 업데이트를 발행하려면 [`Command`](../../concepts/low_level.md#using-inside-tools)를 사용합니다.
 
 ```python
 from langchain_core.messages import ToolMessage
@@ -62,14 +62,14 @@ from langchain_core.tools import InjectedToolCallId, tool
 from langgraph.types import Command, interrupt
 
 @tool
-# Note that because we are generating a ToolMessage for a state update, we
-# generally require the ID of the corresponding tool call. We can use
-# LangChain's InjectedToolCallId to signal that this argument should not
-# be revealed to the model in the tool's schema.
+# 상태 업데이트를 위해 ToolMessage를 생성하므로,
+# 일반적으로 해당 도구 호출의 ID가 필요합니다. LangChain의
+# InjectedToolCallId를 사용하여 이 인수가 도구의 스키마에서
+# 모델에 공개되지 않아야 함을 나타낼 수 있습니다.
 def human_assistance(
     name: str, birthday: str, tool_call_id: Annotated[str, InjectedToolCallId]
 ) -> str:
-    """Request assistance from a human."""
+    """사람에게 도움을 요청합니다."""
     human_response = interrupt(
         {
             "question": "Is this correct?",
@@ -77,25 +77,24 @@ def human_assistance(
             "birthday": birthday,
         },
     )
-    # If the information is correct, update the state as-is.
+    # 정보가 올바른 경우 상태를 그대로 업데이트합니다.
     if human_response.get("correct", "").lower().startswith("y"):
         verified_name = name
         verified_birthday = birthday
         response = "Correct"
-    # Otherwise, receive information from the human reviewer.
+    # 그렇지 않으면 사람 검토자로부터 정보를 받습니다.
     else:
         verified_name = human_response.get("name", name)
         verified_birthday = human_response.get("birthday", birthday)
         response = f"Made a correction: {human_response}"
 
-    # This time we explicitly update the state with a ToolMessage inside
-    # the tool.
+    # 이번에는 도구 내부에서 ToolMessage로 명시적으로 상태를 업데이트합니다.
     state_update = {
         "name": verified_name,
         "birthday": verified_birthday,
         "messages": [ToolMessage(response, tool_call_id=tool_call_id)],
     }
-    # We return a Command object in the tool to update our state.
+    # 도구에서 Command 객체를 반환하여 상태를 업데이트합니다.
     return Command(update=state_update)
 ```
 
@@ -112,9 +111,9 @@ import { Command, interrupt } from "@langchain/langgraph";
 
 const humanAssistance = tool(
   async (input, config) => {
-    // Note that because we are generating a ToolMessage for a state update,
-    // we generally require the ID of the corresponding tool call.
-    // This is available in the tool's config.
+    // 상태 업데이트를 위해 ToolMessage를 생성하므로,
+    // 일반적으로 해당 도구 호출의 ID가 필요합니다.
+    // 이는 도구의 config에서 사용할 수 있습니다.
     const toolCallId = config?.toolCall?.id as string | undefined;
     if (!toolCallId) throw new Error("Tool call ID is required");
 
@@ -124,9 +123,9 @@ const humanAssistance = tool(
       birthday: input.birthday,
     });
 
-    // We explicitly update the state with a ToolMessage inside the tool.
+    // 도구 내부에서 ToolMessage로 명시적으로 상태를 업데이트합니다.
     const stateUpdate = (() => {
-      // If the information is correct, update the state as-is.
+      // 정보가 올바른 경우 상태를 그대로 업데이트합니다.
       if (humanResponse.correct?.toLowerCase().startsWith("y")) {
         return {
           name: input.name,
@@ -137,7 +136,7 @@ const humanAssistance = tool(
         };
       }
 
-      // Otherwise, receive information from the human reviewer.
+      // 그렇지 않으면 사람 검토자로부터 정보를 받습니다.
       return {
         name: humanResponse.name || input.name,
         birthday: humanResponse.birthday || input.birthday,
@@ -150,15 +149,15 @@ const humanAssistance = tool(
       };
     })();
 
-    // We return a Command object in the tool to update our state.
+    // 도구에서 Command 객체를 반환하여 상태를 업데이트합니다.
     return new Command({ update: stateUpdate });
   },
   {
     name: "humanAssistance",
     description: "Request assistance from a human.",
     schema: z.object({
-      name: z.string().describe("The name of the entity"),
-      birthday: z.string().describe("The birthday/release date of the entity"),
+      name: z.string().describe("엔티티의 이름"),
+      birthday: z.string().describe("엔티티의 생일/출시일"),
     }),
   }
 );
@@ -166,12 +165,12 @@ const humanAssistance = tool(
 
 :::
 
-The rest of the graph stays the same.
+그래프의 나머지 부분은 동일하게 유지됩니다.
 
-## 3. Prompt the chatbot
+## 3. 챗봇에 프롬프트 전달
 
 :::python
-Prompt the chatbot to look up the "birthday" of the LangGraph library and direct the chatbot to reach out to the `human_assistance` tool once it has the required information. By setting `name` and `birthday` in the arguments for the tool, you force the chatbot to generate proposals for these fields.
+LangGraph 라이브러리의 "생일"을 조회하도록 챗봇에 프롬프트를 전달하고 필요한 정보를 얻으면 `human_assistance` 도구에 연락하도록 챗봇에 지시합니다. 도구의 인수에 `name`과 `birthday`를 설정하면 챗봇이 이러한 필드에 대한 제안을 생성하도록 강제합니다.
 
 ```python
 user_input = (
@@ -193,7 +192,7 @@ for event in events:
 :::
 
 :::js
-Prompt the chatbot to look up the "birthday" of the LangGraph library and direct the chatbot to reach out to the `humanAssistance` tool once it has the required information. By setting `name` and `birthday` in the arguments for the tool, you force the chatbot to generate proposals for these fields.
+LangGraph 라이브러리의 "생일"을 조회하도록 챗봇에 프롬프트를 전달하고 필요한 정보를 얻으면 `humanAssistance` 도구에 연락하도록 챗봇에 지시합니다. 도구의 인수에 `name`과 `birthday`를 설정하면 챗봇이 이러한 필드에 대한 제안을 생성하도록 강제합니다.
 
 ```typescript
 import { isAIMessage } from "@langchain/core/messages";
@@ -263,16 +262,16 @@ Tool Calls:
 ```
 
 :::python
-We've hit the `interrupt` in the `human_assistance` tool again.
+`human_assistance` 도구에서 다시 `interrupt`에 도달했습니다.
 :::
 
 :::js
-We've hit the `interrupt` in the `humanAssistance` tool again.
+`humanAssistance` 도구에서 다시 `interrupt`에 도달했습니다.
 :::
 
-## 4. Add human assistance
+## 4. 사람의 도움 추가
 
-The chatbot failed to identify the correct date, so supply it with information:
+챗봇이 올바른 날짜를 식별하지 못했으므로 정보를 제공합니다:
 
 :::python
 
@@ -364,7 +363,7 @@ To summarize:
 It's worth noting that LangGraph had been in development and use for some time before the LangGraph Platform announcement, but the official initial release of LangGraph itself was on January 17, 2024.
 ```
 
-Note that these fields are now reflected in the state:
+이제 이러한 필드가 상태에 반영된 것을 확인할 수 있습니다:
 
 :::python
 
@@ -398,12 +397,12 @@ const relevantState = Object.fromEntries(
 
 :::
 
-This makes them easily accessible to downstream nodes (e.g., a node that further processes or stores the information).
+이를 통해 다운스트림 노드(예: 정보를 추가로 처리하거나 저장하는 노드)에서 쉽게 액세스할 수 있습니다.
 
-## 5. Manually update the state
+## 5. 수동으로 상태 업데이트
 
 :::python
-LangGraph gives a high degree of control over the application state. For instance, at any point (including when interrupted), you can manually override a key using `graph.update_state`:
+LangGraph는 애플리케이션 상태에 대한 높은 수준의 제어를 제공합니다. 예를 들어, 언제든지(중단된 경우 포함) `graph.update_state`를 사용하여 키를 수동으로 재정의할 수 있습니다:
 
 ```python
 graph.update_state(config, {"name": "LangGraph (library)"})
@@ -418,7 +417,7 @@ graph.update_state(config, {"name": "LangGraph (library)"})
 :::
 
 :::js
-LangGraph gives a high degree of control over the application state. For instance, at any point (including when interrupted), you can manually override a key using `graph.updateState`:
+LangGraph는 애플리케이션 상태에 대한 높은 수준의 제어를 제공합니다. 예를 들어, 언제든지(중단된 경우 포함) `graph.updateState`를 사용하여 키를 수동으로 재정의할 수 있습니다:
 
 ```typescript
 await graph.updateState(
@@ -439,10 +438,10 @@ await graph.updateState(
 
 :::
 
-## 6. View the new value
+## 6. 새 값 확인
 
 :::python
-If you call `graph.get_state`, you can see the new value is reflected:
+`graph.get_state`를 호출하면 새 값이 반영된 것을 볼 수 있습니다:
 
 ```python
 snapshot = graph.get_state(config)
@@ -457,7 +456,7 @@ snapshot = graph.get_state(config)
 :::
 
 :::js
-If you call `graph.getState`, you can see the new value is reflected:
+`graph.getState`를 호출하면 새 값이 반영된 것을 볼 수 있습니다:
 
 ```typescript
 const updatedSnapshot = await graph.getState(config);
@@ -475,11 +474,11 @@ const updatedRelevantState = Object.fromEntries(
 
 :::
 
-Manual state updates will [generate a trace](https://smith.langchain.com/public/7ebb7827-378d-49fe-9f6c-5df0e90086c8/r) in LangSmith. If desired, they can also be used to [control human-in-the-loop workflows](../../how-tos/human_in_the_loop/add-human-in-the-loop.md). Use of the `interrupt` function is generally recommended instead, as it allows data to be transmitted in a human-in-the-loop interaction independently of state updates.
+수동 상태 업데이트는 LangSmith에서 [trace를 생성](https://smith.langchain.com/public/7ebb7827-378d-49fe-9f6c-5df0e90086c8/r)합니다. 원하는 경우 [사람이 개입하는 워크플로를 제어](../../how-tos/human_in_the_loop/add-human-in-the-loop.md)하는 데에도 사용할 수 있습니다. 일반적으로 `interrupt` 함수 사용이 권장되는데, 이는 상태 업데이트와 독립적으로 사람이 개입하는 상호작용에서 데이터를 전송할 수 있기 때문입니다.
 
-**Congratulations!** You've added custom keys to the state to facilitate a more complex workflow, and learned how to generate state updates from inside tools.
+**축하합니다!** 더 복잡한 워크플로를 용이하게 하기 위해 상태에 사용자 정의 키를 추가했으며 도구 내부에서 상태 업데이트를 생성하는 방법을 배웠습니다.
 
-Check out the code snippet below to review the graph from this tutorial:
+이 튜토리얼의 그래프를 검토하려면 아래 코드 스니펫을 확인하세요:
 
 :::python
 
@@ -608,9 +607,9 @@ const humanAssistance = tool(
       birthday: input.birthday,
     });
 
-    // We explicitly update the state with a ToolMessage inside the tool.
+    // 도구 내부에서 ToolMessage로 명시적으로 상태를 업데이트합니다.
     const stateUpdate = (() => {
-      // If the information is correct, update the state as-is.
+      // 정보가 올바른 경우 상태를 그대로 업데이트합니다.
       if (humanResponse.correct?.toLowerCase().startsWith("y")) {
         return {
           name: input.name,
@@ -621,7 +620,7 @@ const humanAssistance = tool(
         };
       }
 
-      // Otherwise, receive information from the human reviewer.
+      // 그렇지 않으면 사람 검토자로부터 정보를 받습니다.
       return {
         name: humanResponse.name || input.name,
         birthday: humanResponse.birthday || input.birthday,
@@ -634,15 +633,15 @@ const humanAssistance = tool(
       };
     })();
 
-    // We return a Command object in the tool to update our state.
+    // 도구에서 Command 객체를 반환하여 상태를 업데이트합니다.
     return new Command({ update: stateUpdate });
   },
   {
     name: "humanAssistance",
     description: "Request assistance from a human.",
     schema: z.object({
-      name: z.string().describe("The name of the entity"),
-      birthday: z.string().describe("The birthday/release date of the entity"),
+      name: z.string().describe("엔티티의 이름"),
+      birthday: z.string().describe("엔티티의 생일/출시일"),
     }),
   }
 );
@@ -672,6 +671,6 @@ const graph = new StateGraph(State)
 
 :::
 
-## Next steps
+## 다음 단계
 
-There's one more concept to review before finishing the LangGraph basics tutorials: connecting `checkpointing` and `state updates` to [time travel](./6-time-travel.md).
+LangGraph 기본 튜토리얼을 마치기 전에 검토할 개념이 하나 더 있습니다: `checkpointing`과 `state updates`를 [시간 여행](./6-time-travel.md)에 연결하는 것입니다.

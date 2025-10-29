@@ -1,9 +1,8 @@
-"""Utilities for working with embedding functions and LangChain's Embeddings interface.
+"""임베딩 함수 및 LangChain의 Embeddings 인터페이스 작업을 위한 유틸리티입니다.
 
-This module provides tools to wrap arbitrary embedding functions (both sync and async)
-into LangChain's Embeddings interface. This enables using custom embedding functions
-with LangChain-compatible tools while maintaining support for both synchronous and
-asynchronous operations.
+이 모듈은 임의의 임베딩 함수(동기 및 비동기 모두)를 LangChain의 Embeddings
+인터페이스로 래핑하는 도구를 제공합니다. 이를 통해 동기 및 비동기 작업에 대한
+지원을 유지하면서 LangChain 호환 도구와 함께 사용자 정의 임베딩 함수를 사용할 수 있습니다.
 """
 
 from __future__ import annotations
@@ -17,63 +16,61 @@ from typing import Any
 from langchain_core.embeddings import Embeddings
 
 EmbeddingsFunc = Callable[[Sequence[str]], list[list[float]]]
-"""Type for synchronous embedding functions.
+"""동기 임베딩 함수의 타입입니다.
 
-The function should take a sequence of strings and return a list of embeddings,
-where each embedding is a list of floats. The dimensionality of the embeddings
-should be consistent for all inputs.
+함수는 문자열 시퀀스를 받아 임베딩 목록을 반환해야 하며,
+각 임베딩은 float 목록입니다. 임베딩의 차원은 모든 입력에 대해
+일관되어야 합니다.
 """
 
 AEmbeddingsFunc = Callable[[Sequence[str]], Awaitable[list[list[float]]]]
-"""Type for asynchronous embedding functions.
+"""비동기 임베딩 함수의 타입입니다.
 
-Similar to EmbeddingsFunc, but returns an awaitable that resolves to the embeddings.
+EmbeddingsFunc와 유사하지만 임베딩으로 해결되는 awaitable을 반환합니다.
 """
 
 
 def ensure_embeddings(
     embed: Embeddings | EmbeddingsFunc | AEmbeddingsFunc | str | None,
 ) -> Embeddings:
-    """Ensure that an embedding function conforms to LangChain's Embeddings interface.
+    """임베딩 함수가 LangChain의 Embeddings 인터페이스를 준수하도록 보장합니다.
 
-    This function wraps arbitrary embedding functions to make them compatible with
-    LangChain's Embeddings interface. It handles both synchronous and asynchronous
-    functions.
+    이 함수는 임의의 임베딩 함수를 래핑하여 LangChain의 Embeddings 인터페이스와
+    호환되도록 만듭니다. 동기 및 비동기 함수 모두 처리합니다.
 
     Args:
-        embed: Either an existing Embeddings instance, or a function that converts
-            text to embeddings. If the function is async, it will be used for both
-            sync and async operations.
+        embed: 기존 Embeddings 인스턴스 또는 텍스트를 임베딩으로 변환하는 함수.
+            함수가 비동기인 경우 동기 및 비동기 작업 모두에 사용됩니다.
 
     Returns:
-        An Embeddings instance that wraps the provided function(s).
+        제공된 함수를 래핑하는 Embeddings 인스턴스.
 
-    ??? example "Examples"
+    ??? example "예제"
 
-        Wrap a synchronous embedding function:
+        동기 임베딩 함수 래핑:
 
         ```python
         def my_embed_fn(texts):
             return [[0.1, 0.2] for _ in texts]
 
         embeddings = ensure_embeddings(my_embed_fn)
-        result = embeddings.embed_query("hello")  # Returns [0.1, 0.2]
+        result = embeddings.embed_query("hello")  # [0.1, 0.2] 반환
         ```
 
-        Wrap an asynchronous embedding function:
+        비동기 임베딩 함수 래핑:
 
         ```python
         async def my_async_fn(texts):
             return [[0.1, 0.2] for _ in texts]
 
         embeddings = ensure_embeddings(my_async_fn)
-        result = await embeddings.aembed_query("hello")  # Returns [0.1, 0.2]
+        result = await embeddings.aembed_query("hello")  # [0.1, 0.2] 반환
         ```
 
-        Initialize embeddings using a provider string:
+        프로바이더 문자열을 사용하여 임베딩 초기화:
 
         ```python
-        # Requires langchain>=0.3.9 and langgraph-checkpoint>=2.0.11
+        # langchain>=0.3.9 및 langgraph-checkpoint>=2.0.11 필요
         embeddings = ensure_embeddings("openai:text-embedding-3-small")
         result = embeddings.embed_query("hello")
         ```
@@ -107,44 +104,43 @@ def ensure_embeddings(
 
 
 class EmbeddingsLambda(Embeddings):
-    """Wrapper to convert embedding functions into LangChain's Embeddings interface.
+    """임베딩 함수를 LangChain의 Embeddings 인터페이스로 변환하는 래퍼입니다.
 
-    This class allows arbitrary embedding functions to be used with LangChain-compatible
-    tools. It supports both synchronous and asynchronous operations, and can handle:
-    1. A synchronous function for sync operations (async operations will use sync function)
-    2. An async function for both sync/async operations (sync operations will raise an error)
+    이 클래스는 임의의 임베딩 함수를 LangChain 호환 도구와 함께 사용할 수 있도록 합니다.
+    동기 및 비동기 작업을 모두 지원하며 다음을 처리할 수 있습니다:
+    1. 동기 작업용 동기 함수 (비동기 작업은 동기 함수를 사용)
+    2. 동기/비동기 작업 모두를 위한 비동기 함수 (동기 작업은 오류 발생)
 
-    The embedding functions should convert text into fixed-dimensional vectors that
-    capture the semantic meaning of the text.
+    임베딩 함수는 텍스트의 의미를 포착하는 고정 차원 벡터로 텍스트를 변환해야 합니다.
 
     Args:
-        func: Function that converts text to embeddings. Can be sync or async.
-            If async, it will be used for async operations, but sync operations
-            will raise an error. If sync, it will be used for both sync and async operations.
+        func: 텍스트를 임베딩으로 변환하는 함수. 동기 또는 비동기 가능.
+            비동기인 경우 비동기 작업에 사용되지만 동기 작업은 오류를 발생시킵니다.
+            동기인 경우 동기 및 비동기 작업 모두에 사용됩니다.
 
-    ??? example "Examples"
+    ??? example "예제"
 
-        With a sync function:
+        동기 함수 사용:
 
         ```python
         def my_embed_fn(texts):
-            # Return 2D embeddings for each text
+            # 각 텍스트에 대한 2D 임베딩 반환
             return [[0.1, 0.2] for _ in texts]
 
         embeddings = EmbeddingsLambda(my_embed_fn)
-        result = embeddings.embed_query("hello")  # Returns [0.1, 0.2]
-        await embeddings.aembed_query("hello")  # Also returns [0.1, 0.2]
+        result = embeddings.embed_query("hello")  # [0.1, 0.2] 반환
+        await embeddings.aembed_query("hello")  # 역시 [0.1, 0.2] 반환
         ```
 
-        With an async function:
+        비동기 함수 사용:
 
         ```python
         async def my_async_fn(texts):
             return [[0.1, 0.2] for _ in texts]
 
         embeddings = EmbeddingsLambda(my_async_fn)
-        await embeddings.aembed_query("hello")  # Returns [0.1, 0.2]
-        # Note: embed_query() would raise an error
+        await embeddings.aembed_query("hello")  # [0.1, 0.2] 반환
+        # 참고: embed_query()는 오류를 발생시킴
         ```
     """
 
@@ -160,16 +156,16 @@ class EmbeddingsLambda(Embeddings):
             self.func = func
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
-        """Embed a list of texts into vectors.
+        """텍스트 목록을 벡터로 임베딩합니다.
 
         Args:
-            texts: list of texts to convert to embeddings.
+            texts: 임베딩으로 변환할 텍스트 목록.
 
         Returns:
-            list of embeddings, one per input text. Each embedding is a list of floats.
+            입력 텍스트당 하나씩, 임베딩 목록. 각 임베딩은 float 목록입니다.
 
         Raises:
-            ValueError: If the instance was initialized with only an async function.
+            ValueError: 인스턴스가 비동기 함수로만 초기화된 경우.
         """
         func = getattr(self, "func", None)
         if func is None:
@@ -180,31 +176,31 @@ class EmbeddingsLambda(Embeddings):
         return func(texts)
 
     def embed_query(self, text: str) -> list[float]:
-        """Embed a single piece of text.
+        """단일 텍스트를 임베딩합니다.
 
         Args:
-            text: Text to convert to an embedding.
+            text: 임베딩으로 변환할 텍스트.
 
         Returns:
-            Embedding vector as a list of floats.
+            float 목록으로 된 임베딩 벡터.
 
         Note:
-            This is equivalent to calling embed_documents with a single text
-            and taking the first result.
+            이것은 단일 텍스트로 embed_documents를 호출하고
+            첫 번째 결과를 가져오는 것과 동일합니다.
         """
         return self.embed_documents([text])[0]
 
     async def aembed_documents(self, texts: list[str]) -> list[list[float]]:
-        """Asynchronously embed a list of texts into vectors.
+        """텍스트 목록을 비동기적으로 벡터로 임베딩합니다.
 
         Args:
-            texts: list of texts to convert to embeddings.
+            texts: 임베딩으로 변환할 텍스트 목록.
 
         Returns:
-            list of embeddings, one per input text. Each embedding is a list of floats.
+            입력 텍스트당 하나씩, 임베딩 목록. 각 임베딩은 float 목록입니다.
 
         Note:
-            If no async function was provided, this falls back to the sync implementation.
+            비동기 함수가 제공되지 않은 경우 동기 구현으로 대체됩니다.
         """
         afunc = getattr(self, "afunc", None)
         if afunc is None:
@@ -212,17 +208,17 @@ class EmbeddingsLambda(Embeddings):
         return await afunc(texts)
 
     async def aembed_query(self, text: str) -> list[float]:
-        """Asynchronously embed a single piece of text.
+        """단일 텍스트를 비동기적으로 임베딩합니다.
 
         Args:
-            text: Text to convert to an embedding.
+            text: 임베딩으로 변환할 텍스트.
 
         Returns:
-            Embedding vector as a list of floats.
+            float 목록으로 된 임베딩 벡터.
 
         Note:
-            This is equivalent to calling aembed_documents with a single text
-            and taking the first result.
+            이것은 단일 텍스트로 aembed_documents를 호출하고
+            첫 번째 결과를 가져오는 것과 동일합니다.
         """
         afunc = getattr(self, "afunc", None)
         if afunc is None:
@@ -231,18 +227,18 @@ class EmbeddingsLambda(Embeddings):
 
 
 def get_text_at_path(obj: Any, path: str | list[str]) -> list[str]:
-    """Extract text from an object using a path expression or pre-tokenized path.
+    """경로 표현식 또는 사전 토큰화된 경로를 사용하여 객체에서 텍스트를 추출합니다.
 
     Args:
-        obj: The object to extract text from
-        path: Either a path string or pre-tokenized path list.
+        obj: 텍스트를 추출할 객체
+        path: 경로 문자열 또는 사전 토큰화된 경로 목록.
 
-    !!! info "Path types handled"
-        - Simple paths: "field1.field2"
-        - Array indexing: "[0]", "[*]", "[-1]"
-        - Wildcards: "*"
-        - Multi-field selection: "{field1,field2}"
-        - Nested paths in multi-field: "{field1,nested.field2}"
+    !!! info "처리되는 경로 타입"
+        - 단순 경로: "field1.field2"
+        - 배열 인덱싱: "[0]", "[*]", "[-1]"
+        - 와일드카드: "*"
+        - 다중 필드 선택: "{field1,field2}"
+        - 다중 필드의 중첩 경로: "{field1,nested.field2}"
     """
     if not path or path == "$":
         return [json.dumps(obj, sort_keys=True, ensure_ascii=False)]
@@ -308,7 +304,7 @@ def get_text_at_path(obj: Any, path: str | list[str]) -> list[str]:
                                 )
                             )
 
-        # Handle wildcard
+        # 와일드카드 처리
         elif token == "*":
             if isinstance(obj, dict):
                 for value in obj.values():
@@ -317,7 +313,7 @@ def get_text_at_path(obj: Any, path: str | list[str]) -> list[str]:
                 for item in obj:
                     results.extend(_extract_from_obj(item, tokens, pos + 1))
 
-        # Handle regular field
+        # 일반 필드 처리
         else:
             if isinstance(obj, dict) and token in obj:
                 results.extend(_extract_from_obj(obj[token], tokens, pos + 1))
@@ -331,13 +327,13 @@ def get_text_at_path(obj: Any, path: str | list[str]) -> list[str]:
 
 
 def tokenize_path(path: str) -> list[str]:
-    """Tokenize a path into components.
+    """경로를 구성 요소로 토큰화합니다.
 
-    !!! info "Types handled"
-        - Simple paths: "field1.field2"
-        - Array indexing: "[0]", "[*]", "[-1]"
-        - Wildcards: "*"
-        - Multi-field selection: "{field1,field2}"
+    !!! info "처리되는 타입"
+        - 단순 경로: "field1.field2"
+        - 배열 인덱싱: "[0]", "[*]", "[-1]"
+        - 와일드카드: "*"
+        - 다중 필드 선택: "{field1,field2}"
     """
     if not path:
         return []
@@ -348,7 +344,7 @@ def tokenize_path(path: str) -> list[str]:
     while i < len(path):
         char = path[i]
 
-        if char == "[":  # Handle array index
+        if char == "[":  # 배열 인덱스 처리
             if current:
                 tokens.append("".join(current))
                 current = []
@@ -365,7 +361,7 @@ def tokenize_path(path: str) -> list[str]:
             tokens.append("".join(index_chars))
             continue
 
-        elif char == "{":  # Handle multi-field selection
+        elif char == "{":  # 다중 필드 선택 처리
             if current:
                 tokens.append("".join(current))
                 current = []
@@ -382,7 +378,7 @@ def tokenize_path(path: str) -> list[str]:
             tokens.append("".join(field_chars))
             continue
 
-        elif char == ".":  # Handle regular field
+        elif char == ".":  # 일반 필드 처리
             if current:
                 tokens.append("".join(current))
                 current = []
@@ -399,15 +395,15 @@ def tokenize_path(path: str) -> list[str]:
 def _is_async_callable(
     func: Any,
 ) -> bool:
-    """Check if a function is async.
+    """함수가 비동기인지 확인합니다.
 
-    This includes both async def functions and classes with async __call__ methods.
+    이것은 async def 함수와 비동기 __call__ 메서드를 가진 클래스를 모두 포함합니다.
 
     Args:
-        func: Function or callable object to check.
+        func: 확인할 함수 또는 호출 가능한 객체.
 
     Returns:
-        True if the function is async, False otherwise.
+        함수가 비동기이면 True, 그렇지 않으면 False.
     """
     return (
         asyncio.iscoroutinefunction(func)

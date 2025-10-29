@@ -1,23 +1,23 @@
-# Time travel
+# 시간 여행
 
-In a typical chatbot workflow, the user interacts with the bot one or more times to accomplish a task. [Memory](./3-add-memory.md) and a [human-in-the-loop](./4-human-in-the-loop.md) enable checkpoints in the graph state and control future responses.
+일반적인 챗봇 워크플로우에서 사용자는 작업을 수행하기 위해 봇과 한 번 이상 상호작용합니다. [메모리](./3-add-memory.md)와 [human-in-the-loop](./4-human-in-the-loop.md)는 그래프 상태에서 체크포인트를 활성화하고 향후 응답을 제어합니다.
 
-What if you want a user to be able to start from a previous response and explore a different outcome? Or what if you want users to be able to rewind your chatbot's work to fix mistakes or try a different strategy, something that is common in applications like autonomous software engineers?
+사용자가 이전 응답에서 시작하여 다른 결과를 탐색할 수 있도록 하고 싶다면 어떻게 해야 할까요? 또는 자율 소프트웨어 엔지니어와 같은 애플리케이션에서 일반적으로 발생하는 실수를 수정하거나 다른 전략을 시도하기 위해 챗봇의 작업을 되감을 수 있도록 하려면 어떻게 해야 할까요?
 
-You can create these types of experiences using LangGraph's built-in **time travel** functionality.
+LangGraph의 내장 **시간 여행** 기능을 사용하여 이러한 유형의 경험을 만들 수 있습니다.
 
 !!! note
 
-    This tutorial builds on [Customize state](./5-customize-state.md).
+    이 튜토리얼은 [상태 커스터마이즈](./5-customize-state.md)를 기반으로 합니다.
 
-## 1. Rewind your graph
+## 1. 그래프 되감기
 
 :::python
-Rewind your graph by fetching a checkpoint using the graph's `get_state_history` method. You can then resume execution at this previous point in time.
+그래프의 `get_state_history` 메서드를 사용하여 체크포인트를 가져와서 그래프를 되감습니다. 그런 다음 이전 시점에서 실행을 재개할 수 있습니다.
 :::
 
 :::js
-Rewind your graph by fetching a checkpoint using the graph's `getStateHistory` method. You can then resume execution at this previous point in time.
+그래프의 `getStateHistory` 메서드를 사용하여 체크포인트를 가져와서 그래프를 되감습니다. 그런 다음 이전 시점에서 실행을 재개할 수 있습니다.
 :::
 
 :::python
@@ -108,9 +108,9 @@ const graph = new StateGraph(State)
 
 :::
 
-## 2. Add steps
+## 2. 단계 추가
 
-Add steps to your graph. Every step will be checkpointed in its state history:
+그래프에 단계를 추가합니다. 모든 단계는 상태 히스토리에 체크포인트됩니다:
 
 :::python
 
@@ -350,9 +350,9 @@ Based on the search results, I can provide you with a practical overview of how 
 
 :::
 
-## 3. Replay the full state history
+## 3. 전체 상태 히스토리 재생
 
-Now that you have added steps to the chatbot, you can `replay` the full state history to see everything that occurred.
+챗봇에 단계를 추가했으므로 이제 전체 상태 히스토리를 `재생`하여 발생한 모든 것을 볼 수 있습니다.
 
 :::python
 
@@ -362,7 +362,7 @@ for state in graph.get_state_history(config):
     print("Num Messages: ", len(state.values["messages"]), "Next: ", state.next)
     print("-" * 80)
     if len(state.values["messages"]) == 6:
-        # We are somewhat arbitrarily selecting a specific state based on the number of chat messages in the state.
+        # 상태의 채팅 메시지 수를 기준으로 특정 상태를 다소 임의로 선택하고 있습니다.
         to_replay = state
 ```
 
@@ -442,17 +442,17 @@ Num Messages: 0, Next: ["__start__"]
 
 :::
 
-Checkpoints are saved for every step of the graph. This **spans invocations** so you can rewind across a full thread's history.
+체크포인트는 그래프의 모든 단계에 대해 저장됩니다. 이는 **여러 호출에 걸쳐** 적용되므로 전체 thread의 히스토리를 되감을 수 있습니다.
 
-## Resume from a checkpoint
+## 체크포인트에서 재개
 
 :::python
 
-Resume from the `to_replay` state, which is after the `chatbot` node in the second graph invocation. Resuming from this point will call the **action** node next.
+두 번째 그래프 호출에서 `chatbot` 노드 이후의 `to_replay` 상태에서 재개합니다. 이 지점에서 재개하면 다음으로 **action** 노드가 호출됩니다.
 :::
 
 :::js
-Resume from the `toReplay` state, which is after a specific node in one of the graph invocations. Resuming from this point will call the next scheduled node.
+그래프 호출 중 하나에서 특정 노드 이후의 `toReplay` 상태에서 재개합니다. 이 지점에서 재개하면 다음으로 예약된 노드가 호출됩니다.
 :::
 
 :::python
@@ -491,14 +491,14 @@ console.log(toReplay.config);
 
 :::
 
-## 4. Load a state from a moment-in-time
+## 4. 특정 시점의 상태 로드
 
 :::python
 
-The checkpoint's `to_replay.config` contains a `checkpoint_id` timestamp. Providing this `checkpoint_id` value tells LangGraph's checkpointer to **load** the state from that moment in time.
+체크포인트의 `to_replay.config`에는 `checkpoint_id` 타임스탬프가 포함되어 있습니다. 이 `checkpoint_id` 값을 제공하면 LangGraph의 체크포인터가 해당 시점의 상태를 **로드**하도록 지시합니다.
 
 ```python
-# The `checkpoint_id` in the `to_replay.config` corresponds to a state we've persisted to our checkpointer.
+# `to_replay.config`의 `checkpoint_id`는 체크포인터에 저장한 상태에 해당합니다.
 for event in graph.stream(None, to_replay.config, stream_mode="values"):
     if "messages" in event:
         event["messages"][-1].pretty_print()
@@ -534,15 +534,15 @@ Would you like more information on any specific aspect of building your autonomo
 Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
 ```
 
-The graph resumed execution from the `tools` node. You can tell this is the case since the first value printed above is the response from our search engine tool.
+그래프는 `tools` 노드에서 실행을 재개했습니다. 위에 출력된 첫 번째 값이 검색 엔진 도구의 응답이기 때문에 이를 알 수 있습니다.
 :::
 
 :::js
 
-The checkpoint's `toReplay.config` contains a `checkpoint_id` timestamp. Providing this `checkpoint_id` value tells LangGraph's checkpointer to **load** the state from that moment in time.
+체크포인트의 `toReplay.config`에는 `checkpoint_id` 타임스탬프가 포함되어 있습니다. 이 `checkpoint_id` 값을 제공하면 LangGraph의 체크포인터가 해당 시점의 상태를 **로드**하도록 지시합니다.
 
 ```typescript
-// The `checkpoint_id` in the `toReplay.config` corresponds to a state we've persisted to our checkpointer.
+// `toReplay.config`의 `checkpoint_id`는 체크포인터에 저장한 상태에 해당합니다.
 for await (const event of await graph.stream(null, {
   ...toReplay?.config,
   streamMode: "values",
@@ -609,15 +609,15 @@ Based on the search results, I can share some practical information about buildi
 (...)
 ```
 
-The graph resumed execution from the `tools` node. You can tell this is the case since the first value printed above is the response from our search engine tool.
+그래프는 `tools` 노드에서 실행을 재개했습니다. 위에 출력된 첫 번째 값이 검색 엔진 도구의 응답이기 때문에 이를 알 수 있습니다.
 :::
 
-**Congratulations!** You've now used time-travel checkpoint traversal in LangGraph. Being able to rewind and explore alternative paths opens up a world of possibilities for debugging, experimentation, and interactive applications.
+**축하합니다!** 이제 LangGraph에서 시간 여행 체크포인트 탐색을 사용해 보았습니다. 되감기를 통해 대안 경로를 탐색할 수 있는 기능은 디버깅, 실험 및 대화형 애플리케이션에 무한한 가능성을 열어줍니다.
 
-## Learn more
+## 더 알아보기
 
-Take your LangGraph journey further by exploring deployment and advanced features:
+배포 및 고급 기능을 탐색하여 LangGraph 여정을 더 발전시키세요:
 
-- **[LangGraph Server quickstart](../../tutorials/langgraph-platform/local-server.md)**: Launch a LangGraph server locally and interact with it using the REST API and LangGraph Studio Web UI.
-- **[LangGraph Platform quickstart](../../cloud/quick_start.md)**: Deploy your LangGraph app using LangGraph Platform.
-- **[LangGraph Platform concepts](../../concepts/langgraph_platform.md)**: Understand the foundational concepts of the LangGraph Platform.
+- **[LangGraph Server 빠른 시작](../../tutorials/langgraph-platform/local-server.md)**: LangGraph 서버를 로컬에서 시작하고 REST API 및 LangGraph Studio Web UI를 사용하여 상호작용합니다.
+- **[LangGraph Platform 빠른 시작](../../cloud/quick_start.md)**: LangGraph Platform을 사용하여 LangGraph 앱을 배포합니다.
+- **[LangGraph Platform 개념](../../concepts/langgraph_platform.md)**: LangGraph Platform의 기본 개념을 이해합니다.

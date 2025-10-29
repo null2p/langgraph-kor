@@ -9,17 +9,17 @@ hide:
 
 # LangGraph quickstart
 
-This guide shows you how to set up and use LangGraph's **prebuilt**, **reusable** components, which are designed to help you construct agentic systems quickly and reliably.
+이 가이드는 에이전틱 시스템을 빠르고 안정적으로 구축할 수 있도록 설계된 LangGraph의 **사전 구축된**, **재사용 가능한** 컴포넌트를 설정하고 사용하는 방법을 보여줍니다.
 
 ## Prerequisites
 
-Before you start this tutorial, ensure you have the following:
+이 튜토리얼을 시작하기 전에 다음이 준비되어 있는지 확인하세요:
 
-- An [Anthropic](https://console.anthropic.com/settings/keys) API key
+- [Anthropic](https://console.anthropic.com/settings/keys) API 키
 
 ## 1. Install dependencies
 
-If you haven't already, install LangGraph and LangChain:
+아직 설치하지 않았다면 LangGraph와 LangChain을 설치하세요:
 
 :::python
 
@@ -29,7 +29,7 @@ pip install -U langgraph "langchain[anthropic]"
 
 !!! info
 
-    `langchain[anthropic]` is installed so the agent can call the [model](https://python.langchain.com/docs/integrations/chat/).
+    `langchain[anthropic]`은 에이전트가 [모델](https://python.langchain.com/docs/integrations/chat/)을 호출할 수 있도록 설치됩니다.
 
 :::
 
@@ -41,14 +41,14 @@ npm install @langchain/langgraph @langchain/core @langchain/anthropic
 
 !!! info
 
-    `@langchain/core` `@langchain/anthropic` are installed so the agent can call the [model](https://js.langchain.com/docs/integrations/chat/).
+    `@langchain/core` `@langchain/anthropic`은 에이전트가 [모델](https://js.langchain.com/docs/integrations/chat/)을 호출할 수 있도록 설치됩니다.
 
 :::
 
 ## 2. Create an agent
 
 :::python
-To create an agent, use @[`create_react_agent`][create_react_agent]:
+에이전트를 생성하려면 @[`create_react_agent`][create_react_agent]를 사용합니다:
 
 ```python
 from langgraph.prebuilt import create_react_agent
@@ -69,14 +69,14 @@ agent.invoke(
 )
 ```
 
-1. Define a tool for the agent to use. Tools can be defined as vanilla Python functions. For more advanced tool usage and customization, check the [tools](../how-tos/tool-calling.md) page.
-2. Provide a language model for the agent to use. To learn more about configuring language models for the agents, check the [models](./models.md) page.
-3. Provide a list of tools for the model to use.
-4. Provide a system prompt (instructions) to the language model used by the agent.
+1. 에이전트가 사용할 도구를 정의합니다. 도구는 일반 Python 함수로 정의할 수 있습니다. 더 고급 도구 사용 및 커스터마이징은 [tools](../how-tos/tool-calling.md) 페이지를 확인하세요.
+2. 에이전트가 사용할 언어 모델을 제공합니다. 에이전트용 언어 모델 구성에 대한 자세한 내용은 [models](./models.md) 페이지를 확인하세요.
+3. 모델이 사용할 도구 목록을 제공합니다.
+4. 에이전트가 사용하는 언어 모델에 시스템 프롬프트(지침)를 제공합니다.
    :::
 
 :::js
-To create an agent, use [`createReactAgent`](https://langchain-ai.github.io/langgraphjs/reference/functions/langgraph_prebuilt.createReactAgent.html):
+에이전트를 생성하려면 [`createReactAgent`](https://langchain-ai.github.io/langgraphjs/reference/functions/langgraph_prebuilt.createReactAgent.html)를 사용합니다:
 
 ```typescript
 import { ChatAnthropic } from "@langchain/anthropic";
@@ -110,16 +110,16 @@ await agent.invoke({
 });
 ```
 
-1. Define a tool for the agent to use. Tools can be defined using the `tool` function. For more advanced tool usage and customization, check the [tools](./tools.md) page.
-2. Provide a language model for the agent to use. To learn more about configuring language models for the agents, check the [models](./models.md) page.
-3. Provide a list of tools for the model to use.
-4. Provide a system prompt (instructions) to the language model used by the agent.
+1. 에이전트가 사용할 도구를 정의합니다. 도구는 `tool` 함수를 사용하여 정의할 수 있습니다. 더 고급 도구 사용 및 커스터마이징은 [tools](./tools.md) 페이지를 확인하세요.
+2. 에이전트가 사용할 언어 모델을 제공합니다. 에이전트용 언어 모델 구성에 대한 자세한 내용은 [models](./models.md) 페이지를 확인하세요.
+3. 모델이 사용할 도구 목록을 제공합니다.
+4. 에이전트가 사용하는 언어 모델에 시스템 프롬프트(지침)를 제공합니다.
    :::
 
 ## 3. Configure an LLM
 
 :::python
-To configure an LLM with specific parameters, such as temperature, use [init_chat_model](https://python.langchain.com/api_reference/langchain/chat_models/langchain.chat_models.base.init_chat_model.html):
+temperature와 같은 특정 매개변수로 LLM을 구성하려면 [init_chat_model](https://python.langchain.com/api_reference/langchain/chat_models/langchain.chat_models.base.init_chat_model.html)을 사용합니다:
 
 ```python
 from langchain.chat_models import init_chat_model
@@ -142,7 +142,7 @@ agent = create_react_agent(
 :::
 
 :::js
-To configure an LLM with specific parameters, such as temperature, use a model instance:
+temperature와 같은 특정 매개변수로 LLM을 구성하려면 모델 인스턴스를 사용합니다:
 
 ```typescript
 import { ChatAnthropic } from "@langchain/anthropic";
@@ -164,18 +164,18 @@ const agent = createReactAgent({
 
 :::
 
-For more information on how to configure LLMs, see [Models](./models.md).
+LLM 구성 방법에 대한 자세한 내용은 [Models](./models.md)를 참조하세요.
 
 ## 4. Add a custom prompt
 
-Prompts instruct the LLM how to behave. Add one of the following types of prompts:
+프롬프트는 LLM에게 어떻게 동작해야 하는지 지시합니다. 다음 유형의 프롬프트 중 하나를 추가합니다:
 
-- **Static**: A string is interpreted as a **system message**.
-- **Dynamic**: A list of messages generated at **runtime**, based on input or configuration.
+- **Static**: 문자열은 **시스템 메시지**로 해석됩니다.
+- **Dynamic**: 입력 또는 구성을 기반으로 **런타임**에 생성되는 메시지 리스트입니다.
 
 === "Static prompt"
 
-    Define a fixed prompt string or list of messages:
+    고정된 프롬프트 문자열 또는 메시지 리스트를 정의합니다:
 
     :::python
     ```python
@@ -217,7 +217,7 @@ Prompts instruct the LLM how to behave. Add one of the following types of prompt
 === "Dynamic prompt"
 
     :::python
-    Define a function that returns a message list based on the agent's state and configuration:
+    에이전트의 state와 구성을 기반으로 메시지 리스트를 반환하는 함수를 정의합니다:
 
     ```python
     from langchain_core.messages import AnyMessage
@@ -245,16 +245,16 @@ Prompts instruct the LLM how to behave. Add one of the following types of prompt
     )
     ```
 
-    1. Dynamic prompts allow including non-message [context](./context.md) when constructing an input to the LLM, such as:
+    1. 동적 프롬프트를 사용하면 LLM에 대한 입력을 구성할 때 메시지가 아닌 [context](./context.md)를 포함할 수 있습니다. 예를 들면:
 
-        - Information passed at runtime, like a `user_id` or API credentials (using `config`).
-        - Internal agent state updated during a multi-step reasoning process (using `state`).
+        - `user_id`나 API 자격 증명과 같은 런타임에 전달되는 정보 (`config` 사용).
+        - 다단계 추론 프로세스 중에 업데이트되는 내부 에이전트 state (`state` 사용).
 
-        Dynamic prompts can be defined as functions that take `state` and `config` and return a list of messages to send to the LLM.
+        동적 프롬프트는 `state`와 `config`를 받아 LLM에 전송할 메시지 리스트를 반환하는 함수로 정의할 수 있습니다.
     :::
 
     :::js
-    Define a function that returns messages based on the agent's state and configuration:
+    에이전트의 state와 구성을 기반으로 메시지를 반환하는 함수를 정의합니다:
 
     ```typescript
     import { type BaseMessageLike } from "@langchain/core/messages";
@@ -282,19 +282,19 @@ Prompts instruct the LLM how to behave. Add one of the following types of prompt
     );
     ```
 
-    1. Dynamic prompts allow including non-message [context](./context.md) when constructing an input to the LLM, such as:
+    1. 동적 프롬프트를 사용하면 LLM에 대한 입력을 구성할 때 메시지가 아닌 [context](./context.md)를 포함할 수 있습니다. 예를 들면:
 
-        - Information passed at runtime, like a `user_id` or API credentials (using `config`).
-        - Internal agent state updated during a multi-step reasoning process (using `state`).
+        - `user_id`나 API 자격 증명과 같은 런타임에 전달되는 정보 (`config` 사용).
+        - 다단계 추론 프로세스 중에 업데이트되는 내부 에이전트 state (`state` 사용).
 
-        Dynamic prompts can be defined as functions that take `state` and `config` and return a list of messages to send to the LLM.
+        동적 프롬프트는 `state`와 `config`를 받아 LLM에 전송할 메시지 리스트를 반환하는 함수로 정의할 수 있습니다.
     :::
 
-For more information, see [Context](./context.md).
+자세한 내용은 [Context](./context.md)를 참조하세요.
 
 ## 5. Add memory
 
-To allow multi-turn conversations with an agent, you need to enable [persistence](../concepts/persistence.md) by providing a checkpointer when creating an agent. At runtime, you need to provide a config containing `thread_id` — a unique identifier for the conversation (session):
+에이전트와의 다회전 대화를 허용하려면 에이전트를 생성할 때 checkpointer를 제공하여 [persistence](../concepts/persistence.md)를 활성화해야 합니다. 런타임에는 대화(세션)의 고유 식별자인 `thread_id`가 포함된 config를 제공해야 합니다:
 
 :::python
 
@@ -327,8 +327,8 @@ ny_response = agent.invoke(
 )
 ```
 
-1. `checkpointer` allows the agent to store its state at every step in the tool calling loop. This enables [short-term memory](../how-tos/memory/add-memory.md#add-short-term-memory) and [human-in-the-loop](../concepts/human_in_the_loop.md) capabilities.
-2. Pass configuration with `thread_id` to be able to resume the same conversation on future agent invocations.
+1. `checkpointer`를 사용하면 에이전트가 도구 호출 루프의 모든 단계에서 상태를 저장할 수 있습니다. 이를 통해 [단기 메모리](../how-tos/memory/add-memory.md#add-short-term-memory) 및 [human-in-the-loop](../concepts/human_in_the_loop.md) 기능이 가능합니다.
+2. `thread_id`가 포함된 구성을 전달하여 향후 에이전트 호출 시 동일한 대화를 재개할 수 있습니다.
    :::
 
 :::js
@@ -362,26 +362,26 @@ const nyResponse = await agent.invoke(
 );
 ```
 
-1. `checkpointSaver` allows the agent to store its state at every step in the tool calling loop. This enables [short-term memory](../how-tos/memory/add-memory.md#add-short-term-memory) and [human-in-the-loop](../concepts/human_in_the_loop.md) capabilities.
-2. Pass configuration with `thread_id` to be able to resume the same conversation on future agent invocations.
+1. `checkpointSaver`를 사용하면 에이전트가 도구 호출 루프의 모든 단계에서 상태를 저장할 수 있습니다. 이를 통해 [단기 메모리](../how-tos/memory/add-memory.md#add-short-term-memory) 및 [human-in-the-loop](../concepts/human_in_the_loop.md) 기능이 가능합니다.
+2. `thread_id`가 포함된 구성을 전달하여 향후 에이전트 호출 시 동일한 대화를 재개할 수 있습니다.
    :::
 
 :::python
-When you enable the checkpointer, it stores agent state at every step in the provided checkpointer database (or in memory, if using `InMemorySaver`).
+checkpointer를 활성화하면 제공된 checkpointer 데이터베이스(또는 `InMemorySaver`를 사용하는 경우 메모리)의 모든 단계에서 에이전트 state를 저장합니다.
 :::
 
 :::js
-When you enable the checkpointer, it stores agent state at every step in the provided checkpointer database (or in memory, if using `MemorySaver`).
+checkpointer를 활성화하면 제공된 checkpointer 데이터베이스(또는 `MemorySaver`를 사용하는 경우 메모리)의 모든 단계에서 에이전트 state를 저장합니다.
 :::
 
-Note that in the above example, when the agent is invoked the second time with the same `thread_id`, the original message history from the first conversation is automatically included, together with the new user input.
+위의 예제에서 에이전트가 동일한 `thread_id`로 두 번째로 호출될 때 첫 번째 대화의 원래 메시지 히스토리가 새 사용자 입력과 함께 자동으로 포함됩니다.
 
-For more information, see [Memory](../how-tos/memory/add-memory.md).
+자세한 내용은 [Memory](../how-tos/memory/add-memory.md)를 참조하세요.
 
 ## 6. Configure structured output
 
 :::python
-To produce structured responses conforming to a schema, use the `response_format` parameter. The schema can be defined with a `Pydantic` model or `TypedDict`. The result will be accessible via the `structured_response` field.
+스키마에 맞는 구조화된 응답을 생성하려면 `response_format` 매개변수를 사용합니다. 스키마는 `Pydantic` 모델 또는 `TypedDict`로 정의할 수 있습니다. 결과는 `structured_response` 필드를 통해 액세스할 수 있습니다.
 
 ```python
 from pydantic import BaseModel
@@ -405,14 +405,14 @@ response = agent.invoke(
 response["structured_response"]
 ```
 
-1.  When `response_format` is provided, a separate step is added at the end of the agent loop: agent message history is passed to an LLM with structured output to generate a structured response.
+1.  `response_format`이 제공되면 에이전트 루프 끝에 별도의 단계가 추가됩니다: 에이전트 메시지 히스토리가 구조화된 출력을 생성하기 위해 구조화된 출력이 있는 LLM에 전달됩니다.
 
-        To provide a system prompt to this LLM, use a tuple `(prompt, schema)`, e.g., `response_format=(prompt, WeatherResponse)`.
+        이 LLM에 시스템 프롬프트를 제공하려면 튜플 `(prompt, schema)`를 사용합니다. 예: `response_format=(prompt, WeatherResponse)`.
 
     :::
 
 :::js
-To produce structured responses conforming to a schema, use the `responseFormat` parameter. The schema can be defined with a `Zod` schema. The result will be accessible via the `structuredResponse` field.
+스키마에 맞는 구조화된 응답을 생성하려면 `responseFormat` 매개변수를 사용합니다. 스키마는 `Zod` 스키마로 정의할 수 있습니다. 결과는 `structuredResponse` 필드를 통해 액세스할 수 있습니다.
 
 ```typescript
 import { z } from "zod";
@@ -437,18 +437,18 @@ const response = await agent.invoke({
 response.structuredResponse;
 ```
 
-1.  When `responseFormat` is provided, a separate step is added at the end of the agent loop: agent message history is passed to an LLM with structured output to generate a structured response.
+1.  `responseFormat`이 제공되면 에이전트 루프 끝에 별도의 단계가 추가됩니다: 에이전트 메시지 히스토리가 구조화된 출력을 생성하기 위해 구조화된 출력이 있는 LLM에 전달됩니다.
 
-        To provide a system prompt to this LLM, use an object `{ prompt, schema }`, e.g., `responseFormat: { prompt, schema: WeatherResponse }`.
+        이 LLM에 시스템 프롬프트를 제공하려면 객체 `{ prompt, schema }`를 사용합니다. 예: `responseFormat: { prompt, schema: WeatherResponse }`.
 
     :::
 
 !!! Note "LLM post-processing"
 
-    Structured output requires an additional call to the LLM to format the response according to the schema.
+    구조화된 출력은 스키마에 따라 응답을 형식화하기 위해 LLM에 대한 추가 호출이 필요합니다.
 
 ## Next steps
 
-- [Deploy your agent locally](../tutorials/langgraph-platform/local-server.md)
-- [Learn more about prebuilt agents](../agents/overview.md)
+- [에이전트를 로컬에 배포](../tutorials/langgraph-platform/local-server.md)
+- [사전 구축된 에이전트에 대해 자세히 알아보기](../agents/overview.md)
 - [LangGraph Platform quickstart](../cloud/quick_start.md)

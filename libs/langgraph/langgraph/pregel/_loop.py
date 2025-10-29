@@ -250,8 +250,8 @@ class PregelLoop:
             self.stream = DuplexStream(self.stream, config[CONF][CONFIG_KEY_STREAM])
         scratchpad: PregelScratchpad | None = config[CONF].get(CONFIG_KEY_SCRATCHPAD)
         if isinstance(scratchpad, PregelScratchpad):
-            # if count is > 0, append to checkpoint_ns
-            # if count is 0, leave as is
+            # count가 > 0이면 checkpoint_ns에 추가
+            # count가 0이면 그대로 둠
             if cnt := scratchpad.subgraph_counter():
                 self.config = patch_configurable(
                     self.config,
@@ -298,14 +298,14 @@ class PregelLoop:
         self.prev_checkpoint_config = None
 
     def put_writes(self, task_id: str, writes: WritesT) -> None:
-        """Put writes for a task, to be read by the next tick."""
+        """다음 틱에서 읽을 작업에 대한 쓰기를 저장합니다."""
         if not writes:
             return
-        # deduplicate writes to special channels, last write wins
+        # 특수 채널에 대한 쓰기 중복 제거, 마지막 쓰기가 이김
         if all(w[0] in WRITES_IDX_MAP for w in writes):
             writes = list({w[0]: w for w in writes}.values())
         if task_id == NULL_TASK_ID:
-            # writes for the null task are accumulated
+            # null 작업에 대한 쓰기는 누적됩니다
             self.checkpoint_pending_writes = [
                 w
                 for w in self.checkpoint_pending_writes
@@ -315,12 +315,12 @@ class PregelLoop:
                 w[1:] for w in self.checkpoint_pending_writes if w[0] == task_id
             ] + list(writes)
         else:
-            # remove existing writes for this task
+            # 이 작업에 대한 기존 쓰기 제거
             self.checkpoint_pending_writes = [
                 w for w in self.checkpoint_pending_writes if w[0] != task_id
             ]
             writes_to_save = writes
-        # save writes
+        # 쓰기 저장
         self.checkpoint_pending_writes.extend((task_id, c, v) for c, v in writes)
         if self.durability != "exit" and self.checkpointer_put_writes is not None:
             config = patch_configurable(
@@ -351,7 +351,7 @@ class PregelLoop:
                     writes_to_save,
                     task_id,
                 )
-        # output writes
+        # 쓰기 출력
         if hasattr(self, "tasks"):
             self.output_writes(task_id, writes)
 
@@ -360,7 +360,7 @@ class PregelLoop:
             return
         if not self.checkpoint_pending_writes:
             return
-        # patch config
+        # config 패치
         config = patch_configurable(
             self.checkpoint_config,
             {
@@ -370,11 +370,11 @@ class PregelLoop:
                 CONFIG_KEY_CHECKPOINT_ID: self.checkpoint["id"],
             },
         )
-        # group by task id
+        # task id로 그룹화
         by_task = defaultdict(list)
         for task_id, channel, value in self.checkpoint_pending_writes:
             by_task[task_id].append((channel, value))
-        # submit writes to checkpointer
+        # checkpointer에 쓰기 제출
         for task_id, writes in by_task.items():
             if self.checkpointer_put_writes_accepts_task_path and hasattr(
                 self, "tasks"
@@ -398,7 +398,7 @@ class PregelLoop:
     def accept_push(
         self, task: PregelExecutableTask, write_idx: int, call: Call | None = None
     ) -> PregelExecutableTask | None:
-        """Accept a PUSH from a task, potentially returning a new task to start."""
+        """작업으로부터 PUSH를 수락하고, 잠재적으로 시작할 새 작업을 반환합니다."""
         checkpoint_id_bytes = binascii.unhexlify(self.checkpoint["id"].replace("-", ""))
         null_version = checkpoint_null_version(self.checkpoint)
         if pushed := cast(
@@ -424,32 +424,32 @@ class PregelLoop:
                 cache_policy=self.cache_policy,
             ),
         ):
-            # produce debug output
+            # 디버그 출력 생성
             self._emit("tasks", map_debug_tasks, [pushed])
-            # save the new task
+            # 새 작업 저장
             self.tasks[pushed.id] = pushed
-            # match any pending writes to the new task
+            # 새 작업에 대기 중인 쓰기 매칭
             if self.skip_done_tasks:
                 self._match_writes({pushed.id: pushed})
-            # return the new task, to be started if not run before
+            # 이전에 실행되지 않은 경우 시작할 새 작업 반환
             return pushed
 
     def tick(self) -> bool:
-        """Execute a single iteration of the Pregel loop.
+        """Pregel 루프의 단일 반복을 실행합니다.
 
         Args:
-            input_keys: The key(s) to read input from.
+            input_keys: 입력을 읽을 키입니다.
 
         Returns:
-            True if more iterations are needed.
+            더 많은 반복이 필요한 경우 True입니다.
         """
 
-        # check if iteration limit is reached
+        # 반복 제한에 도달했는지 확인
         if self.step > self.stop:
             self.status = "out_of_steps"
             return False
 
-        # prepare next tasks
+        # 다음 작업 준비
         self.tasks = prepare_next_tasks(
             self.checkpoint,
             self.checkpoint_pending_writes,
@@ -490,16 +490,16 @@ class PregelLoop:
                 self.output_keys,
             )
 
-        # if no more tasks, we're done
+        # 더 이상 작업이 없으면 완료
         if not self.tasks:
             self.status = "done"
             return False
 
-        # if there are pending writes from a previous loop, apply them
+        # 이전 루프에서 대기 중인 쓰기가 있으면 적용
         if self.skip_done_tasks and self.checkpoint_pending_writes:
             self._match_writes(self.tasks)
 
-        # before execution, check if we should interrupt
+        # 실행 전에 인터럽트해야 하는지 확인
         if self.interrupt_before and should_interrupt(
             self.checkpoint, self.interrupt_before, self.tasks.values()
         ):
@@ -509,7 +509,7 @@ class PregelLoop:
         # produce debug output
         self._emit("tasks", map_debug_tasks, self.tasks.values())
 
-        # print output for any tasks we applied previous writes to
+        # 이전 쓰기를 적용한 모든 작업에 대한 출력 인쇄
         for task in self.tasks.values():
             if task.writes:
                 self.output_writes(task.id, task.writes, cached=True)
@@ -517,9 +517,9 @@ class PregelLoop:
         return True
 
     def after_tick(self) -> None:
-        # finish superstep
+        # superstep 완료
         writes = [w for t in self.tasks.values() for w in t.writes]
-        # all tasks have finished
+        # 모든 작업이 완료됨
         self.updated_channels = apply_writes(
             self.checkpoint,
             self.channels,
@@ -527,7 +527,7 @@ class PregelLoop:
             self.checkpointer_get_next_version,
             self.trigger_to_nodes,
         )
-        # produce values output
+        # values 출력 생성
         if not self.updated_channels.isdisjoint(
             (self.output_keys,)
             if isinstance(self.output_keys, str)
@@ -536,19 +536,19 @@ class PregelLoop:
             self._emit(
                 "values", map_output_values, self.output_keys, writes, self.channels
             )
-        # clear pending writes
+        # 대기 중인 쓰기 지우기
         self.checkpoint_pending_writes.clear()
-        # "not skip_done_tasks" only applies to first tick after resuming
+        # "not skip_done_tasks"는 재개 후 첫 번째 틱에만 적용됩니다
         self.skip_done_tasks = True
-        # save checkpoint
+        # 체크포인트 저장
         self._put_checkpoint({"source": "loop"})
-        # after execution, check if we should interrupt
+        # 실행 후 인터럽트해야 하는지 확인
         if self.interrupt_after and should_interrupt(
             self.checkpoint, self.interrupt_after, self.tasks.values()
         ):
             self.status = "interrupt_after"
             raise GraphInterrupt()
-        # unset resuming flag
+        # resuming 플래그 해제
         self.config[CONF].pop(CONFIG_KEY_RESUMING, None)
 
     def match_cached_writes(self) -> Sequence[PregelExecutableTask]:
@@ -567,16 +567,16 @@ class PregelLoop:
                 task.writes.append((k, v))
 
     def _pending_interrupts(self) -> set[str]:
-        """Return the set of interrupt ids that are pending without corresponding resume values."""
-        # mapping of task ids to interrupt ids
+        """해당하는 resume 값이 없는 대기 중인 interrupt id 집합을 반환합니다."""
+        # task id에서 interrupt id로의 매핑
         pending_interrupts: dict[str, str] = {}
 
-        # set of resume task ids
+        # resume task id 집합
         pending_resumes: set[str] = set()
 
         for task_id, write_type, value in self.checkpoint_pending_writes:
             if write_type == INTERRUPT:
-                # interrupts is always a list, but there should only be one element
+                # interrupts는 항상 리스트이지만 하나의 요소만 있어야 합니다
                 pending_interrupts[task_id] = value[0].id
             elif write_type == RESUME:
                 pending_resumes.add(task_id)
@@ -587,7 +587,7 @@ class PregelLoop:
             if task_id in pending_interrupts
         }
 
-        # Keep only interrupts whose interrupt_id is not resumed
+        # interrupt_id가 재개되지 않은 인터럽트만 유지
         hanging_interrupts: set[str] = {
             interrupt_id
             for interrupt_id in pending_interrupts.values()
@@ -599,9 +599,9 @@ class PregelLoop:
     def _first(
         self, *, input_keys: str | Sequence[str], updated_channels: set[str] | None
     ) -> set[str] | None:
-        # resuming from previous checkpoint requires
-        # - finding a previous checkpoint
-        # - receiving None input (outer graph) or RESUMING flag (subgraph)
+        # 이전 체크포인트에서 재개하려면 다음이 필요합니다
+        # - 이전 체크포인트 찾기
+        # - None 입력(외부 그래프) 또는 RESUMING 플래그(서브그래프) 받기
         configurable = self.config.get(CONF, {})
         is_resuming = bool(self.checkpoint["channel_versions"]) and bool(
             configurable.get(
@@ -616,7 +616,7 @@ class PregelLoop:
             )
         )
 
-        # map command to writes
+        # 명령을 쓰기로 매핑
         if isinstance(self.input, Command):
             if (resume := self.input.resume) is not None:
                 if not self.checkpointer:
@@ -637,16 +637,16 @@ class PregelLoop:
                         )
 
             writes: defaultdict[str, list[tuple[str, Any]]] = defaultdict(list)
-            # group writes by task ID
+            # task ID별로 쓰기를 그룹화
             for tid, c, v in map_command(cmd=self.input):
                 if not (c == RESUME and resume_is_map):
                     writes[tid].append((c, v))
             if not writes and not resume_is_map:
                 raise EmptyInputError("Received empty Command input")
-            # save writes
+            # 쓰기 저장
             for tid, ws in writes.items():
                 self.put_writes(tid, ws)
-        # apply NULL writes
+        # NULL 쓰기 적용
         if null_writes := [
             w[1:] for w in self.checkpoint_pending_writes if w[0] == NULL_TASK_ID
         ]:
@@ -659,14 +659,14 @@ class PregelLoop:
             )
             if updated_channels is not None:
                 updated_channels.update(null_updated_channels)
-        # proceed past previous checkpoint
+        # 이전 체크포인트를 지나 계속 진행
         if is_resuming:
             self.checkpoint["versions_seen"].setdefault(INTERRUPT, {})
             for k in self.channels:
                 if k in self.checkpoint["channel_versions"]:
                     version = self.checkpoint["channel_versions"][k]
                     self.checkpoint["versions_seen"][INTERRUPT][k] = version
-            # produce values output
+            # values 출력 생성
             self._emit(
                 "values", map_output_values, self.output_keys, True, self.channels
             )
@@ -1023,7 +1023,7 @@ class SyncPregelLoop(PregelLoop, AbstractContextManager):
         return pushed
 
     def put_writes(self, task_id: str, writes: WritesT) -> None:
-        """Put writes for a task, to be read by the next tick."""
+        """다음 틱에서 읽을 작업에 대한 쓰기를 저장합니다."""
         super().put_writes(task_id, writes)
         if not writes or self.cache is None or not hasattr(self, "tasks"):
             return
@@ -1199,7 +1199,7 @@ class AsyncPregelLoop(PregelLoop, AbstractAsyncContextManager):
         return pushed
 
     def put_writes(self, task_id: str, writes: WritesT) -> None:
-        """Put writes for a task, to be read by the next tick."""
+        """다음 틱에서 읽을 작업에 대한 쓰기를 저장합니다."""
         super().put_writes(task_id, writes)
         if not writes or self.cache is None or not hasattr(self, "tasks"):
             return

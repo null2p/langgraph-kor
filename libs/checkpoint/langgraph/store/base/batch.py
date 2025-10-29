@@ -1,4 +1,4 @@
-"""Utilities for batching operations in a background task."""
+"""백그라운드 작업에서 작업을 배치 처리하기 위한 유틸리티입니다."""
 
 from __future__ import annotations
 
@@ -56,7 +56,7 @@ def _check_loop(func: F) -> F:
 
 
 class AsyncBatchedBaseStore(BaseStore):
-    """Efficiently batch operations in a background task."""
+    """백그라운드 작업에서 작업을 효율적으로 배치 처리합니다."""
 
     __slots__ = ("_loop", "_aqueue", "_task")
 
@@ -75,7 +75,7 @@ class AsyncBatchedBaseStore(BaseStore):
             pass
 
     def _ensure_task(self) -> None:
-        """Ensure the background processing loop is running."""
+        """백그라운드 처리 루프가 실행 중인지 확인합니다."""
         if self._task is None or self._task.done():
             self._task = self._loop.create_task(_run(self._aqueue, weakref.ref(self)))
 
@@ -281,14 +281,14 @@ class AsyncBatchedBaseStore(BaseStore):
 
 
 def _dedupe_ops(values: list[Op]) -> tuple[list[int] | None, list[Op]]:
-    """Dedupe operations while preserving order for results.
+    """결과의 순서를 유지하면서 작업을 중복 제거합니다.
 
     Args:
-        values: List of operations to dedupe
+        values: 중복 제거할 작업 목록
 
     Returns:
-        Tuple of (listen indices, deduped operations)
-        where listen indices map deduped operation results back to original positions
+        (listen 인덱스, 중복 제거된 작업)의 튜플
+        여기서 listen 인덱스는 중복 제거된 작업 결과를 원래 위치로 다시 매핑합니다
     """
     if len(values) <= 1:
         return None, list(values)
@@ -307,7 +307,7 @@ def _dedupe_ops(values: list[Op]) -> tuple[list[int] | None, list[Op]]:
         elif isinstance(op, PutOp):
             putkey = (op.namespace, op.key)
             if putkey in puts:
-                # Overwrite previous put
+                # 이전 put 덮어쓰기
                 ix = puts[putkey]
                 dedupped[ix] = op
                 listen.append(ix)
@@ -316,7 +316,7 @@ def _dedupe_ops(values: list[Op]) -> tuple[list[int] | None, list[Op]]:
                 listen.append(len(dedupped))
                 dedupped.append(op)
 
-        else:  # Any new ops will be treated regularly
+        else:  # 새로운 작업은 정기적으로 처리됩니다
             listen.append(len(dedupped))
             dedupped.append(op)
 
@@ -328,38 +328,38 @@ async def _run(
     store: weakref.ReferenceType[BaseStore],
 ) -> None:
     while item := await aqueue.get():
-        # check if store is still alive
+        # 저장소가 아직 살아있는지 확인
         if s := store():
             try:
-                # accumulate operations scheduled in same tick
+                # 동일한 틱에서 예약된 작업 누적
                 items = [item]
                 try:
                     while item := aqueue.get_nowait():
                         items.append(item)
                 except asyncio.QueueEmpty:
                     pass
-                # get the operations to run
+                # 실행할 작업 가져오기
                 futs = [item[0] for item in items]
                 values = [item[1] for item in items]
-                # action each operation
+                # 각 작업 실행
                 try:
                     listen, dedupped = _dedupe_ops(values)
                     results = await s.abatch(dedupped)
                     if listen is not None:
                         results = [results[ix] for ix in listen]
 
-                    # set the results of each operation
+                    # 각 작업의 결과 설정
                     for fut, result in zip(futs, results, strict=False):
-                        # guard against future being done (e.g. cancelled)
+                        # future가 완료되지 않았는지 확인 (예: 취소됨)
                         if not fut.done():
                             fut.set_result(result)
                 except Exception as e:
                     for fut in futs:
-                        # guard against future being done (e.g. cancelled)
+                        # future가 완료되지 않았는지 확인 (예: 취소됨)
                         if not fut.done():
                             fut.set_exception(e)
             finally:
-                # remove strong ref to store
+                # 저장소에 대한 강한 참조 제거
                 del s
         else:
             break

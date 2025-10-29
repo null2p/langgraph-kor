@@ -1,14 +1,14 @@
-# Use threads
+# 스레드 사용
 
-In this guide, we will show how to create, view, and inspect [threads](../../concepts/persistence.md#threads).
+이 가이드에서는 [스레드](../../concepts/persistence.md#threads)를 생성, 보기 및 검사하는 방법을 보여줍니다.
 
-## Create a thread
+## 스레드 생성
 
-To run your graph and the state persisted, you must first create a thread.
+그래프를 실행하고 상태를 지속하려면 먼저 스레드를 생성해야 합니다.
 
-### Empty thread
+### 빈 스레드
 
-To create a new thread, use the [LangGraph SDK](../../concepts/sdk.md) `create` method. See the [Python](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/#langgraph_sdk.client.ThreadsClient.create) and [JS](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#create_3) SDK reference docs for more information.
+새 스레드를 생성하려면 [LangGraph SDK](../../concepts/sdk.md) `create` 메서드를 사용하세요. 자세한 내용은 [Python](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/#langgraph_sdk.client.ThreadsClient.create) 및 [JS](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#create_3) SDK 레퍼런스 문서를 참조하세요.
 
 === "Python"
 
@@ -52,9 +52,9 @@ Output:
       "values": {}
     }
 
-### Copy thread
+### 스레드 복사
 
-Alternatively, if you already have a thread in your application whose state you wish to copy, you can use the `copy` method. This will create an independent thread whose history is identical to the original thread at the time of the operation. See the [Python](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/#langgraph_sdk.client.ThreadsClient.copy) and [JS](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#copy) SDK reference docs for more information.
+또는 애플리케이션에 상태를 복사하려는 스레드가 이미 있는 경우 `copy` 메서드를 사용할 수 있습니다. 이렇게 하면 작업 시점에 원본 스레드와 동일한 히스토리를 가진 독립적인 스레드가 생성됩니다. 자세한 내용은 [Python](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/#langgraph_sdk.client.ThreadsClient.copy) 및 [JS](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#copy) SDK 레퍼런스 문서를 참조하세요.
 
 === "Python"
 
@@ -75,9 +75,9 @@ Alternatively, if you already have a thread in your application whose state you 
     --header 'Content-Type: application/json'
     ```
 
-### Prepopulated State
+### 미리 채워진 상태
 
-Finally, you can create a thread with an arbitrary pre-defined state by providing a list of `supersteps` into the `create` method. The `supersteps` describe a list of a sequence of state updates. For example:
+마지막으로 `create` 메서드에 `supersteps` 목록을 제공하여 임의의 사전 정의된 상태로 스레드를 생성할 수 있습니다. `supersteps`는 상태 업데이트 시퀀스의 목록을 설명합니다. 예를 들어:
 
 === "Python"
 
@@ -235,9 +235,9 @@ Output:
 
 To list threads, use the [LangGraph SDK](../../concepts/sdk.md) `search` method. This will list the threads in the application that match the provided filters. See the [Python](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/#langgraph_sdk.client.ThreadsClient.search) and [JS](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#search_2) SDK reference docs for more information.
 
-#### Filter by thread status
+#### 스레드 상태로 필터링
 
-Use the `status` field to filter threads based on their status. Supported values are `idle`, `busy`, `interrupted`, and `error`. See [here](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/?h=thread+status#langgraph_sdk.auth.types.ThreadStatus) for information on each status. For example, to view `idle` threads:
+`status` 필드를 사용하여 상태에 따라 스레드를 필터링합니다. 지원되는 값은 `idle`, `busy`, `interrupted` 및 `error`입니다. 각 상태에 대한 정보는 [여기](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/?h=thread+status#langgraph_sdk.auth.types.ThreadStatus)를 참조하세요. 예를 들어 `idle` 스레드를 보려면:
 
 === "Python"
 
@@ -273,9 +273,9 @@ Output:
       }
     ]
 
-#### Filter by metadata
+#### 메타데이터로 필터링
 
-The `search` method allows you to filter on metadata:
+`search` 메서드를 사용하면 메타데이터를 기준으로 필터링할 수 있습니다:
 
 === "Python"
 
@@ -311,25 +311,25 @@ Output:
       }
     ]
 
-#### Sorting
+#### 정렬
 
-The SDK also supports sorting threads by `thread_id`, `status`, `created_at`, and `updated_at` using the `sort_by` and `sort_order` params.
+SDK는 `sort_by` 및 `sort_order` 파라미터를 사용하여 `thread_id`, `status`, `created_at` 및 `updated_at`로 스레드를 정렬하는 것도 지원합니다.
 
 ### LangGraph Platform UI
 
-You can also view threads in a deployment via the LangGraph Platform UI.
+LangGraph Platform UI를 통해 배포의 스레드를 볼 수도 있습니다.
 
-Inside your deployment, select the "Threads" tab. This will load a table of all of the threads in your deployment.
+배포 내에서 "Threads" 탭을 선택하세요. 배포의 모든 스레드 테이블이 로드됩니다.
 
-To filter by thread status, select a status in the top bar. To sort by a supported property, click on the arrow icon for the desired column.
+스레드 상태로 필터링하려면 상단 바에서 상태를 선택하세요. 지원되는 속성으로 정렬하려면 원하는 열의 화살표 아이콘을 클릭하세요.
 
 ## Inspect threads
 
 ### LangGraph SDK
 
-#### Get Thread
+#### 스레드 가져오기
 
-To view a specific thread given its `thread_id`, use the `get` method:
+`thread_id`가 주어진 특정 스레드를 보려면 `get` 메서드를 사용하세요:
 
 === "Python"
 
@@ -362,9 +362,9 @@ Output:
       'config': {'configurable': {}}
     }
 
-#### Inspect Thread State
+#### 스레드 상태 검사
 
-To view the current state of a given thread, use the `get_state` method:
+주어진 스레드의 현재 상태를 보려면 `get_state` 메서드를 사용하세요:
 
 === "Python"
 
@@ -449,7 +449,7 @@ Output:
         "parent_checkpoint_id": "1f02f46f-7308-616c-8000-1b158a9a6955"
     }
 
-Optionally, to view the state of a thread at a given checkpoint, simply pass in the checkpoint id (or the entire checkpoint object):
+선택적으로 주어진 체크포인트에서 스레드의 상태를 보려면 체크포인트 ID(또는 전체 체크포인트 객체)를 전달하면 됩니다:
 
 === "Python"
 
@@ -474,14 +474,14 @@ Optionally, to view the state of a thread at a given checkpoint, simply pass in 
     --header 'Content-Type: application/json'
     ```
 
-#### Inspect Full Thread History
+#### 전체 Thread 히스토리 검사
 
-To view a thread's history, use the `get_history` method. This returns a list of every state the thread experienced. For more information see the [Python](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/?h=thread+status#langgraph_sdk.client.ThreadsClient.get_history) and [JS](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#gethistory) reference docs.
+thread의 히스토리를 보려면 `get_history` 메서드를 사용하세요. thread가 경험한 모든 상태의 목록을 반환합니다. 자세한 내용은 [Python](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/?h=thread+status#langgraph_sdk.client.ThreadsClient.get_history) 및 [JS](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#gethistory) 레퍼런스 문서를 참조하세요.
 
 ### LangGraph Platform UI
 
-You can also view threads in a deployment via the LangGraph Platform UI.
+LangGraph Platform UI를 통해 배포의 thread를 볼 수도 있습니다.
 
-Inside your deployment, select the "Threads" tab. This will load a table of all of the threads in your deployment.
+배포 내에서 "Threads" 탭을 선택하세요. 배포의 모든 thread 테이블이 로드됩니다.
 
-Select a thread to inspect its current state. To view its full history and for further debugging, open the thread in [LangGraph Studio](../../concepts//langgraph_studio.md).
+thread를 선택하여 현재 상태를 검사하세요. 전체 히스토리를 보고 추가 디버깅을 하려면 [LangGraph Studio](../../concepts//langgraph_studio.md)에서 thread를 여세요.

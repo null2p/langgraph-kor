@@ -64,9 +64,9 @@ class _NodeWithRuntime(Protocol[NodeInputT_contra, ContextT]):
     ) -> Any: ...
 
 
-# TODO: we probably don't want to explicitly support the config / store signatures once
-# we move to adding a context arg. Maybe what we do is we add support for kwargs with param spec
-# this is purely for typing purposes though, so can easily change in the coming weeks.
+# TODO: context 인자를 추가하는 것으로 이동하면 config / store 서명을
+# 명시적으로 지원하지 않는 것이 좋을 것입니다. 아마도 param spec이 있는 kwargs에 대한 지원을 추가할 것입니다
+# 하지만 이것은 순전히 타이핑 목적이므로 앞으로 몇 주 안에 쉽게 변경할 수 있습니다.
 StateNode: TypeAlias = (
     _Node[NodeInputT]
     | _NodeWithConfig[NodeInputT]

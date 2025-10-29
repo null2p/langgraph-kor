@@ -1,14 +1,14 @@
-# Use the functional API
+# 함수형 API 사용
 
-The [**Functional API**](../concepts/functional_api.md) allows you to add LangGraph's key features — [persistence](../concepts/persistence.md), [memory](../how-tos/memory/add-memory.md), [human-in-the-loop](../concepts/human_in_the_loop.md), and [streaming](../concepts/streaming.md) — to your applications with minimal changes to your existing code.
+[**함수형 API**](../concepts/functional_api.md)를 사용하면 기존 코드를 최소한으로 변경하면서 LangGraph의 주요 기능인 [영속성](../concepts/persistence.md), [메모리](../how-tos/memory/add-memory.md), [human-in-the-loop](../concepts/human_in_the_loop.md) 및 [스트리밍](../concepts/streaming.md)을 애플리케이션에 추가할 수 있습니다.
 
 !!! tip
 
-    For conceptual information on the functional API, see [Functional API](../concepts/functional_api.md).
+    함수형 API에 대한 개념 정보는 [Functional API](../concepts/functional_api.md)를 참조하세요.
 
-## Creating a simple workflow
+## 간단한 워크플로우 생성
 
-When defining an `entrypoint`, input is restricted to the first argument of the function. To pass multiple inputs, you can use a dictionary.
+`entrypoint`를 정의할 때 입력은 함수의 첫 번째 인수로 제한됩니다. 여러 입력을 전달하려면 딕셔너리를 사용할 수 있습니다.
 
 :::python
 
@@ -186,9 +186,9 @@ await myWorkflow.invoke({ value: 1, anotherValue: 2 });
     ```
     :::
 
-## Parallel execution
+## 병렬 실행
 
-Tasks can be executed in parallel by invoking them concurrently and waiting for the results. This is useful for improving performance in IO bound tasks (e.g., calling APIs for LLMs).
+작업을 동시에 호출하고 결과를 기다려 병렬로 실행할 수 있습니다. 이는 IO 바운드 작업(예: LLM용 API 호출)의 성능을 개선하는 데 유용합니다.
 
 :::python
 
@@ -301,7 +301,7 @@ const graph = entrypoint(
 
     This example uses LangGraph's concurrency model to improve execution time, especially when tasks involve I/O like LLM completions.
 
-## Calling graphs
+## 그래프 호출
 
 The **Functional API** and the [**Graph API**](../concepts/low_level.md) can be used together in the same application as they share the same underlying runtime.
 
@@ -431,7 +431,7 @@ const someWorkflow = entrypoint(
     ```
     :::
 
-## Call other entrypoints
+## 다른 엔트리포인트 호출
 
 You can call other **entrypoints** from within an **entrypoint** or a **task**.
 
@@ -531,7 +531,7 @@ const myWorkflow = entrypoint(
     ```
     :::
 
-## Streaming
+## 스트리밍
 
 The **Functional API** uses the same streaming mechanism as the **Graph API**. Please
 read the [**streaming guide**](../concepts/streaming.md) section for more details.
@@ -647,7 +647,7 @@ updates: {"main": 5}
 
 :::
 
-## Retry policy
+## 재시도 정책
 
 :::python
 
@@ -751,7 +751,7 @@ await main.invoke({ any_input: "foobar" }, config);
 
 :::
 
-## Caching Tasks
+## 작업 캐싱
 
 :::python
 
@@ -831,7 +831,7 @@ for await (const chunk of await main.stream(
 1. `ttl` is specified in seconds. The cache will be invalidated after this time.
    :::
 
-## Resuming after an error
+## 오류 후 재개
 
 :::python
 
@@ -1356,7 +1356,7 @@ const agent = entrypoint(
 
 :::
 
-## Short-term memory
+## 단기 메모리
 
 Short-term memory allows storing information across different **invocations** of the same **thread id**. See [short-term memory](../concepts/functional_api.md#short-term-memory) for more details.
 
@@ -1741,7 +1741,7 @@ for await (const chunk of await workflow.stream([inputMessage2], {
 
      [How to add thread-level persistence (functional API)](./persistence-functional.ipynb): Shows how to add thread-level persistence to a functional API workflow and implements a simple chatbot.
 
-## Long-term memory
+## 장기 메모리
 
 [long-term memory](../concepts/memory.md#long-term-memory) allows storing information across different **thread ids**. This could be useful for learning information about a given user in one conversation and using it in another.
 
@@ -1749,16 +1749,16 @@ for await (const chunk of await workflow.stream([inputMessage2], {
 
     [How to add cross-thread persistence (functional API)](./cross-thread-persistence-functional.ipynb): Shows how to add cross-thread persistence to a functional API workflow and implements a simple chatbot.
 
-## Workflows
+## 워크플로
 
 - [Workflows and agent](../tutorials/workflows.md) guide for more examples of how to build workflows using the Functional API.
 
-## Agents
+## 에이전트
 
 - [How to create an agent from scratch (Functional API)](./react-agent-from-scratch-functional.ipynb): Shows how to create a simple agent from scratch using the functional API.
 - [How to build a multi-agent network](./multi-agent-network-functional.ipynb): Shows how to build a multi-agent network using the functional API.
 - [How to add multi-turn conversation in a multi-agent application (functional API)](./multi-agent-multi-turn-convo-functional.ipynb): allow an end-user to engage in a multi-turn conversation with one or more agents.
 
-## Integrate with other libraries
+## 다른 라이브러리와 통합
 
 - [Add LangGraph's features to other frameworks using the functional API](./autogen-integration-functional.ipynb): Add LangGraph features like persistence, memory and streaming to other agent frameworks that do not provide them out of the box.

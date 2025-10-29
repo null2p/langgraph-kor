@@ -44,7 +44,7 @@ def _get_branch_path_input_schema(
     | Runnable[Any, Hashable | Sequence[Hashable]],
 ) -> type[Any] | None:
     input = None
-    # detect input schema annotation in the branch callable
+    # 분기 callable에서 입력 스키마 주석 감지
     try:
         callable_: (
             Callable[..., Hashable | Sequence[Hashable]]
@@ -92,7 +92,7 @@ class BranchSpec(NamedTuple):
         path_map: dict[Hashable, str] | list[str] | None,
         infer_schema: bool = False,
     ) -> BranchSpec:
-        # coerce path_map to a dictionary
+        # path_map을 딕셔너리로 변환
         path_map_: dict[Hashable, str] | None = None
         try:
             if isinstance(path_map, dict):
@@ -100,23 +100,23 @@ class BranchSpec(NamedTuple):
             elif isinstance(path_map, list):
                 path_map_ = {name: name for name in path_map}
             else:
-                # find func
+                # func 찾기
                 func: Callable | None = None
                 if isinstance(path, (RunnableCallable, RunnableLambda)):
                     func = path.func or path.afunc
                 if func is not None:
-                    # find callable method
+                    # callable 메서드 찾기
                     if (cal := getattr(path, "__call__", None)) and ismethod(cal):
                         func = cal
-                    # get the return type
+                    # 반환 타입 가져오기
                     if rtn_type := get_type_hints(func).get("return"):
                         if get_origin(rtn_type) is Literal:
                             path_map_ = {name: name for name in get_args(rtn_type)}
         except Exception:
             pass
-        # infer input schema
+        # 입력 스키마 추론
         input_schema = _get_branch_path_input_schema(path) if infer_schema else None
-        # create branch
+        # 분기 생성
         return cls(path=path, ends=path_map_, input_schema=input_schema)
 
     def run(
@@ -153,8 +153,8 @@ class BranchSpec(NamedTuple):
     ) -> Runnable:
         if reader:
             value = reader(config)
-            # passthrough additional keys from node to branch
-            # only doable when using dict states
+            # 노드에서 분기로 추가 키 전달
+            # 딕셔너리 상태를 사용할 때만 가능
             if (
                 isinstance(value, dict)
                 and isinstance(input, dict)
@@ -176,8 +176,8 @@ class BranchSpec(NamedTuple):
     ) -> Runnable:
         if reader:
             value = reader(config)
-            # passthrough additional keys from node to branch
-            # only doable when using dict states
+            # 노드에서 분기로 추가 키 전달
+            # 딕셔너리 상태를 사용할 때만 가능
             if (
                 isinstance(value, dict)
                 and isinstance(input, dict)

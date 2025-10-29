@@ -28,7 +28,7 @@ def run_with_retry(
     retry_policy: Sequence[RetryPolicy] | None,
     configurable: dict[str, Any] | None = None,
 ) -> None:
-    """Run a task with retries."""
+    """재시도와 함께 작업을 실행합니다."""
     retry_policy = task.retry_policy or retry_policy
     attempts = 0
     config = task.config

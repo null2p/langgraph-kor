@@ -93,7 +93,7 @@ def store(request) -> PostgresStore:
 
 
 def test_batch_order(store: PostgresStore) -> None:
-    # Setup test data
+    # 테스트 데이터 설정
     store.put(("test", "foo"), "key1", {"data": "value1"})
     store.put(("test", "bar"), "key2", {"data": "value2"})
 
@@ -113,14 +113,14 @@ def test_batch_order(store: PostgresStore) -> None:
     assert isinstance(results[0].value, dict)
     assert results[0].value == {"data": "value1"}
     assert results[0].key == "key1"
-    assert results[1] is None  # Put operation returns None
+    assert results[1] is None  # Put 작업은 None을 반환합니다
     assert isinstance(results[2], list)
     assert len(results[2]) == 1
     assert isinstance(results[3], list)
-    assert len(results[3]) > 0  # Should contain at least our test namespaces
-    assert results[4] is None  # Non-existent key returns None
+    assert len(results[3]) > 0  # 최소한 우리 테스트 네임스페이스들을 포함해야 함
+    assert results[4] is None  # 존재하지 않는 키 returns None
 
-    # Test reordered operations
+    # 재정렬된 작업 테스트
     ops_reordered = [
         SearchOp(namespace_prefix=("test",), filter=None, limit=5, offset=0),
         GetOp(namespace=("test", "bar"), key="key2"),
@@ -132,27 +132,27 @@ def test_batch_order(store: PostgresStore) -> None:
     results_reordered = store.batch(ops_reordered)
     assert len(results_reordered) == 5
     assert isinstance(results_reordered[0], list)
-    assert len(results_reordered[0]) >= 2  # Should find at least our two test items
+    assert len(results_reordered[0]) >= 2  # 최소한 우리의 두 테스트 아이템을 찾아야 함
     assert isinstance(results_reordered[1], Item)
     assert results_reordered[1].value == {"data": "value2"}
     assert results_reordered[1].key == "key2"
     assert isinstance(results_reordered[2], list)
     assert len(results_reordered[2]) > 0
-    assert results_reordered[3] is None  # Put operation returns None
+    assert results_reordered[3] is None  # Put 작업은 None을 반환합니다
     assert isinstance(results_reordered[4], Item)
     assert results_reordered[4].value == {"data": "value1"}
     assert results_reordered[4].key == "key1"
 
 
 def test_batch_get_ops(store: PostgresStore) -> None:
-    # Setup test data
+    # 테스트 데이터 설정
     store.put(("test",), "key1", {"data": "value1"})
     store.put(("test",), "key2", {"data": "value2"})
 
     ops = [
         GetOp(namespace=("test",), key="key1"),
         GetOp(namespace=("test",), key="key2"),
-        GetOp(namespace=("test",), key="key3"),  # Non-existent key
+        GetOp(namespace=("test",), key="key3"),  # 존재하지 않는 키
     ]
 
     results = store.batch(ops)
@@ -169,14 +169,14 @@ def test_batch_put_ops(store: PostgresStore) -> None:
     ops = [
         PutOp(namespace=("test",), key="key1", value={"data": "value1"}),
         PutOp(namespace=("test",), key="key2", value={"data": "value2"}),
-        PutOp(namespace=("test",), key="key3", value=None),  # Delete operation
+        PutOp(namespace=("test",), key="key3", value=None),  # 삭제 작업
     ]
 
     results = store.batch(ops)
     assert len(results) == 3
     assert all(result is None for result in results)
 
-    # Verify the puts worked
+    # put이 제대로 작동했는지 확인
     item1 = store.get(("test",), "key1")
     item2 = store.get(("test",), "key2")
     item3 = store.get(("test",), "key3")
@@ -187,7 +187,7 @@ def test_batch_put_ops(store: PostgresStore) -> None:
 
 
 def test_batch_search_ops(store: PostgresStore) -> None:
-    # Setup test data
+    # 테스트 데이터 설정
     test_data = [
         (("test", "foo"), "key1", {"data": "value1", "tag": "a"}),
         (("test", "bar"), "key2", {"data": "value2", "tag": "a"}),
@@ -205,20 +205,20 @@ def test_batch_search_ops(store: PostgresStore) -> None:
     results = store.batch(ops)
     assert len(results) == 3
 
-    # First search should find items with tag "a"
+    # 첫 번째 검색은 태그가 있는 항목을 찾아야 함 "a"
     assert len(results[0]) == 2
     assert all(item.value["tag"] == "a" for item in results[0])
 
-    # Second search should return first 2 items
+    # 두 번째 검색은 첫 2개 항목을 반환해야 함
     assert len(results[1]) == 2
 
-    # Third search should only find items in test/foo namespace
+    # 세 번째 검색은 항목만 찾아야 함 in test/foo namespace
     assert len(results[2]) == 1
     assert results[2][0].namespace == ("test", "foo")
 
 
 def test_batch_list_namespaces_ops(store: PostgresStore) -> None:
-    # Setup test data with various namespaces
+    # 테스트 데이터 설정 with various namespaces
     test_data = [
         (("test", "documents", "public"), "doc1", {"content": "public doc"}),
         (("test", "documents", "private"), "doc2", {"content": "private doc"}),
@@ -242,13 +242,13 @@ def test_batch_list_namespaces_ops(store: PostgresStore) -> None:
     results = store.batch(ops)
     assert len(results) == 3
 
-    # First operation should list all namespaces
+    # 첫 번째 작업은 모든 네임스페이스를 나열해야 함
     assert len(results[0]) == len(test_data)
 
-    # Second operation should only return namespaces up to depth 2
+    # 두 번째 작업은 깊이 2까지의 네임스페이스만 반환해야 함
     assert all(len(ns) <= 2 for ns in results[1])
 
-    # Third operation should only return namespaces ending with "public"
+    # 세 번째 작업은 다음으로 끝나는 네임스페이스만 반환해야 함 "public"
     assert all(ns[-1] == "public" for ns in results[2])
 
 
@@ -265,7 +265,7 @@ def test_basic_store_ops(store) -> None:
     assert item.key == item_id
     assert item.value == item_value
 
-    # Test update
+    # 업데이트 테스트
     updated_value = {"title": "Updated Document", "content": "Hello, Updated!"}
     store.put(namespace, item_id, updated_value)
     updated_item = store.get(namespace, item_id)
@@ -273,19 +273,19 @@ def test_basic_store_ops(store) -> None:
     assert updated_item.value == updated_value
     assert updated_item.updated_at > item.updated_at
 
-    # Test get from non-existent namespace
+    # 존재하지 않는 네임스페이스에서 가져오기 테스트
     different_namespace = ("test", "other_documents")
     item_in_different_namespace = store.get(different_namespace, item_id)
     assert item_in_different_namespace is None
 
-    # Test delete
+    # 삭제 테스트
     store.delete(namespace, item_id)
     deleted_item = store.get(namespace, item_id)
     assert deleted_item is None
 
 
 def test_list_namespaces(store) -> None:
-    # Create test data with various namespaces
+    # 테스트 데이터 생성 with various namespaces
     test_namespaces = [
         ("test", "documents", "public"),
         ("test", "documents", "private"),
@@ -295,39 +295,39 @@ def test_list_namespaces(store) -> None:
         ("prod", "documents", "private"),
     ]
 
-    # Insert test data
+    # 테스트 데이터 삽입
     for namespace in test_namespaces:
         store.put(namespace, "dummy", {"content": "dummy"})
 
-    # Test listing with various filters
+    # 다양한 필터로 목록 조회 테스트
     all_namespaces = store.list_namespaces()
     assert len(all_namespaces) == len(test_namespaces)
 
-    # Test prefix filtering
+    # 접두사 필터링 테스트
     test_prefix_namespaces = store.list_namespaces(prefix=["test"])
     assert len(test_prefix_namespaces) == 4
     assert all(ns[0] == "test" for ns in test_prefix_namespaces)
 
-    # Test suffix filtering
+    # 접미사 필터링 테스트
     public_namespaces = store.list_namespaces(suffix=["public"])
     assert len(public_namespaces) == 3
     assert all(ns[-1] == "public" for ns in public_namespaces)
 
-    # Test max depth
+    # 최대 깊이 테스트
     depth_2_namespaces = store.list_namespaces(max_depth=2)
     assert all(len(ns) <= 2 for ns in depth_2_namespaces)
 
-    # Test pagination
+    # 페이지네이션 테스트
     paginated_namespaces = store.list_namespaces(limit=3)
     assert len(paginated_namespaces) == 3
 
-    # Cleanup
+    # 정리
     for namespace in test_namespaces:
         store.delete(namespace, "dummy")
 
 
 def test_search(store) -> None:
-    # Create test data
+    # 테스트 데이터 생성
     test_data = [
         (
             ("test", "docs"),
@@ -349,28 +349,28 @@ def test_search(store) -> None:
     for namespace, key, value in test_data:
         store.put(namespace, key, value)
 
-    # Test basic search
+    # 기본 검색 테스트
     all_items = store.search(["test"])
     assert len(all_items) == 3
 
-    # Test namespace filtering
+    # 네임스페이스 필터링 테스트
     docs_items = store.search(["test", "docs"])
     assert len(docs_items) == 2
     assert all(item.namespace == ("test", "docs") for item in docs_items)
 
-    # Test value filtering
+    # 값 필터링 테스트
     alice_items = store.search(["test"], filter={"author": "Alice"})
     assert len(alice_items) == 2
     assert all(item.value["author"] == "Alice" for item in alice_items)
 
-    # Test pagination
+    # 페이지네이션 테스트
     paginated_items = store.search(["test"], limit=2)
     assert len(paginated_items) == 2
 
     offset_items = store.search(["test"], offset=2)
     assert len(offset_items) == 1
 
-    # Cleanup
+    # 정리
     for namespace, key, _ in test_data:
         store.delete(namespace, key)
 
@@ -383,7 +383,7 @@ def _create_vector_store(
     text_fields: list[str] | None = None,
     enable_ttl: bool = True,
 ) -> PostgresStore:
-    """Create a store with vector search enabled."""
+    """벡터 검색이 활성화된 저장소를 생성합니다."""
     database = f"test_{uuid4().hex[:16]}"
     uri_parts = DEFAULT_URI.split("/")
     uri_base = "/".join(uri_parts[:-1])
@@ -415,9 +415,9 @@ def _create_vector_store(
         ) as store:
             store.setup()
             with store._cursor() as cur:
-                # drop the migration index
+                # 마이그레이션 인덱스 삭제
                 cur.execute("DROP TABLE IF EXISTS store_migrations")
-            store.setup()  # Will fail if migrations aren't idempotent
+            store.setup()  # 마이그레이션이 멱등성이 아니면 실패함
             yield store
     finally:
         with Connection.connect(admin_conn_string, autocommit=True) as conn:
@@ -443,7 +443,7 @@ def vector_store(
     request,
     fake_embeddings: Embeddings,
 ) -> PostgresStore:
-    """Create a store with vector search enabled."""
+    """벡터 검색이 활성화된 저장소를 생성합니다."""
     vector_type, distance_type, enable_ttl = request.param
     with _create_vector_store(
         vector_type, distance_type, fake_embeddings, enable_ttl=enable_ttl
@@ -454,15 +454,15 @@ def vector_store(
 def test_vector_store_initialization(
     vector_store: PostgresStore, fake_embeddings: CharacterEmbeddings
 ) -> None:
-    """Test store initialization with embedding config."""
-    # Store should be initialized with embedding config
+    """임베딩 설정으로 저장소 초기화를 테스트합니다."""
+    # 저장소는 임베딩 설정으로 초기화되어야 함
     assert vector_store.index_config is not None
     assert vector_store.index_config["dims"] == fake_embeddings.dims
     assert vector_store.index_config["embed"] == fake_embeddings
 
 
 def test_vector_insert_with_auto_embedding(vector_store: PostgresStore) -> None:
-    """Test inserting items that get auto-embedded."""
+    """자동으로 임베딩되는 항목 삽입을 테스트합니다."""
     docs = [
         ("doc1", {"text": "short text"}),
         ("doc2", {"text": "longer text document"}),
@@ -484,7 +484,7 @@ def test_vector_insert_with_auto_embedding(vector_store: PostgresStore) -> None:
 
 
 def test_vector_update_with_embedding(vector_store: PostgresStore) -> None:
-    """Test that updating items properly updates their embeddings."""
+    """항목 업데이트 시 임베딩이 올바르게 업데이트되는지 테스트합니다."""
     vector_store.put(("test",), "doc1", {"text": "zany zebra Xerxes"})
     vector_store.put(("test",), "doc2", {"text": "something about dogs"})
     vector_store.put(("test",), "doc3", {"text": "text about birds"})
@@ -505,7 +505,7 @@ def test_vector_update_with_embedding(vector_store: PostgresStore) -> None:
         if r.key == "doc1":
             assert r.score > after_score
 
-    # Don't index this one
+    # 이것은 인덱싱하지 않음
     vector_store.put(("test",), "doc4", {"text": "new text about dogs"}, index=False)
     results_new = vector_store.search(("test",), query="new text about dogs", limit=3)
     assert not any(r.key == "doc4" for r in results_new)
@@ -515,8 +515,8 @@ def test_vector_update_with_embedding(vector_store: PostgresStore) -> None:
 def test_vector_search_with_filters(
     vector_store: PostgresStore, refresh_ttl: bool
 ) -> None:
-    """Test combining vector search with filters."""
-    # Insert test documents
+    """벡터 검색과 필터를 결합하여 테스트합니다."""
+    # 테스트 문서 삽입
     docs = [
         ("doc1", {"text": "red apple", "color": "red", "score": 4.5}),
         ("doc2", {"text": "red car", "color": "red", "score": 3.0}),
@@ -548,7 +548,7 @@ def test_vector_search_with_filters(
     assert len(results) == 3
     assert results[0].key == "doc4"
 
-    # Multiple filters
+    # 여러 필터
     results = vector_store.search(
         ("test",), query="apple", filter={"score": {"$gte": 4.0}, "color": "green"}
     )
@@ -557,12 +557,12 @@ def test_vector_search_with_filters(
 
 
 def test_vector_search_pagination(vector_store: PostgresStore) -> None:
-    """Test pagination with vector search."""
-    # Insert multiple similar documents
+    """벡터 검색의 페이지네이션을 테스트합니다."""
+    # 여러 유사한 문서 삽입
     for i in range(5):
         vector_store.put(("test",), f"doc{i}", {"text": f"test document number {i}"})
 
-    # Test with different page sizes
+    # 다양한 페이지 크기로 테스트
     results_page1 = vector_store.search(("test",), query="test", limit=2)
     results_page2 = vector_store.search(("test",), query="test", limit=2, offset=2)
 
@@ -570,13 +570,13 @@ def test_vector_search_pagination(vector_store: PostgresStore) -> None:
     assert len(results_page2) == 2
     assert results_page1[0].key != results_page2[0].key
 
-    # Get all results
+    # 모든 결과 가져오기
     all_results = vector_store.search(("test",), query="test", limit=10)
     assert len(all_results) == 5
 
 
 def test_vector_search_edge_cases(vector_store: PostgresStore) -> None:
-    """Test edge cases in vector search."""
+    """벡터 검색의 엣지 케이스를 테스트합니다."""
     vector_store.put(("test",), "doc1", {"text": "test document"})
 
     results = vector_store.search(("test",), query="")
@@ -609,21 +609,21 @@ def test_embed_with_path_sync(
     vector_type: str,
     distance_type: str,
 ) -> None:
-    """Test vector search with specific text fields in Postgres store."""
+    """Postgres 저장소에서 특정 텍스트 필드를 사용한 벡터 검색을 테스트합니다."""
     with _create_vector_store(
         vector_type,
         distance_type,
         fake_embeddings,
         text_fields=["key0", "key1", "key3"],
     ) as store:
-        # This will have 2 vectors representing it
+        # 이것은 2개의 벡터로 표현됩니다
         doc1 = {
-            # Omit key0 - check it doesn't raise an error
+            # key0 생략 - 오류가 발생하지 않는지 확인
             "key1": "xxx",
             "key2": "yyy",
             "key3": "zzz",
         }
-        # This will have 3 vectors representing it
+        # 이것은 3개의 벡터로 표현됩니다
         doc2 = {
             "key0": "uuu",
             "key1": "vvv",
@@ -641,7 +641,7 @@ def test_embed_with_path_sync(
         bscore = results[1].score
         assert ascore == pytest.approx(bscore, abs=1e-3)
 
-        # ~Only match doc2
+        # ~doc2만 일치
         results = store.search(("test",), query="uuu")
         assert len(results) == 2
         assert results[0].key != results[1].key
@@ -649,7 +649,7 @@ def test_embed_with_path_sync(
         assert results[0].score > results[1].score
         assert ascore == pytest.approx(results[0].score, abs=1e-3)
 
-        # ~Only match doc1
+        # ~doc1만 일치
         results = store.search(("test",), query="zzz")
         assert len(results) == 2
         assert results[0].key != results[1].key
@@ -657,7 +657,7 @@ def test_embed_with_path_sync(
         assert results[0].score > results[1].score
         assert ascore == pytest.approx(results[0].score, abs=1e-3)
 
-        # Un-indexed - will have low results for both. Not zero (because we're projecting)
+        # 인덱싱되지 않음 - 둘 다 낮은 결과를 가짐. Not zero (because we're projecting)
         # but less than the above.
         results = store.search(("test",), query="www")
         assert len(results) == 2
@@ -681,13 +681,13 @@ def test_embed_with_path_operation_config(
     vector_type: str,
     distance_type: str,
 ) -> None:
-    """Test operation-level field configuration for vector search."""
+    """벡터 검색을 위한 작업 수준의 필드 설정을 테스트합니다."""
 
     with _create_vector_store(
         vector_type,
         distance_type,
         fake_embeddings,
-        text_fields=["key17"],  # Default fields that won't match our test data
+        text_fields=["key17"],  # 테스트 데이터와 일치하지 않는 기본 필드
     ) as store:
         doc3 = {
             "key0": "aaa",
@@ -697,7 +697,7 @@ def test_embed_with_path_operation_config(
         }
         doc4 = {
             "key0": "eee",
-            "key1": "bbb",  # Same as doc3.key1
+            "key1": "bbb",  # doc3.key1과 동일
             "key2": "fff",
             "key3": "ggg",
         }
@@ -725,9 +725,9 @@ def test_embed_with_path_operation_config(
         assert len(results) == 2
         assert all(
             r.score < 0.9 for r in results
-        )  # Unindexed field should have low scores
+        )  # 인덱싱되지 않은 필드는 낮은 점수를 가져야 함
 
-        # Test index=False behavior
+        # index=False 동작 테스트
         doc5 = {
             "key0": "hhh",
             "key1": "iii",
@@ -739,8 +739,8 @@ def test_embed_with_path_operation_config(
         assert any(r.key == "doc5" for r in results)
 
         results = store.search(("test",), query="hhh")
-        # TODO: We don't currently fill in additional results if there are not enough
-        # returned during vector search.
+        # TODO: 현재 결과가 충분하지 않은 경우 추가 결과를 채우지 않습니다
+        # 벡터 검색 중에 반환됩니다.
         # assert len(results) == 3
         # doc5_result = next(r for r in results if r.key == "doc5")
         # assert doc5_result.score is None
@@ -748,8 +748,8 @@ def test_embed_with_path_operation_config(
 
 def _cosine_similarity(X: list[float], Y: list[list[float]]) -> list[float]:
     """
-    Compute cosine similarity between a vector X and a matrix Y.
-    Lazy import numpy for efficiency.
+    벡터 X와 행렬 Y 간의 코사인 유사도를 계산합니다.
+    효율성을 위해 numpy를 지연 임포트합니다.
     """
 
     similarities = []
@@ -765,8 +765,8 @@ def _cosine_similarity(X: list[float], Y: list[list[float]]) -> list[float]:
 
 def _inner_product(X: list[float], Y: list[list[float]]) -> list[float]:
     """
-    Compute inner product between a vector X and a matrix Y.
-    Lazy import numpy for efficiency.
+    벡터 X와 행렬 Y 간의 내적을 계산합니다.
+    효율성을 위해 numpy를 지연 임포트합니다.
     """
 
     similarities = []
@@ -779,8 +779,8 @@ def _inner_product(X: list[float], Y: list[list[float]]) -> list[float]:
 
 def _neg_l2_distance(X: list[float], Y: list[list[float]]) -> list[float]:
     """
-    Compute l2 distance between a vector X and a matrix Y.
-    Lazy import numpy for efficiency.
+    벡터 X와 행렬 Y 간의 L2 거리를 계산합니다.
+    효율성을 위해 numpy를 지연 임포트합니다.
     """
 
     similarities = []
@@ -806,7 +806,7 @@ def test_scores(
     distance_type: str,
     query: str,
 ) -> None:
-    """Test operation-level field configuration for vector search."""
+    """벡터 검색을 위한 작업 수준의 필드 설정을 테스트합니다."""
     with _create_vector_store(
         vector_type,
         distance_type,
@@ -840,7 +840,7 @@ def test_nonnull_migrations() -> None:
 
 
 def test_store_ttl(store):
-    # Assumes a TTL of 1 minute = 60 seconds
+    # TTL이 1분 = 60초라고 가정
     ns = ("foo",)
     store.put(
         ns,
@@ -858,7 +858,7 @@ def test_store_ttl(store):
     res = store.get(ns, key="item1", refresh_ttl=False)
     assert res is not None
     time.sleep(TTL_SECONDS - 1)
-    # Now has been (TTL_SECONDS-2)*2 > TTL_SECONDS + TTL_SECONDS/2
+    # 이제 경과 시간이 (TTL_SECONDS-2)*2 > TTL_SECONDS + TTL_SECONDS/2
     res = store.search(ns, query="bar", refresh_ttl=False)
     assert len(res) == 0
 
@@ -878,15 +878,15 @@ def test_non_ascii(
     vector_type: str,
     distance_type: str,
 ) -> None:
-    """Test support for non-ascii characters"""
+    """ASCII가 아닌 문자 지원을 테스트합니다"""
     with _create_vector_store(vector_type, distance_type, fake_embeddings) as store:
-        store.put(("user_123", "memories"), "1", {"text": "这是中文"})  # Chinese
+        store.put(("user_123", "memories"), "1", {"text": "这是中文"})  # 중국어
         store.put(
             ("user_123", "memories"), "2", {"text": "これは日本語です"}
-        )  # Japanese
-        store.put(("user_123", "memories"), "3", {"text": "이건 한국어야"})  # Korean
-        store.put(("user_123", "memories"), "4", {"text": "Это русский"})  # Russian
-        store.put(("user_123", "memories"), "5", {"text": "यह रूसी है"})  # Hindi
+        )  # 일본어
+        store.put(("user_123", "memories"), "3", {"text": "이건 한국어야"})  # 한국어
+        store.put(("user_123", "memories"), "4", {"text": "Это русский"})  # 러시아어
+        store.put(("user_123", "memories"), "5", {"text": "यह रूसी है"})  # 힌디어
 
         result1 = store.search(("user_123", "memories"), query="这是中文")
         result2 = store.search(("user_123", "memories"), query="これは日本語です")

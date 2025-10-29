@@ -1,48 +1,48 @@
-# Run application
+# 애플리케이션 실행
 
-!!!info  "Prerequisites"
-    - [Running agents](../../agents/run_agents.md#running-agents)
+!!!info  "사전 요구사항"
+    - [에이전트 실행하기](../../agents/run_agents.md#running-agents)
 
-This guide shows how to submit a [run](../../concepts/assistants.md#execution) to your application.
+이 가이드는 애플리케이션에 [run](../../concepts/assistants.md#execution)을 제출하는 방법을 보여줍니다.
 
-## Graph mode
+## 그래프 모드
 
-### Specify input
-First define the input to your graph with in the "Input" section on the left side of the page, below the graph interface.
+### 입력 지정
+먼저 페이지 왼쪽의 그래프 인터페이스 아래 "Input" 섹션에서 그래프에 대한 입력을 정의합니다.
 
-Studio will attempt to render a form for your input based on the graph's defined [state schema](../../concepts/low_level.md/#schema). To disable this, click the "View Raw" button, which will present you with a JSON editor.
+Studio는 그래프에 정의된 [state schema](../../concepts/low_level.md/#schema)를 기반으로 입력 폼을 렌더링하려고 시도합니다. 이를 비활성화하려면 "View Raw" 버튼을 클릭하면 JSON 에디터가 제공됩니다.
 
-Click the up/down arrows at the top of the "Input" section to toggle through and use previously submitted inputs.
+"Input" 섹션 상단의 위/아래 화살표를 클릭하면 이전에 제출한 입력들을 토글하고 사용할 수 있습니다.
 
-### Run settings
+### Run 설정
 
 #### Assistant
 
-To specify the [assistant](../../concepts/assistants.md) that is used for the run click the settings button in the bottom left corner. If an assistant is currently selected the button will also list the assistant name. If no assistant is selected it will say "Manage Assistants".
+Run에 사용할 [assistant](../../concepts/assistants.md)를 지정하려면 왼쪽 하단의 설정 버튼을 클릭합니다. assistant가 현재 선택되어 있으면 버튼에 assistant 이름도 표시됩니다. assistant가 선택되지 않은 경우 "Manage Assistants"라고 표시됩니다.
 
-Select the assistant to run and click the "Active" toggle at the top of the modal to activate it. [See here](./studio/manage_assistants.md) for more information on managing assistants.
+실행할 assistant를 선택하고 모달 상단의 "Active" 토글을 클릭하여 활성화합니다. assistant 관리에 대한 자세한 내용은 [여기](./studio/manage_assistants.md)를 참조하세요.
 
 #### Streaming
-Click the dropdown next to "Submit" and click the toggle to enable/disable streaming.
+"Submit" 옆의 드롭다운을 클릭하고 토글을 클릭하여 스트리밍을 활성화/비활성화합니다.
 
 #### Breakpoints
-To run your graph with breakpoints, click the "Interrupt" button. Select a node and whether to pause before and/or after that node has executed. Click "Continue" in the thread log to resume execution.
+breakpoint와 함께 그래프를 실행하려면 "Interrupt" 버튼을 클릭합니다. 노드를 선택하고 해당 노드가 실행되기 전 및/또는 후에 일시 중지할지 여부를 선택합니다. 실행을 재개하려면 thread 로그에서 "Continue"를 클릭합니다.
 
 
-For more information on breakpoints see [here](../../concepts/human_in_the_loop.md).
+breakpoint에 대한 자세한 내용은 [여기](../../concepts/human_in_the_loop.md)를 참조하세요.
 
-### Submit run
+### Run 제출
 
-To submit the run with the specified input and run settings, click the "Submit" button. This will add a [run](../../concepts/assistants.md#execution) to the existing selected [thread](../../concepts/persistence.md#threads). If no thread is currently selected, a new one will be created.
+지정한 입력과 run 설정으로 run을 제출하려면 "Submit" 버튼을 클릭합니다. 이렇게 하면 기존에 선택한 [thread](../../concepts/persistence.md#threads)에 [run](../../concepts/assistants.md#execution)이 추가됩니다. 현재 선택된 thread가 없으면 새 thread가 생성됩니다.
 
-To cancel the ongoing run, click the "Cancel" button.
+진행 중인 run을 취소하려면 "Cancel" 버튼을 클릭합니다.
 
 
-## Chat mode
-Specify the input to your chat application in the bottom of the conversation panel. Click the "Send message" button to submit the input as a Human message and have the response streamed back.
+## 챗 모드
+대화 패널 하단에서 챗 애플리케이션에 대한 입력을 지정합니다. "Send message" 버튼을 클릭하면 입력이 사람 메시지로 제출되고 응답이 스트리밍됩니다.
 
-To cancel the ongoing run, click the "Cancel" button. Click the "Show tool calls" toggle to hide/show tool calls in the conversation.
+진행 중인 run을 취소하려면 "Cancel" 버튼을 클릭합니다. "Show tool calls" 토글을 클릭하면 대화에서 tool call을 숨기거나 표시할 수 있습니다.
 
-## Learn more
+## 더 알아보기
 
-To run your application from a specific checkpoint in an existing thread, see [this guide](./threads_studio.md#edit-thread-history).
+기존 thread의 특정 checkpoint에서 애플리케이션을 실행하는 방법은 [이 가이드](./threads_studio.md#edit-thread-history)를 참조하세요.

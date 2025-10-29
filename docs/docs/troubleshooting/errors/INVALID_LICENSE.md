@@ -1,38 +1,38 @@
 # INVALID_LICENSE
 
-This error is raised when license verification fails while attempting to start a self-hosted LangGraph Platform server. This error is specific to the LangGraph Platform and is not related to the open source libraries.
+이 에러는 self-hosted LangGraph Platform 서버를 시작하려고 할 때 라이선스 검증이 실패하면 발생합니다. 이 에러는 LangGraph Platform에만 해당되며 오픈소스 라이브러리와는 관련이 없습니다.
 
-## When This Occurs
+## 발생 시점
 
-This error occurs when running a self-hosted deployment of LangGraph Platform without a valid enterprise license or API key.
+이 에러는 유효한 엔터프라이즈 라이선스나 API 키 없이 LangGraph Platform의 self-hosted 배포를 실행할 때 발생합니다.
 
-## Troubleshooting
+## 트러블슈팅
 
-### Confirm deployment type
+### 배포 유형 확인
 
-First, confirm the desired mode of deployment.
+먼저 원하는 배포 모드를 확인하세요.
 
-#### For Local Development
+#### 로컬 개발용
 
-If you're just developing locally, you can use the lightweight in-memory server by running `langgraph dev`.
-See the [local server](../../tutorials/langgraph-platform/local-server.md) docs for more information.
+로컬에서 개발만 하는 경우, `langgraph dev`를 실행하여 경량 인메모리 서버를 사용할 수 있습니다.
+자세한 내용은 [로컬 서버](../../tutorials/langgraph-platform/local-server.md) 문서를 참조하세요.
 
-#### For Managed LangGraph Platform
+#### 관리형 LangGraph Platform용
 
-If you would like a fast managed environment, consider the [Cloud SaaS](../../concepts/langgraph_cloud.md) deployment option. This requires no additional license key.
+빠른 관리형 환경을 원하시면 [Cloud SaaS](../../concepts/langgraph_cloud.md) 배포 옵션을 고려해보세요. 추가 라이선스 키가 필요하지 않습니다.
 
-#### For Standalone Container
+#### Standalone Container용
 
-For self-hosting, set the `LANGGRAPH_CLOUD_LICENSE_KEY` environment variable. If you are interested in an enterprise license key, please contact the LangChain support team.
+self-hosting의 경우 `LANGGRAPH_CLOUD_LICENSE_KEY` 환경 변수를 설정하세요. 엔터프라이즈 라이선스 키에 관심이 있으시면 LangChain 지원팀에 문의하세요.
 
-For more information on deployment options and their features, see the [Deployment Options](../../concepts/deployment_options.md) documentation.
+배포 옵션과 기능에 대한 자세한 내용은 [배포 옵션](../../concepts/deployment_options.md) 문서를 참조하세요.
 
 
-### Confirm credentials
+### 자격 증명 확인
 
-If you have confirmed that you would like to self-host LangGraph Platform, please verify your credentials.
+LangGraph Platform을 self-host하려는 것이 확실하다면 자격 증명을 확인하세요.
 
-#### For Standalone Container
+#### Standalone Container용
 
-1. Confirm that you have provided a working `LANGGRAPH_CLOUD_LICENSE_KEY` environment variable in your deployment environment or `.env` file
-2. Confirm the key is still valid and has not surpassed its expiration date
+1. 배포 환경이나 `.env` 파일에 작동하는 `LANGGRAPH_CLOUD_LICENSE_KEY` 환경 변수를 제공했는지 확인하세요
+2. 키가 아직 유효하고 만료일을 넘지 않았는지 확인하세요

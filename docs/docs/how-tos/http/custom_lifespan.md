@@ -1,24 +1,24 @@
-# How to add custom lifespan events
+# 커스텀 lifespan 이벤트 추가 방법
 
-When deploying agents to LangGraph Platform, you often need to initialize resources like database connections when your server starts up, and ensure they're properly closed when it shuts down. Lifespan events let you hook into your server's startup and shutdown sequence to handle these critical setup and teardown tasks.
+에이전트를 LangGraph Platform에 배포할 때, 서버가 시작될 때 데이터베이스 연결과 같은 리소스를 초기화하고, 종료될 때 적절하게 닫히도록 해야 하는 경우가 많습니다. Lifespan 이벤트를 사용하면 서버의 시작 및 종료 시퀀스에 연결하여 이러한 중요한 설정 및 정리 작업을 처리할 수 있습니다.
 
-This works the same way as [adding custom routes](./custom_routes.md). You just need to provide your own [`Starlette`](https://www.starlette.io/applications/) app (including [`FastAPI`](https://fastapi.tiangolo.com/), [`FastHTML`](https://fastht.ml/) and other compatible apps).
+이는 [커스텀 라우트 추가](./custom_routes.md)와 동일한 방식으로 작동합니다. 자신만의 [`Starlette`](https://www.starlette.io/applications/) 앱([`FastAPI`](https://fastapi.tiangolo.com/), [`FastHTML`](https://fastht.ml/) 및 기타 호환 가능한 앱 포함)을 제공하기만 하면 됩니다.
 
-Below is an example using FastAPI.
+다음은 FastAPI를 사용한 예제입니다.
 
-???+ note "Python only"
+???+ note "Python만 지원"
 
-    We currently only support custom lifespan events in Python deployments with `langgraph-api>=0.0.26`.
+    현재 `langgraph-api>=0.0.26`을 사용하는 Python 배포에서만 커스텀 lifespan 이벤트를 지원합니다.
 
-## Create app
+## 앱 생성
 
-Starting from an **existing** LangGraph Platform application, add the following lifespan code to your `webapp.py` file. If you are starting from scratch, you can create a new app from a template using the CLI.
+**기존** LangGraph Platform 애플리케이션에서 시작하여 `webapp.py` 파일에 다음 lifespan 코드를 추가합니다. 처음부터 시작하는 경우 CLI를 사용하여 템플릿에서 새 앱을 생성할 수 있습니다.
 
 ```bash
 langgraph new --template=new-langgraph-project-python my_new_project
 ```
 
-Once you have a LangGraph project, add the following app code:
+LangGraph 프로젝트가 있으면 다음 앱 코드를 추가합니다:
 
 ```python
 # ./src/agent/webapp.py
@@ -29,25 +29,25 @@ from sqlalchemy.orm import sessionmaker
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # for example...
+    # 예를 들어...
     engine = create_async_engine("postgresql+asyncpg://user:pass@localhost/db")
-    # Create reusable session factory
+    # 재사용 가능한 세션 팩토리 생성
     async_session = sessionmaker(engine, class_=AsyncSession)
-    # Store in app state
+    # 앱 상태에 저장
     app.state.db_session = async_session
     yield
-    # Clean up connections
+    # 연결 정리
     await engine.dispose()
 
 # highlight-next-line
 app = FastAPI(lifespan=lifespan)
 
-# ... can add custom routes if needed.
+# ... 필요한 경우 커스텀 라우트를 추가할 수 있습니다.
 ```
 
-## Configure `langgraph.json`
+## `langgraph.json` 구성
 
-Add the following to your `langgraph.json` configuration file. Make sure the path points to the `webapp.py` file you created above.
+`langgraph.json` 구성 파일에 다음을 추가합니다. 경로가 위에서 만든 `webapp.py` 파일을 가리키는지 확인하세요.
 
 ```json
 {
@@ -59,24 +59,24 @@ Add the following to your `langgraph.json` configuration file. Make sure the pat
   "http": {
     "app": "./src/agent/webapp.py:app"
   }
-  // Other configuration options like auth, store, etc.
+  // 인증, 저장소 등과 같은 기타 구성 옵션
 }
 ```
 
-## Start server
+## 서버 시작
 
-Test the server out locally:
+로컬에서 서버를 테스트합니다:
 
 ```bash
 langgraph dev --no-browser
 ```
 
-You should see your startup message printed when the server starts, and your cleanup message when you stop it with `Ctrl+C`.
+서버가 시작될 때 시작 메시지가 출력되고, `Ctrl+C`로 중지하면 정리 메시지가 출력되는 것을 볼 수 있습니다.
 
-## Deploying
+## 배포
 
-You can deploy your app as-is to LangGraph Platform or to your self-hosted platform.
+이 앱을 그대로 LangGraph Platform 또는 self-hosted platform에 배포할 수 있습니다.
 
-## Next steps
+## 다음 단계
 
-Now that you've added lifespan events to your deployment, you can use similar techniques to add [custom routes](./custom_routes.md) or [custom middleware](./custom_middleware.md) to further customize your server's behavior.
+이제 배포에 lifespan 이벤트를 추가했으므로 유사한 기술을 사용하여 [커스텀 라우트](./custom_routes.md)나 [커스텀 미들웨어](./custom_middleware.md)를 추가하여 서버의 동작을 추가로 커스터마이징할 수 있습니다.

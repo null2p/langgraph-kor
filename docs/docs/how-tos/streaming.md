@@ -1,42 +1,42 @@
-# Stream outputs
+# 출력 스트리밍
 
-You can [stream outputs](../concepts/streaming.md) from a LangGraph agent or workflow.
+LangGraph 에이전트 또는 워크플로에서 [출력을 스트리밍](../concepts/streaming.md)할 수 있습니다.
 
-## Supported stream modes
+## 지원되는 스트림 모드
 
 :::python
-Pass one or more of the following stream modes as a list to the @[`stream()`][CompiledStateGraph.stream] or @[`astream()`][CompiledStateGraph.astream] methods:
+다음 스트림 모드 중 하나 이상을 리스트로 @[`stream()`][CompiledStateGraph.stream] 또는 @[`astream()`][CompiledStateGraph.astream] 메서드에 전달하세요:
 :::
 
 :::js
-Pass one or more of the following stream modes as a list to the @[`stream()`][CompiledStateGraph.stream] method:
+다음 스트림 모드 중 하나 이상을 리스트로 @[`stream()`][CompiledStateGraph.stream] 메서드에 전달하세요:
 :::
 
-| Mode       | Description                                                                                                                                                                         |
+| 모드       | 설명                                                                                                                                                                         |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `values`   | Streams the full value of the state after each step of the graph.                                                                                                                   |
-| `updates`  | Streams the updates to the state after each step of the graph. If multiple updates are made in the same step (e.g., multiple nodes are run), those updates are streamed separately. |
-| `custom`   | Streams custom data from inside your graph nodes.                                                                                                                                   |
-| `messages` | Streams 2-tuples (LLM token, metadata) from any graph nodes where an LLM is invoked.                                                                                                |
-| `debug`    | Streams as much information as possible throughout the execution of the graph.                                                                                                      |
+| `values`   | 그래프의 각 단계 후 상태의 전체 값을 스트리밍합니다.                                                                                                                   |
+| `updates`  | 그래프의 각 단계 후 상태 업데이트를 스트리밍합니다. 동일한 단계에서 여러 업데이트가 발생하면(예: 여러 노드가 실행됨), 해당 업데이트는 개별적으로 스트리밍됩니다. |
+| `custom`   | 그래프 노드 내부에서 커스텀 데이터를 스트리밍합니다.                                                                                                                                   |
+| `messages` | LLM이 호출되는 모든 그래프 노드에서 2-튜플(LLM 토큰, 메타데이터)을 스트리밍합니다.                                                                                                |
+| `debug`    | 그래프 실행 전반에 걸쳐 가능한 많은 정보를 스트리밍합니다.                                                                                                      |
 
-## Stream from an agent
+## 에이전트에서 스트리밍
 
-### Agent progress
+### 에이전트 진행 상황
 
 :::python
-To stream agent progress, use the @[`stream()`][CompiledStateGraph.stream] or @[`astream()`][CompiledStateGraph.astream] methods with `stream_mode="updates"`. This emits an event after every agent step.
+에이전트 진행 상황을 스트리밍하려면 `stream_mode="updates"`와 함께 @[`stream()`][CompiledStateGraph.stream] 또는 @[`astream()`][CompiledStateGraph.astream] 메서드를 사용하세요. 이것은 모든 에이전트 단계 후에 이벤트를 발생시킵니다.
 :::
 
 :::js
-To stream agent progress, use the @[`stream()`][CompiledStateGraph.stream] method with `streamMode: "updates"`. This emits an event after every agent step.
+에이전트 진행 상황을 스트리밍하려면 `streamMode: "updates"`와 함께 @[`stream()`][CompiledStateGraph.stream] 메서드를 사용하세요. 이것은 모든 에이전트 단계 후에 이벤트를 발생시킵니다.
 :::
 
-For example, if you have an agent that calls a tool once, you should see the following updates:
+예를 들어, 도구를 한 번 호출하는 에이전트가 있다면 다음 업데이트를 볼 수 있습니다:
 
-- **LLM node**: AI message with tool call requests
-- **Tool node**: Tool message with execution result
-- **LLM node**: Final AI response
+- **LLM 노드**: 도구 호출 요청이 포함된 AI 메시지
+- **도구 노드**: 실행 결과가 포함된 도구 메시지
+- **LLM 노드**: 최종 AI 응답
 
 :::python
 === "Sync"
@@ -94,10 +94,10 @@ for await (const chunk of await agent.stream(
 
 :::
 
-### LLM tokens
+### LLM 토큰
 
 :::python
-To stream tokens as they are produced by the LLM, use `stream_mode="messages"`:
+LLM이 생성하는 토큰을 스트리밍하려면 `stream_mode="messages"`를 사용하세요:
 
 === "Sync"
 
@@ -138,7 +138,7 @@ To stream tokens as they are produced by the LLM, use `stream_mode="messages"`:
 :::
 
 :::js
-To stream tokens as they are produced by the LLM, use `streamMode: "messages"`:
+LLM이 생성하는 토큰을 스트리밍하려면 `streamMode: "messages"`를 사용하세요:
 
 ```typescript
 const agent = createReactAgent({
@@ -158,10 +158,10 @@ for await (const [token, metadata] of await agent.stream(
 
 :::
 
-### Tool updates
+### 도구 업데이트
 
 :::python
-To stream updates from tools as they are executed, you can use @[get_stream_writer][get_stream_writer].
+도구가 실행될 때 업데이트를 스트리밍하려면 @[get_stream_writer][get_stream_writer]를 사용할 수 있습니다.
 
 === "Sync"
 
@@ -228,7 +228,7 @@ To stream updates from tools as they are executed, you can use @[get_stream_writ
 :::
 
 :::js
-To stream updates from tools as they are executed, you can use the `writer` parameter from the configuration.
+도구가 실행될 때 업데이트를 스트리밍하려면 설정에서 `writer` 파라미터를 사용할 수 있습니다.
 
 ```typescript
 import { LangGraphRunnableConfig } from "@langchain/langgraph";
@@ -266,10 +266,10 @@ for await (const chunk of await agent.stream(
       If you add the `writer` parameter to your tool, you won't be able to invoke the tool outside of a LangGraph execution context without providing a writer function.
 :::
 
-### Stream multiple modes
+### 여러 모드 스트리밍
 
 :::python
-You can specify multiple streaming modes by passing stream mode as a list: `stream_mode=["updates", "messages", "custom"]`:
+스트림 모드를 리스트로 전달하여 여러 스트리밍 모드를 지정할 수 있습니다: `stream_mode=["updates", "messages", "custom"]`:
 
 === "Sync"
 
@@ -308,7 +308,7 @@ You can specify multiple streaming modes by passing stream mode as a list: `stre
 :::
 
 :::js
-You can specify multiple streaming modes by passing streamMode as an array: `streamMode: ["updates", "messages", "custom"]`:
+streamMode를 배열로 전달하여 여러 스트리밍 모드를 지정할 수 있습니다: `streamMode: ["updates", "messages", "custom"]`:
 
 ```typescript
 const agent = createReactAgent({
@@ -327,18 +327,18 @@ for await (const chunk of await agent.stream(
 
 :::
 
-### Disable streaming
+### 스트리밍 비활성화
 
-In some applications you might need to disable streaming of individual tokens for a given model. This is useful in [multi-agent](../agents/multi-agent.md) systems to control which agents stream their output.
+일부 애플리케이션에서는 특정 모델에 대해 개별 토큰의 스트리밍을 비활성화해야 할 수 있습니다. 이는 [멀티 에이전트](../agents/multi-agent.md) 시스템에서 어떤 에이전트가 출력을 스트리밍할지 제어하는 데 유용합니다.
 
-See the [Models](../agents/models.md#disable-streaming) guide to learn how to disable streaming.
+스트리밍을 비활성화하는 방법은 [모델](../agents/models.md#disable-streaming) 가이드를 참조하세요.
 
-## Stream from a workflow
+## 워크플로에서 스트리밍
 
-### Basic usage example
+### 기본 사용 예제
 
 :::python
-LangGraph graphs expose the @[`.stream()`][Pregel.stream] (sync) and @[`.astream()`][Pregel.astream] (async) methods to yield streamed outputs as iterators.
+LangGraph 그래프는 스트리밍된 출력을 이터레이터로 생성하기 위해 @[`.stream()`][Pregel.stream] (동기) 및 @[`.astream()`][Pregel.astream] (비동기) 메서드를 제공합니다.
 
 === "Sync"
 
@@ -357,7 +357,7 @@ LangGraph graphs expose the @[`.stream()`][Pregel.stream] (sync) and @[`.astream
 :::
 
 :::js
-LangGraph graphs expose the @[`.stream()`][Pregel.stream] method to yield streamed outputs as iterators.
+LangGraph 그래프는 스트리밍된 출력을 이터레이터로 생성하기 위해 @[`.stream()`][Pregel.stream] 메서드를 제공합니다.
 
 ```typescript
 for await (const chunk of await graph.stream(inputs, {
@@ -447,12 +447,12 @@ for await (const chunk of await graph.stream(inputs, {
       {'generateJoke': {'joke': 'This is a joke about ice cream and cats'}}
       ```                                                                                                   |
 
-### Stream multiple modes
+### 여러 모드 스트리밍
 
 :::python
-You can pass a list as the `stream_mode` parameter to stream multiple modes at once.
+한 번에 여러 모드를 스트리밍하기 위해 `stream_mode` 파라미터에 리스트를 전달할 수 있습니다.
 
-The streamed outputs will be tuples of `(mode, chunk)` where `mode` is the name of the stream mode and `chunk` is the data streamed by that mode.
+스트리밍된 출력은 `(mode, chunk)` 튜플이며, 여기서 `mode`는 스트림 모드의 이름이고 `chunk`는 해당 모드에서 스트리밍된 데이터입니다.
 
 === "Sync"
 
@@ -471,9 +471,9 @@ The streamed outputs will be tuples of `(mode, chunk)` where `mode` is the name 
 :::
 
 :::js
-You can pass an array as the `streamMode` parameter to stream multiple modes at once.
+한 번에 여러 모드를 스트리밍하기 위해 `streamMode` 파라미터에 배열을 전달할 수 있습니다.
 
-The streamed outputs will be tuples of `[mode, chunk]` where `mode` is the name of the stream mode and `chunk` is the data streamed by that mode.
+스트리밍된 출력은 `[mode, chunk]` 튜플이며, 여기서 `mode`는 스트림 모드의 이름이고 `chunk`는 해당 모드에서 스트리밍된 데이터입니다.
 
 ```typescript
 for await (const [mode, chunk] of await graph.stream(inputs, {
@@ -485,12 +485,12 @@ for await (const [mode, chunk] of await graph.stream(inputs, {
 
 :::
 
-### Stream graph state
+### 그래프 상태 스트리밍
 
-Use the stream modes `updates` and `values` to stream the state of the graph as it executes.
+그래프가 실행될 때 상태를 스트리밍하려면 `updates` 및 `values` 스트림 모드를 사용하세요.
 
-- `updates` streams the **updates** to the state after each step of the graph.
-- `values` streams the **full value** of the state after each step of the graph.
+- `updates`는 그래프의 각 단계 후 상태 **업데이트**를 스트리밍합니다.
+- `values`는 그래프의 각 단계 후 상태의 **전체 값**을 스트리밍합니다.
 
 :::python
 
@@ -552,7 +552,7 @@ const graph = new StateGraph(State)
 
 === "updates"
 
-    Use this to stream only the **state updates** returned by the nodes after each step. The streamed outputs include the name of the node as well as the update.
+    각 단계 후 노드에서 반환된 **상태 업데이트**만 스트리밍하려면 이것을 사용하세요. 스트리밍된 출력에는 노드 이름과 업데이트가 포함됩니다.
 
     :::python
     ```python
@@ -578,7 +578,7 @@ const graph = new StateGraph(State)
 
 === "values"
 
-    Use this to stream the **full state** of the graph after each step.
+    각 단계 후 그래프의 **전체 상태**를 스트리밍하려면 이것을 사용하세요.
 
     :::python
     ```python
@@ -602,12 +602,12 @@ const graph = new StateGraph(State)
     ```
     :::
 
-### Stream subgraph outputs
+### 서브그래프 출력 스트리밍
 
 :::python
-To include outputs from [subgraphs](../concepts/subgraphs.md) in the streamed outputs, you can set `subgraphs=True` in the `.stream()` method of the parent graph. This will stream outputs from both the parent graph and any subgraphs.
+스트리밍된 출력에 [서브그래프](../concepts/subgraphs.md)의 출력을 포함하려면 부모 그래프의 `.stream()` 메서드에서 `subgraphs=True`를 설정할 수 있습니다. 이렇게 하면 부모 그래프와 모든 서브그래프의 출력이 스트리밍됩니다.
 
-The outputs will be streamed as tuples `(namespace, data)`, where `namespace` is a tuple with the path to the node where a subgraph is invoked, e.g. `("parent_node:<task_id>", "child_node:<task_id>")`.
+출력은 `(namespace, data)` 튜플로 스트리밍되며, 여기서 `namespace`는 서브그래프가 호출되는 노드의 경로를 가진 튜플입니다(예: `("parent_node:<task_id>", "child_node:<task_id>")`).
 
 ```python
 for chunk in graph.stream(
@@ -623,9 +623,9 @@ for chunk in graph.stream(
    :::
 
 :::js
-To include outputs from [subgraphs](../concepts/subgraphs.md) in the streamed outputs, you can set `subgraphs: true` in the `.stream()` method of the parent graph. This will stream outputs from both the parent graph and any subgraphs.
+스트리밍된 출력에 [서브그래프](../concepts/subgraphs.md)의 출력을 포함하려면 부모 그래프의 `.stream()` 메서드에서 `subgraphs: true`를 설정할 수 있습니다. 이렇게 하면 부모 그래프와 모든 서브그래프의 출력이 스트리밍됩니다.
 
-The outputs will be streamed as tuples `[namespace, data]`, where `namespace` is a tuple with the path to the node where a subgraph is invoked, e.g. `["parent_node:<task_id>", "child_node:<task_id>"]`.
+출력은 `[namespace, data]` 튜플로 스트리밍되며, 여기서 `namespace`는 서브그래프가 호출되는 노드의 경로를 가진 튜플입니다(예: `["parent_node:<task_id>", "child_node:<task_id>"]`).
 
 ```typescript
 for await (const chunk of await graph.stream(
@@ -763,9 +763,9 @@ for await (const chunk of await graph.stream(
 
       **Note** that we are receiving not just the node updates, but we also the namespaces which tell us what graph (or subgraph) we are streaming from.
 
-### Debugging {#debug}
+### 디버깅 {#debug}
 
-Use the `debug` streaming mode to stream as much information as possible throughout the execution of the graph. The streamed outputs include the name of the node as well as the full state.
+그래프 실행 전반에 걸쳐 가능한 많은 정보를 스트리밍하려면 `debug` 스트리밍 모드를 사용하세요. 스트리밍된 출력에는 노드 이름과 전체 상태가 포함됩니다.
 
 :::python
 
@@ -793,17 +793,17 @@ for await (const chunk of await graph.stream(
 
 :::
 
-### LLM tokens {#messages}
+### LLM 토큰 {#messages}
 
-Use the `messages` streaming mode to stream Large Language Model (LLM) outputs **token by token** from any part of your graph, including nodes, tools, subgraphs, or tasks.
+노드, 도구, 서브그래프 또는 작업을 포함한 그래프의 모든 부분에서 대형 언어 모델(LLM) 출력을 **토큰 단위로** 스트리밍하려면 `messages` 스트리밍 모드를 사용하세요.
 
 :::python
-The streamed output from [`messages` mode](#supported-stream-modes) is a tuple `(message_chunk, metadata)` where:
+[`messages` 모드](#supported-stream-modes)의 스트리밍된 출력은 `(message_chunk, metadata)` 튜플이며, 여기서:
 
-- `message_chunk`: the token or message segment from the LLM.
-- `metadata`: a dictionary containing details about the graph node and LLM invocation.
+- `message_chunk`: LLM의 토큰 또는 메시지 세그먼트입니다.
+- `metadata`: 그래프 노드 및 LLM 호출에 대한 세부 정보가 포함된 딕셔너리입니다.
 
-> If your LLM is not available as a LangChain integration, you can stream its outputs using `custom` mode instead. See [use with any LLM](#use-with-any-llm) for details.
+> LLM이 LangChain 통합으로 사용할 수 없는 경우 대신 `custom` 모드를 사용하여 출력을 스트리밍할 수 있습니다. 자세한 내용은 [모든 LLM과 사용](#use-with-any-llm)을 참조하세요.
 
 !!! warning "Manual config required for async in Python < 3.11"
 
@@ -855,12 +855,12 @@ for message_chunk, metadata in graph.stream( # (2)!
    :::
 
 :::js
-The streamed output from [`messages` mode](#supported-stream-modes) is a tuple `[message_chunk, metadata]` where:
+[`messages` 모드](#supported-stream-modes)의 스트리밍된 출력은 `[message_chunk, metadata]` 튜플이며, 여기서:
 
-- `message_chunk`: the token or message segment from the LLM.
-- `metadata`: a dictionary containing details about the graph node and LLM invocation.
+- `message_chunk`: LLM의 토큰 또는 메시지 세그먼트입니다.
+- `metadata`: 그래프 노드 및 LLM 호출에 대한 세부 정보가 포함된 딕셔너리입니다.
 
-> If your LLM is not available as a LangChain integration, you can stream its outputs using `custom` mode instead. See [use with any LLM](#use-with-any-llm) for details.
+> LLM이 LangChain 통합으로 사용할 수 없는 경우 대신 `custom` 모드를 사용하여 출력을 스트리밍할 수 있습니다. 자세한 내용은 [모든 LLM과 사용](#use-with-any-llm)을 참조하세요.
 
 ```typescript
 import { ChatOpenAI } from "@langchain/openai";
@@ -902,9 +902,9 @@ for await (const [messageChunk, metadata] of await graph.stream(
 2. The "messages" stream mode returns an iterator of tuples `[messageChunk, metadata]` where `messageChunk` is the token streamed by the LLM and `metadata` is a dictionary with information about the graph node where the LLM was called and other information.
    :::
 
-#### Filter by LLM invocation
+#### LLM 호출별 필터링
 
-You can associate `tags` with LLM invocations to filter the streamed tokens by LLM invocation.
+LLM 호출과 `tags`를 연결하여 LLM 호출별로 스트리밍된 토큰을 필터링할 수 있습니다.
 
 :::python
 
@@ -1080,9 +1080,9 @@ for await (const [msg, metadata] of await graph.stream( // (3)!
       4. Filter the streamed tokens by the `tags` field in the metadata to only include the tokens from the LLM invocation with the "joke" tag.
       :::
 
-#### Filter by node
+#### 노드별 필터링
 
-To stream tokens only from specific nodes, use `stream_mode="messages"` and filter the outputs by the `langgraph_node` field in the streamed metadata:
+특정 노드에서만 토큰을 스트리밍하려면 `stream_mode="messages"`를 사용하고 스트리밍된 메타데이터의 `langgraph_node` 필드로 출력을 필터링하세요:
 
 :::python
 
@@ -1225,13 +1225,13 @@ for await (const [msg, metadata] of await graph.stream(
       2. Filter the streamed tokens by the `langgraph_node` field in the metadata to only include the tokens from the `writePoem` node.
       :::
 
-### Stream custom data
+### 커스텀 데이터 스트리밍
 
 :::python
-To send **custom user-defined data** from inside a LangGraph node or tool, follow these steps:
+LangGraph 노드 또는 도구 내부에서 **사용자 정의 커스텀 데이터**를 전송하려면 다음 단계를 따르세요:
 
-1. Use `get_stream_writer()` to access the stream writer and emit custom data.
-2. Set `stream_mode="custom"` when calling `.stream()` or `.astream()` to get the custom data in the stream. You can combine multiple modes (e.g., `["updates", "custom"]`), but at least one must be `"custom"`.
+1. `get_stream_writer()`를 사용하여 스트림 writer에 접근하고 커스텀 데이터를 발생시킵니다.
+2. `.stream()` 또는 `.astream()`을 호출할 때 `stream_mode="custom"`을 설정하여 스트림에서 커스텀 데이터를 가져옵니다. 여러 모드를 결합할 수 있지만(예: `["updates", "custom"]`), 최소한 하나는 `"custom"`이어야 합니다.
 
 !!! warning "No `get_stream_writer()` in async for Python < 3.11"
 
@@ -1305,10 +1305,10 @@ To send **custom user-defined data** from inside a LangGraph node or tool, follo
 :::
 
 :::js
-To send **custom user-defined data** from inside a LangGraph node or tool, follow these steps:
+LangGraph 노드 또는 도구 내부에서 **사용자 정의 커스텀 데이터**를 전송하려면 다음 단계를 따르세요:
 
-1. Use the `writer` parameter from the `LangGraphRunnableConfig` to emit custom data.
-2. Set `streamMode: "custom"` when calling `.stream()` to get the custom data in the stream. You can combine multiple modes (e.g., `["updates", "custom"]`), but at least one must be `"custom"`.
+1. `LangGraphRunnableConfig`의 `writer` 파라미터를 사용하여 커스텀 데이터를 발생시킵니다.
+2. `.stream()`을 호출할 때 `streamMode: "custom"`을 설정하여 스트림에서 커스텀 데이터를 가져옵니다. 여러 모드를 결합할 수 있지만(예: `["updates", "custom"]`), 최소한 하나는 `"custom"`이어야 합니다.
 
 === "node"
 
@@ -1376,12 +1376,12 @@ To send **custom user-defined data** from inside a LangGraph node or tool, follo
 
 :::
 
-### Use with any LLM
+### 모든 LLM과 사용
 
 :::python
-You can use `stream_mode="custom"` to stream data from **any LLM API** — even if that API does **not** implement the LangChain chat model interface.
+**모든 LLM API**에서 데이터를 스트리밍하기 위해 `stream_mode="custom"`을 사용할 수 있습니다 — 해당 API가 LangChain 채팅 모델 인터페이스를 구현하지 **않더라도** 말입니다.
 
-This lets you integrate raw LLM clients or external services that provide their own streaming interfaces, making LangGraph highly flexible for custom setups.
+이를 통해 자체 스트리밍 인터페이스를 제공하는 원시 LLM 클라이언트 또는 외부 서비스를 통합할 수 있어 LangGraph를 커스텀 설정에 매우 유연하게 사용할 수 있습니다.
 
 ```python
 from langgraph.config import get_stream_writer
@@ -1419,9 +1419,9 @@ for chunk in graph.stream(
    :::
 
 :::js
-You can use `streamMode: "custom"` to stream data from **any LLM API** — even if that API does **not** implement the LangChain chat model interface.
+**모든 LLM API**에서 데이터를 스트리밍하기 위해 `streamMode: "custom"`을 사용할 수 있습니다 — 해당 API가 LangChain 채팅 모델 인터페이스를 구현하지 **않더라도** 말입니다.
 
-This lets you integrate raw LLM clients or external services that provide their own streaming interfaces, making LangGraph highly flexible for custom setups.
+이를 통해 자체 스트리밍 인터페이스를 제공하는 원시 LLM 클라이언트 또는 외부 서비스를 통합할 수 있어 LangGraph를 커스텀 설정에 매우 유연하게 사용할 수 있습니다.
 
 ```typescript
 import { LangGraphRunnableConfig } from "@langchain/langgraph";
@@ -1698,13 +1698,12 @@ for await (const chunk of await graph.stream(
       ```
       :::
 
-### Disable streaming for specific chat models
+### 특정 채팅 모델에 대한 스트리밍 비활성화
 
-If your application mixes models that support streaming with those that do not, you may need to explicitly disable streaming for
-models that do not support it.
+애플리케이션에서 스트리밍을 지원하는 모델과 그렇지 않은 모델을 혼합하여 사용하는 경우 스트리밍을 지원하지 않는 모델에 대해 명시적으로 스트리밍을 비활성화해야 할 수 있습니다.
 
 :::python
-Set `disable_streaming=True` when initializing the model.
+모델을 초기화할 때 `disable_streaming=True`를 설정하세요.
 
 === "init_chat_model"
 
@@ -1733,7 +1732,7 @@ Set `disable_streaming=True` when initializing the model.
 :::
 
 :::js
-Set `streaming: false` when initializing the model.
+모델을 초기화할 때 `streaming: false`를 설정하세요.
 
 ```typescript
 import { ChatOpenAI } from "@langchain/openai";
@@ -1748,13 +1747,13 @@ const model = new ChatOpenAI({
 
 :::python
 
-### Async with Python < 3.11 { #async }
+### Python < 3.11에서 비동기 사용 { #async }
 
-In Python versions < 3.11, [asyncio tasks](https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task) do not support the `context` parameter.  
-This limits LangGraph ability to automatically propagate context, and affects LangGraph's streaming mechanisms in two key ways:
+Python 버전 < 3.11에서는 [asyncio 작업](https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task)이 `context` 파라미터를 지원하지 않습니다.
+이는 LangGraph가 컨텍스트를 자동으로 전파하는 능력을 제한하며 LangGraph의 스트리밍 메커니즘에 두 가지 주요 방식으로 영향을 미칩니다:
 
-1. You **must** explicitly pass [`RunnableConfig`](https://python.langchain.com/docs/concepts/runnables/#runnableconfig) into async LLM calls (e.g., `ainvoke()`), as callbacks are not automatically propagated.
-2. You **cannot** use `get_stream_writer()` in async nodes or tools — you must pass a `writer` argument directly.
+1. 콜백이 자동으로 전파되지 않으므로 비동기 LLM 호출(예: `ainvoke()`)에 [`RunnableConfig`](https://python.langchain.com/docs/concepts/runnables/#runnableconfig)를 명시적으로 전달**해야 합니다**.
+2. 비동기 노드 또는 도구에서 `get_stream_writer()`를 사용할 수 **없으며** — `writer` 인수를 직접 전달해야 합니다.
 
 ??? example "Extended example: async LLM call with manual config"
 

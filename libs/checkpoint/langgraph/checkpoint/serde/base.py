@@ -4,7 +4,7 @@ from typing import Any, Protocol, runtime_checkable
 
 
 class UntypedSerializerProtocol(Protocol):
-    """Protocol for serialization and deserialization of objects."""
+    """객체의 직렬화 및 역직렬화를 위한 프로토콜입니다."""
 
     def dumps(self, obj: Any) -> bytes: ...
 
@@ -13,14 +13,14 @@ class UntypedSerializerProtocol(Protocol):
 
 @runtime_checkable
 class SerializerProtocol(Protocol):
-    """Protocol for serialization and deserialization of objects.
+    """객체의 직렬화 및 역직렬화를 위한 프로토콜입니다.
 
-    - `dumps`: Serialize an object to bytes.
-    - `dumps_typed`: Serialize an object to a tuple `(type, bytes)`.
-    - `loads`: Deserialize an object from bytes.
-    - `loads_typed`: Deserialize an object from a tuple `(type, bytes)`.
+    - `dumps`: 객체를 바이트로 직렬화합니다.
+    - `dumps_typed`: 객체를 튜플 `(type, bytes)`로 직렬화합니다.
+    - `loads`: 바이트에서 객체를 역직렬화합니다.
+    - `loads_typed`: 튜플 `(type, bytes)`에서 객체를 역직렬화합니다.
 
-    Valid implementations include the `pickle`, `json` and `orjson` modules.
+    유효한 구현에는 `pickle`, `json` 및 `orjson` 모듈이 포함됩니다.
     """
 
     def dumps_typed(self, obj: Any) -> tuple[str, bytes]: ...
@@ -42,7 +42,7 @@ class SerializerCompat(SerializerProtocol):
 def maybe_add_typed_methods(
     serde: SerializerProtocol | UntypedSerializerProtocol,
 ) -> SerializerProtocol:
-    """Wrap serde old serde implementations in a class with loads_typed and dumps_typed for backwards compatibility."""
+    """하위 호환성을 위해 loads_typed 및 dumps_typed가 있는 클래스로 이전 serde 구현을 래핑합니다."""
 
     if not isinstance(serde, SerializerProtocol):
         return SerializerCompat(serde)
@@ -51,15 +51,15 @@ def maybe_add_typed_methods(
 
 
 class CipherProtocol(Protocol):
-    """Protocol for encryption and decryption of data.
-    - `encrypt`: Encrypt plaintext.
-    - `decrypt`: Decrypt ciphertext.
+    """데이터 암호화 및 복호화를 위한 프로토콜입니다.
+    - `encrypt`: 평문을 암호화합니다.
+    - `decrypt`: 암호문을 복호화합니다.
     """
 
     def encrypt(self, plaintext: bytes) -> tuple[str, bytes]:
-        """Encrypt plaintext. Returns a tuple (cipher name, ciphertext)."""
+        """평문을 암호화합니다. 튜플 (cipher name, ciphertext)을 반환합니다."""
         ...
 
     def decrypt(self, ciphername: str, ciphertext: bytes) -> bytes:
-        """Decrypt ciphertext. Returns the plaintext."""
+        """암호문을 복호화합니다. 평문을 반환합니다."""
         ...

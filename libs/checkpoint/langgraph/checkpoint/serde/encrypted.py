@@ -6,7 +6,7 @@ from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 
 
 class EncryptedSerializer(SerializerProtocol):
-    """Serializer that encrypts and decrypts data using an encryption protocol."""
+    """암호화 프로토콜을 사용하여 데이터를 암호화 및 복호화하는 시리얼라이저입니다."""
 
     def __init__(
         self, cipher: CipherProtocol, serde: SerializerProtocol = JsonPlusSerializer()
@@ -15,31 +15,31 @@ class EncryptedSerializer(SerializerProtocol):
         self.serde = serde
 
     def dumps_typed(self, obj: Any) -> tuple[str, bytes]:
-        """Serialize an object to a tuple `(type, bytes)` and encrypt the bytes."""
-        # serialize data
+        """객체를 튜플 `(type, bytes)`로 직렬화하고 바이트를 암호화합니다."""
+        # 데이터 직렬화
         typ, data = self.serde.dumps_typed(obj)
-        # encrypt data
+        # 데이터 암호화
         ciphername, ciphertext = self.cipher.encrypt(data)
-        # add cipher name to type
+        # 타입에 cipher name 추가
         return f"{typ}+{ciphername}", ciphertext
 
     def loads_typed(self, data: tuple[str, bytes]) -> Any:
         enc_cipher, ciphertext = data
-        # unencrypted data
+        # 암호화되지 않은 데이터
         if "+" not in enc_cipher:
             return self.serde.loads_typed(data)
-        # extract cipher name
+        # cipher name 추출
         typ, ciphername = enc_cipher.split("+", 1)
-        # decrypt data
+        # 데이터 복호화
         decrypted_data = self.cipher.decrypt(ciphername, ciphertext)
-        # deserialize data
+        # 데이터 역직렬화
         return self.serde.loads_typed((typ, decrypted_data))
 
     @classmethod
     def from_pycryptodome_aes(
         cls, serde: SerializerProtocol = JsonPlusSerializer(), **kwargs: Any
     ) -> "EncryptedSerializer":
-        """Create an `EncryptedSerializer` using AES encryption."""
+        """AES 암호화를 사용하는 `EncryptedSerializer`를 생성합니다."""
         try:
             from Crypto.Cipher import AES  # type: ignore
         except ImportError:
@@ -47,18 +47,18 @@ class EncryptedSerializer(SerializerProtocol):
                 "Pycryptodome is not installed. Please install it with `pip install pycryptodome`."
             ) from None
 
-        # check if AES key is provided
+        # AES 키가 제공되었는지 확인
         if "key" in kwargs:
             key: bytes = kwargs.pop("key")
         else:
             key_str = os.getenv("LANGGRAPH_AES_KEY")
             if key_str is None:
-                raise ValueError("LANGGRAPH_AES_KEY environment variable is not set.")
+                raise ValueError("LANGGRAPH_AES_KEY 환경 변수가 설정되지 않았습니다.")
             key = key_str.encode()
             if len(key) not in (16, 24, 32):
-                raise ValueError("LANGGRAPH_AES_KEY must be 16, 24, or 32 bytes long.")
+                raise ValueError("LANGGRAPH_AES_KEY는 16, 24 또는 32바이트 길이여야 합니다.")
 
-        # set default mode to EAX if not provided
+        # 제공되지 않은 경우 기본 모드를 EAX로 설정
         if kwargs.get("mode") is None:
             kwargs["mode"] = AES.MODE_EAX
 

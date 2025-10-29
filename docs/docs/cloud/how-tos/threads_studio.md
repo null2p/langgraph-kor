@@ -1,37 +1,37 @@
-# Manage threads
+# Thread 관리
 
-Studio allows you to view [threads](../../concepts/persistence.md#threads) from the server and edit their state.
+Studio를 사용하면 서버에서 [thread](../../concepts/persistence.md#threads)를 보고 상태를 편집할 수 있습니다.
 
-## View threads
+## Thread 보기
 
-### Graph mode
+### 그래프 모드
 
-1. In the top of the right-hand pane, select the dropdown menu to view existing threads.
-1. Select the desired thread, and the thread history will populate in the right-hand side of the page.
-1. To create a new thread, click `+ New Thread` and [submit a run](../how-tos/invoke_studio.md#graph-mode).
+1. 오른쪽 패널 상단에서 드롭다운 메뉴를 선택하여 기존 thread를 봅니다.
+1. 원하는 thread를 선택하면 thread 히스토리가 페이지 오른쪽에 채워집니다.
+1. 새 thread를 생성하려면 `+ New Thread`를 클릭하고 [run을 제출](../how-tos/invoke_studio.md#graph-mode)합니다.
 
-To view more granular information in the thread, drag the slider at the top of the page to the right. To view less information, drag the slider to the left. Additionally, collapse or expand individual turns, nodes, and keys of the state.
+thread에서 더 세부적인 정보를 보려면 페이지 상단의 슬라이더를 오른쪽으로 드래그합니다. 더 적은 정보를 보려면 슬라이더를 왼쪽으로 드래그합니다. 또한 상태의 개별 턴, 노드 및 키를 축소하거나 확장합니다.
 
-Switch between `Pretty` and `JSON` mode for different rendering formats.
+다양한 렌더링 형식을 위해 `Pretty`와 `JSON` 모드 간에 전환합니다.
 
-### Chat mode
+### 챗 모드
 
-1. View all threads in the right-hand pane of the page.
-2. Select the desired thread and the thread history will populate in the center panel.
-3. To create a new thread, click the plus button and [submit a run](../how-tos/invoke_studio.md#chat-mode).
+1. 페이지 오른쪽 패널에서 모든 thread를 봅니다.
+2. 원하는 thread를 선택하면 thread 히스토리가 중앙 패널에 채워집니다.
+3. 새 thread를 생성하려면 더하기 버튼을 클릭하고 [run을 제출](../how-tos/invoke_studio.md#chat-mode)합니다.
 
-## Edit thread history
+## Thread 히스토리 편집
 
-### Graph mode
+### 그래프 모드
 
-To edit the state of the thread, select "edit node state" next to the desired node. Edit the node's output as desired and click "fork" to confirm. This will create a new forked run from the checkpoint of the selected node.
+thread의 상태를 편집하려면 원하는 노드 옆에 있는 "edit node state"를 선택합니다. 원하는 대로 노드의 출력을 편집하고 "fork"를 클릭하여 확인합니다. 그러면 선택한 노드의 체크포인트에서 새 분기된 run이 생성됩니다.
 
-If you instead want to re-run the thread from a given checkpoint without editing the state, click the "Re-run from here". This will again create a new forked run from the selected checkpoint. This is useful for re-running with changes that are not specific to the state, such as the selected assistant.
+대신 상태를 편집하지 않고 주어진 체크포인트에서 thread를 다시 실행하려면 "Re-run from here"를 클릭합니다. 그러면 선택한 체크포인트에서 다시 새 분기된 run이 생성됩니다. 이는 선택한 어시스턴트와 같이 상태와 관련이 없는 변경 사항으로 다시 실행하는 데 유용합니다.
 
-### Chat mode
+### 챗 모드
 
-To edit a human message in the thread, click the edit button below the human message. Edit the message as desired and submit. This will create a new fork of the conversation history. To re-generate an AI message, click the retry icon below the AI message.
+thread에서 사람 메시지를 편집하려면 사람 메시지 아래의 편집 버튼을 클릭합니다. 원하는 대로 메시지를 편집하고 제출합니다. 그러면 대화 히스토리의 새 분기가 생성됩니다. AI 메시지를 다시 생성하려면 AI 메시지 아래의 재시도 아이콘을 클릭합니다.
 
-## Learn more
+## 더 알아보기
 
-For more information about time travel, [see here](../../concepts/time-travel.md).
+타임 트래블에 대한 자세한 내용은 [여기](../../concepts/time-travel.md)를 참조하세요.

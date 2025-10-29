@@ -37,7 +37,7 @@ def fanout_to_subgraph() -> StateGraph:
     async def bump_loop(state: JokeOutput):
         return END if state["jokes"][0].endswith(" a" * 10) else "bump"
 
-    # subgraph
+    # 서브그래프
     subgraph = StateGraph(JokeState, input_schema=JokeInput, output_schema=JokeOutput)
     subgraph.add_node("edit", edit)
     subgraph.add_node("generate", generate)
@@ -49,7 +49,7 @@ def fanout_to_subgraph() -> StateGraph:
     subgraph.set_finish_point("generate")
     subgraphc = subgraph.compile()
 
-    # parent graph
+    # 부모 그래프
     builder = StateGraph(OverallState)
     builder.add_node("generate_joke", subgraphc)
     builder.add_conditional_edges(START, continue_to_jokes)
@@ -87,7 +87,7 @@ def fanout_to_subgraph_sync() -> StateGraph:
     def bump_loop(state: JokeOutput):
         return END if state["jokes"][0].endswith(" a" * 10) else "bump"
 
-    # subgraph
+    # 서브그래프
     subgraph = StateGraph(JokeState, input_schema=JokeInput, output_schema=JokeOutput)
     subgraph.add_node("edit", edit)
     subgraph.add_node("generate", generate)
@@ -99,7 +99,7 @@ def fanout_to_subgraph_sync() -> StateGraph:
     subgraph.set_finish_point("generate")
     subgraphc = subgraph.compile()
 
-    # parent graph
+    # 부모 그래프
     builder = StateGraph(OverallState)
     builder.add_node("generate_joke", subgraphc)
     builder.add_conditional_edges(START, continue_to_jokes)

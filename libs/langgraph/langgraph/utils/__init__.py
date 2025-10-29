@@ -1,1 +1,1 @@
-"""Legacy utilities module, to be removed in v1."""
+"""레거시 유틸리티 모듈로, v1에서 제거될 예정입니다."""

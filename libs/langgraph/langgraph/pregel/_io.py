@@ -54,7 +54,7 @@ def read_channels(
 
 
 def map_command(cmd: Command) -> Iterator[tuple[str, str, Any]]:
-    """Map input chunk to a sequence of pending writes in the form (channel, value)."""
+    """입력 청크를 (채널, 값) 형태의 대기 중인 쓰기 시퀀스로 매핑합니다."""
     if cmd.graph == Command.PARENT:
         raise InvalidUpdateError("There is no parent graph")
     if cmd.goto:
@@ -82,7 +82,7 @@ def map_input(
     input_channels: str | Sequence[str],
     chunk: dict[str, Any] | Any | None,
 ) -> Iterator[tuple[str, Any]]:
-    """Map input chunk to a sequence of pending writes in the form (channel, value)."""
+    """입력 청크를 (채널, 값) 형태의 대기 중인 쓰기 시퀀스로 매핑합니다."""
     if chunk is None:
         return
     elif isinstance(input_channels, str):

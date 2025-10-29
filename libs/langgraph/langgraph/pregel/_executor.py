@@ -38,12 +38,12 @@ class Submit(Protocol[P, T]):
 
 
 class BackgroundExecutor(AbstractContextManager):
-    """A context manager that runs sync tasks in the background.
-    Uses a thread pool executor to delegate tasks to separate threads.
-    On exit,
-    - cancels any (not yet started) tasks with `__cancel_on_exit__=True`
-    - waits for all tasks to finish
-    - re-raises the first exception from tasks with `__reraise_on_exit__=True`"""
+    """백그라운드에서 동기 작업을 실행하는 컨텍스트 매니저입니다.
+    스레드 풀 실행자를 사용하여 작업을 별도의 스레드에 위임합니다.
+    종료 시,
+    - `__cancel_on_exit__=True`인 (아직 시작되지 않은) 작업을 취소합니다
+    - 모든 작업이 완료될 때까지 기다립니다
+    - `__reraise_on_exit__=True`인 작업에서 첫 번째 예외를 다시 발생시킵니다"""
 
     def __init__(self, config: RunnableConfig) -> None:
         self.stack = ExitStack()
@@ -75,7 +75,7 @@ class BackgroundExecutor(AbstractContextManager):
         return task
 
     def done(self, task: concurrent.futures.Future) -> None:
-        """Remove the task from the tasks dict when it's done."""
+        """작업이 완료되면 tasks 딕셔너리에서 작업을 제거합니다."""
         try:
             task.result()
         except GraphBubbleUp:

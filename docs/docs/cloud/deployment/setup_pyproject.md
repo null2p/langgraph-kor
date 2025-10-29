@@ -1,14 +1,14 @@
-# How to Set Up a LangGraph Application with pyproject.toml
+# pyproject.toml로 LangGraph 애플리케이션 설정 방법
 
-A LangGraph application must be configured with a [LangGraph configuration file](../reference/cli.md#configuration-file) in order to be deployed to LangGraph Platform (or to be self-hosted). This how-to guide discusses the basic steps to setup a LangGraph application for deployment using `pyproject.toml` to define your package's dependencies.
+LangGraph 애플리케이션을 LangGraph Platform에 배포하거나 셀프 호스팅하려면 [LangGraph 구성 파일](../reference/cli.md#configuration-file)로 구성해야 합니다. 이 가이드는 `pyproject.toml`을 사용하여 패키지의 의존성을 정의하고 배포를 위한 LangGraph 애플리케이션을 설정하는 기본 단계를 다룹니다.
 
-This walkthrough is based on [this repository](https://github.com/langchain-ai/langgraph-example-pyproject), which you can play around with to learn more about how to setup your LangGraph application for deployment.
+이 워크스루는 [이 리포지토리](https://github.com/langchain-ai/langgraph-example-pyproject)를 기반으로 하며, LangGraph 애플리케이션을 배포용으로 설정하는 방법을 자세히 알아보기 위해 사용해볼 수 있습니다.
 
-!!! tip "Setup with requirements.txt"
-    If you prefer using `requirements.txt` for dependency management, check out [this how-to guide](./setup.md).
+!!! tip "requirements.txt로 설정"
+    의존성 관리에 `requirements.txt` 사용을 선호하는 경우, [이 가이드](./setup.md)를 참조하세요.
 
-!!! tip "Setup with a Monorepo"
-    If you are interested in deploying a graph located inside a monorepo, take a look at [this](https://github.com/langchain-ai/langgraph-example-monorepo) repository for an example of how to do so.
+!!! tip "모노레포로 설정"
+    모노레포 내에 위치한 그래프를 배포하는 데 관심이 있다면, 방법의 예시로 [이](https://github.com/langchain-ai/langgraph-example-monorepo) 리포지토리를 살펴보세요.
 
 The final repository structure will look something like this:
 
@@ -27,13 +27,13 @@ my-app/
 └── pyproject.toml # dependencies for your project
 ```
 
-After each step, an example file directory is provided to demonstrate how code can be organized.
+각 단계 후에는 코드를 어떻게 구성할 수 있는지 보여주는 예제 파일 디렉토리가 제공됩니다.
 
-## Specify Dependencies
+## 의존성 지정
 
-Dependencies can optionally be specified in one of the following files: `pyproject.toml`, `setup.py`, or `requirements.txt`. If none of these files is created, then dependencies can be specified later in the [LangGraph configuration file](#create-langgraph-configuration-file).
+의존성은 선택적으로 다음 파일 중 하나에 지정할 수 있습니다: `pyproject.toml`, `setup.py` 또는 `requirements.txt`. 이러한 파일이 생성되지 않은 경우 나중에 [LangGraph 구성 파일](#create-langgraph-configuration-file)에서 의존성을 지정할 수 있습니다.
 
-The dependencies below will be included in the image, you can also use them in your code, as long as with a compatible version range:
+아래 의존성은 이미지에 포함되며, 호환 가능한 버전 범위로 코드에서도 사용할 수 있습니다:
 
 ```
 langgraph>=0.3.27
@@ -86,9 +86,9 @@ my-app/
 └── pyproject.toml   # Python packages required for your graph
 ```
 
-## Specify Environment Variables
+## 환경 변수 지정
 
-Environment variables can optionally be specified in a file (e.g. `.env`). See the [Environment Variables reference](../reference/env_var.md) to configure additional variables for a deployment.
+환경 변수는 선택적으로 파일(예: `.env`)에 지정할 수 있습니다. 배포를 위한 추가 변수 구성은 [환경 변수 레퍼런스](../reference/env_var.md)를 참조하세요.
 
 Example `.env` file:
 
@@ -106,11 +106,11 @@ my-app/
 └── pyproject.toml
 ```
 
-## Define Graphs
+## 그래프 정의
 
-Implement your graphs! Graphs can be defined in a single file or multiple files. Make note of the variable names of each @[CompiledStateGraph][CompiledStateGraph] to be included in the LangGraph application. The variable names will be used later when creating the [LangGraph configuration file](../reference/cli.md#configuration-file).
+그래프를 구현하세요! 그래프는 단일 파일 또는 여러 파일로 정의할 수 있습니다. LangGraph 애플리케이션에 포함될 각 @[CompiledStateGraph][CompiledStateGraph]의 변수 이름을 기록해두세요. 변수 이름은 나중에 [LangGraph 구성 파일](../reference/cli.md#configuration-file)을 생성할 때 사용됩니다.
 
-Example `agent.py` file, which shows how to import from other modules you define (code for the modules is not shown here, please see [this repository](https://github.com/langchain-ai/langgraph-example-pyproject) to see their implementation):
+정의한 다른 모듈에서 가져오는 방법을 보여주는 예제 `agent.py` 파일입니다(모듈에 대한 코드는 여기에 표시되지 않으며, 구현을 보려면 [이 리포지토리](https://github.com/langchain-ai/langgraph-example-pyproject)를 참조하세요):
 
 ```python
 # my_agent/agent.py
@@ -158,9 +158,9 @@ my-app/
 └── pyproject.toml
 ```
 
-## Create LangGraph Configuration File
+## LangGraph 구성 파일 생성
 
-Create a [LangGraph configuration file](../reference/cli.md#configuration-file) called `langgraph.json`. See the [LangGraph configuration file reference](../reference/cli.md#configuration-file) for detailed explanations of each key in the JSON object of the configuration file.
+`langgraph.json`이라는 [LangGraph 구성 파일](../reference/cli.md#configuration-file)을 생성합니다. 구성 파일의 JSON 객체에서 각 키에 대한 자세한 설명은 [LangGraph 구성 파일 레퍼런스](../reference/cli.md#configuration-file)를 참조하세요.
 
 Example `langgraph.json` file:
 
@@ -174,10 +174,10 @@ Example `langgraph.json` file:
 }
 ```
 
-Note that the variable name of the `CompiledGraph` appears at the end of the value of each subkey in the top-level `graphs` key (i.e. `:<variable_name>`).
+`CompiledGraph`의 변수 이름이 최상위 `graphs` 키의 각 하위 키 값 끝에 나타납니다(즉, `:<variable_name>`).
 
-!!! warning "Configuration File Location"
-    The LangGraph configuration file must be placed in a directory that is at the same level or higher than the Python files that contain compiled graphs and associated dependencies.
+!!! warning "구성 파일 위치"
+    LangGraph 구성 파일은 컴파일된 그래프와 관련 의존성을 포함하는 Python 파일과 같은 레벨 또는 더 높은 레벨의 디렉토리에 배치되어야 합니다.
 
 Example file directory:
 
@@ -196,6 +196,6 @@ my-app/
 └── pyproject.toml # dependencies for your project
 ```
 
-## Next
+## 다음 단계
 
-After you setup your project and place it in a GitHub repository, it's time to [deploy your app](./cloud.md).
+프로젝트를 설정하고 GitHub 리포지토리에 배치한 후에는 [앱을 배포](./cloud.md)할 차례입니다.

@@ -1,13 +1,13 @@
-# Use subgraphs
+# 서브그래프 사용
 
-This guide explains the mechanics of using [subgraphs](../concepts/subgraphs.md). A common application of subgraphs is to build [multi-agent](../concepts/multi_agent.md) systems.
+이 가이드는 [서브그래프](../concepts/subgraphs.md) 사용의 메커니즘을 설명합니다. 서브그래프의 일반적인 용도는 [멀티 에이전트](../concepts/multi_agent.md) 시스템을 구축하는 것입니다.
 
-When adding subgraphs, you need to define how the parent graph and the subgraph communicate:
+서브그래프를 추가할 때는 부모 그래프와 서브그래프가 통신하는 방법을 정의해야 합니다:
 
-* [Shared state schemas](#shared-state-schemas) — parent and subgraph have **shared state keys** in their state [schemas](../concepts/low_level.md#state)
-* [Different state schemas](#different-state-schemas) — **no shared state keys** in parent and subgraph [schemas](../concepts/low_level.md#state)
+* [공유 상태 스키마](#shared-state-schemas) — 부모와 서브그래프가 상태 [스키마](../concepts/low_level.md#state)에 **공유 상태 키**를 가집니다
+* [다른 상태 스키마](#different-state-schemas) — 부모와 서브그래프 [스키마](../concepts/low_level.md#state)에 **공유 상태 키가 없습니다**
 
-## Setup
+## 설정
 
 :::python
 ```bash
@@ -21,19 +21,19 @@ npm install @langchain/langgraph
 ```
 :::
 
-!!! tip "Set up LangSmith for LangGraph development"
+!!! tip "LangGraph 개발을 위한 LangSmith 설정"
 
-    Sign up for [LangSmith](https://smith.langchain.com) to quickly spot issues and improve the performance of your LangGraph projects. LangSmith lets you use trace data to debug, test, and monitor your LLM apps built with LangGraph — read more about how to get started [here](https://docs.smith.langchain.com).
+    [LangSmith](https://smith.langchain.com)에 가입하여 LangGraph 프로젝트의 문제를 빠르게 발견하고 성능을 개선하세요. LangSmith를 사용하면 추적 데이터를 활용하여 LangGraph로 구축한 LLM 앱을 디버그, 테스트 및 모니터링할 수 있습니다 — 시작하는 방법에 대한 자세한 내용은 [여기](https://docs.smith.langchain.com)를 참조하세요.
 
-## Shared state schemas
+## 공유 상태 스키마
 
-A common case is for the parent graph and subgraph to communicate over a shared state key (channel) in the [schema](../concepts/low_level.md#state). For example, in [multi-agent](../concepts/multi_agent.md) systems, the agents often communicate over a shared [messages](https://langchain-ai.github.io/langgraph/concepts/low_level.md#why-use-messages) key.
+부모 그래프와 서브그래프가 [스키마](../concepts/low_level.md#state)에서 공유 상태 키(채널)를 통해 통신하는 것이 일반적인 경우입니다. 예를 들어, [멀티 에이전트](../concepts/multi_agent.md) 시스템에서는 에이전트들이 공유 [messages](https://langchain-ai.github.io/langgraph/concepts/low_level.md#why-use-messages) 키를 통해 통신하는 경우가 많습니다.
 
-If your subgraph shares state keys with the parent graph, you can follow these steps to add it to your graph:
+서브그래프가 부모 그래프와 상태 키를 공유하는 경우 다음 단계를 따라 그래프에 추가할 수 있습니다:
 
 :::python
-1. Define the subgraph workflow (`subgraph_builder` in the example below) and compile it
-2. Pass compiled subgraph to the `.add_node` method when defining the parent graph workflow
+1. 서브그래프 워크플로(`subgraph_builder`)를 정의하고 컴파일합니다
+2. 부모 그래프 워크플로를 정의할 때 컴파일된 서브그래프를 `.add_node` 메서드에 전달합니다
 
 ```python
 from typing_extensions import TypedDict
@@ -62,8 +62,8 @@ graph = builder.compile()
 :::
 
 :::js
-1. Define the subgraph workflow (`subgraphBuilder` in the example below) and compile it
-2. Pass compiled subgraph to the `.addNode` method when defining the parent graph workflow
+1. 서브그래프 워크플로(`subgraphBuilder`)를 정의하고 컴파일합니다
+2. 부모 그래프 워크플로를 정의할 때 컴파일된 서브그래프를 `.addNode` 메서드에 전달합니다
 
 ```typescript
 import { StateGraph, START } from "@langchain/langgraph";
@@ -199,11 +199,11 @@ const graph = builder.compile();
     ```
     :::
 
-## Different state schemas
+## 다른 상태 스키마
 
-For more complex systems you might want to define subgraphs that have a **completely different schema** from the parent graph (no shared keys). For example, you might want to keep a private message history for each of the agents in a [multi-agent](../concepts/multi_agent.md) system.
+더 복잡한 시스템의 경우 부모 그래프와 **완전히 다른 스키마**를 가진 서브그래프를 정의하고 싶을 수 있습니다(공유 키 없음). 예를 들어, [멀티 에이전트](../concepts/multi_agent.md) 시스템의 각 에이전트에 대해 비공개 메시지 히스토리를 유지하고 싶을 수 있습니다.
 
-If that's the case for your application, you need to define a node **function that invokes the subgraph**. This function needs to transform the input (parent) state to the subgraph state before invoking the subgraph, and transform the results back to the parent state before returning the state update from the node.
+애플리케이션이 그런 경우라면 **서브그래프를 호출하는** 노드 함수를 정의해야 합니다. 이 함수는 서브그래프를 호출하기 전에 입력(부모) 상태를 서브그래프 상태로 변환하고, 노드에서 상태 업데이트를 반환하기 전에 결과를 다시 부모 상태로 변환해야 합니다.
 
 :::python
 ```python
@@ -576,9 +576,9 @@ const graph = builder.compile();
     ```
     :::
 
-## Add persistence 
+## 영속성 추가
 
-You only need to **provide the checkpointer when compiling the parent graph**. LangGraph will automatically propagate the checkpointer to the child subgraphs.
+**부모 그래프를 컴파일할 때 체크포인터를 제공**하기만 하면 됩니다. LangGraph는 체크포인터를 자식 서브그래프에 자동으로 전파합니다.
 
 :::python
 ```python
@@ -654,7 +654,7 @@ const subgraph = subgraphBuilder.compile({ checkpointer: true });
 ```
 :::
 
-## View subgraph state
+## 서브그래프 상태 보기
 
 When you enable [persistence](../concepts/persistence.md), you can [inspect the graph state](../concepts/persistence.md#checkpoints) (checkpoint) via the appropriate method. To view the subgraph state, you can use the subgraphs option.
 
@@ -756,7 +756,7 @@ You can inspect the graph state via `graph.getState(config)`. To view the subgra
     2. This will be available only when the subgraph is interrupted. Once you resume the graph, you won't be able to access the subgraph state.
     :::
 
-## Stream subgraph outputs
+## 서브그래프 출력 스트리밍
 
 To include outputs from subgraphs in the streamed outputs, you can set the subgraphs option in the stream method of the parent graph. This will stream outputs from both the parent graph and any subgraphs.
 

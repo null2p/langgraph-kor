@@ -31,18 +31,18 @@ logger = logging.getLogger(__name__)
 class InMemorySaver(
     BaseCheckpointSaver[str], AbstractContextManager, AbstractAsyncContextManager
 ):
-    """An in-memory checkpoint saver.
+    """메모리 내 체크포인트 세이버입니다.
 
-    This checkpoint saver stores checkpoints in memory using a defaultdict.
+    이 체크포인트 세이버는 defaultdict를 사용하여 메모리에 체크포인트를 저장합니다.
 
     Note:
-        Only use `InMemorySaver` for debugging or testing purposes.
-        For production use cases we recommend installing [langgraph-checkpoint-postgres](https://pypi.org/project/langgraph-checkpoint-postgres/) and using `PostgresSaver` / `AsyncPostgresSaver`.
+        디버깅이나 테스트 목적으로만 `InMemorySaver`를 사용하세요.
+        프로덕션 사용 사례의 경우 [langgraph-checkpoint-postgres](https://pypi.org/project/langgraph-checkpoint-postgres/)를 설치하고 `PostgresSaver` / `AsyncPostgresSaver`를 사용하는 것이 좋습니다.
 
-        If you are using LangSmith Deployment, no checkpointer needs to be specified. The correct managed checkpointer will be used automatically.
+        LangSmith Deployment를 사용하는 경우 체크포인터를 지정할 필요가 없습니다. 올바른 관리형 체크포인터가 자동으로 사용됩니다.
 
     Args:
-        serde: The serializer to use for serializing and deserializing checkpoints.
+        serde: 체크포인트 직렬화 및 역직렬화에 사용할 시리얼라이저입니다.
 
     Examples:
 
@@ -62,7 +62,7 @@ class InMemorySaver(
             asyncio.run(coro)  # Output: 2
     """
 
-    # thread ID ->  checkpoint NS -> checkpoint ID -> checkpoint mapping
+    # thread ID -> checkpoint NS -> checkpoint ID -> checkpoint 매핑
     storage: defaultdict[
         str,
         dict[str, dict[str, tuple[tuple[str, bytes], tuple[str, bytes], str | None]]],
@@ -130,18 +130,17 @@ class InMemorySaver(
         return channel_values
 
     def get_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
-        """Get a checkpoint tuple from the in-memory storage.
+        """메모리 내 저장소에서 체크포인트 튜플을 가져옵니다.
 
-        This method retrieves a checkpoint tuple from the in-memory storage based on the
-        provided config. If the config contains a `checkpoint_id` key, the checkpoint with
-        the matching thread ID and timestamp is retrieved. Otherwise, the latest checkpoint
-        for the given thread ID is retrieved.
+        이 메서드는 제공된 config를 기반으로 메모리 내 저장소에서 체크포인트 튜플을 검색합니다.
+        config에 `checkpoint_id` 키가 포함된 경우 일치하는 thread ID와 타임스탬프를 가진
+        체크포인트가 검색됩니다. 그렇지 않으면 주어진 thread ID에 대한 최신 체크포인트가 검색됩니다.
 
         Args:
-            config: The config to use for retrieving the checkpoint.
+            config: 체크포인트 검색에 사용할 config입니다.
 
         Returns:
-            The retrieved checkpoint tuple, or None if no matching checkpoint was found.
+            검색된 체크포인트 튜플 또는 일치하는 체크포인트가 없으면 None입니다.
         """
         thread_id: str = config["configurable"]["thread_id"]
         checkpoint_ns: str = config["configurable"].get("checkpoint_ns", "")
@@ -219,19 +218,18 @@ class InMemorySaver(
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> Iterator[CheckpointTuple]:
-        """List checkpoints from the in-memory storage.
+        """메모리 내 저장소에서 체크포인트를 나열합니다.
 
-        This method retrieves a list of checkpoint tuples from the in-memory storage based
-        on the provided criteria.
+        이 메서드는 제공된 기준을 기반으로 메모리 내 저장소에서 체크포인트 튜플 목록을 검색합니다.
 
         Args:
-            config: Base configuration for filtering checkpoints.
-            filter: Additional filtering criteria for metadata.
-            before: List checkpoints created before this configuration.
-            limit: Maximum number of checkpoints to return.
+            config: 체크포인트 필터링을 위한 기본 구성입니다.
+            filter: 메타데이터에 대한 추가 필터링 기준입니다.
+            before: 이 구성 이전에 생성된 체크포인트를 나열합니다.
+            limit: 반환할 최대 체크포인트 수입니다.
 
         Yields:
-            An iterator of matching checkpoint tuples.
+            일치하는 체크포인트 튜플의 반복자입니다.
         """
         thread_ids = (config["configurable"]["thread_id"],) if config else self.storage
         config_checkpoint_ns = (
@@ -255,11 +253,11 @@ class InMemorySaver(
                     key=lambda x: x[0],
                     reverse=True,
                 ):
-                    # filter by checkpoint ID from config
+                    # config의 checkpoint ID로 필터링
                     if config_checkpoint_id and checkpoint_id != config_checkpoint_id:
                         continue
 
-                    # filter by checkpoint ID from `before` config
+                    # `before` config의 checkpoint ID로 필터링
                     if (
                         before
                         and (before_checkpoint_id := get_checkpoint_id(before))
@@ -267,7 +265,7 @@ class InMemorySaver(
                     ):
                         continue
 
-                    # filter by metadata
+                    # 메타데이터로 필터링
                     metadata = self.serde.loads_typed(metadata_b)
                     if filter and not all(
                         query_value == metadata.get(query_key)
@@ -275,7 +273,7 @@ class InMemorySaver(
                     ):
                         continue
 
-                    # limit search results
+                    # 검색 결과 제한
                     if limit is not None and limit <= 0:
                         break
                     elif limit is not None:
@@ -327,19 +325,19 @@ class InMemorySaver(
         metadata: CheckpointMetadata,
         new_versions: ChannelVersions,
     ) -> RunnableConfig:
-        """Save a checkpoint to the in-memory storage.
+        """메모리 내 저장소에 체크포인트를 저장합니다.
 
-        This method saves a checkpoint to the in-memory storage. The checkpoint is associated
-        with the provided config.
+        이 메서드는 메모리 내 저장소에 체크포인트를 저장합니다. 체크포인트는
+        제공된 config와 연결됩니다.
 
         Args:
-            config: The config to associate with the checkpoint.
-            checkpoint: The checkpoint to save.
-            metadata: Additional metadata to save with the checkpoint.
-            new_versions: New versions as of this write
+            config: 체크포인트와 연결할 config입니다.
+            checkpoint: 저장할 체크포인트입니다.
+            metadata: 체크포인트와 함께 저장할 추가 메타데이터입니다.
+            new_versions: 이 쓰기 시점의 새로운 버전입니다.
 
         Returns:
-            RunnableConfig: The updated config containing the saved checkpoint's timestamp.
+            RunnableConfig: 저장된 체크포인트의 타임스탬프를 포함하는 업데이트된 config입니다.
         """
         c = checkpoint.copy()
         thread_id = config["configurable"]["thread_id"]
@@ -373,19 +371,19 @@ class InMemorySaver(
         task_id: str,
         task_path: str = "",
     ) -> None:
-        """Save a list of writes to the in-memory storage.
+        """메모리 내 저장소에 쓰기 작업 목록을 저장합니다.
 
-        This method saves a list of writes to the in-memory storage. The writes are associated
-        with the provided config.
+        이 메서드는 메모리 내 저장소에 쓰기 작업 목록을 저장합니다. 쓰기 작업은
+        제공된 config와 연결됩니다.
 
         Args:
-            config: The config to associate with the writes.
-            writes: The writes to save.
-            task_id: Identifier for the task creating the writes.
-            task_path: Path of the task creating the writes.
+            config: 쓰기 작업과 연결할 config입니다.
+            writes: 저장할 쓰기 작업입니다.
+            task_id: 쓰기 작업을 생성하는 작업의 식별자입니다.
+            task_path: 쓰기 작업을 생성하는 작업의 경로입니다.
 
         Returns:
-            RunnableConfig: The updated config containing the saved writes' timestamp.
+            RunnableConfig: 저장된 쓰기 작업의 타임스탬프를 포함하는 업데이트된 config입니다.
         """
         thread_id = config["configurable"]["thread_id"]
         checkpoint_ns = config["configurable"].get("checkpoint_ns", "")
@@ -405,10 +403,10 @@ class InMemorySaver(
             )
 
     def delete_thread(self, thread_id: str) -> None:
-        """Delete all checkpoints and writes associated with a thread ID.
+        """thread ID와 연결된 모든 체크포인트 및 쓰기 작업을 삭제합니다.
 
         Args:
-            thread_id: The thread ID to delete.
+            thread_id: 삭제할 thread ID입니다.
 
         Returns:
             None
@@ -423,16 +421,16 @@ class InMemorySaver(
                 del self.blobs[k]
 
     async def aget_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
-        """Asynchronous version of `get_tuple`.
+        """비동기 버전의 `get_tuple`입니다.
 
-        This method is an asynchronous wrapper around `get_tuple` that runs the synchronous
-        method in a separate thread using asyncio.
+        이 메서드는 asyncio를 사용하여 별도의 스레드에서 동기 메서드를 실행하는
+        `get_tuple`에 대한 비동기 래퍼입니다.
 
         Args:
-            config: The config to use for retrieving the checkpoint.
+            config: 체크포인트 검색에 사용할 config입니다.
 
         Returns:
-            The retrieved checkpoint tuple, or None if no matching checkpoint was found.
+            검색된 체크포인트 튜플 또는 일치하는 체크포인트가 없으면 None입니다.
         """
         return self.get_tuple(config)
 
@@ -444,16 +442,16 @@ class InMemorySaver(
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> AsyncIterator[CheckpointTuple]:
-        """Asynchronous version of `list`.
+        """비동기 버전의 `list`입니다.
 
-        This method is an asynchronous wrapper around `list` that runs the synchronous
-        method in a separate thread using asyncio.
+        이 메서드는 asyncio를 사용하여 별도의 스레드에서 동기 메서드를 실행하는
+        `list`에 대한 비동기 래퍼입니다.
 
         Args:
-            config: The config to use for listing the checkpoints.
+            config: 체크포인트 나열에 사용할 config입니다.
 
         Yields:
-            An asynchronous iterator of checkpoint tuples.
+            체크포인트 튜플의 비동기 반복자입니다.
         """
         for item in self.list(config, filter=filter, before=before, limit=limit):
             yield item
@@ -465,16 +463,16 @@ class InMemorySaver(
         metadata: CheckpointMetadata,
         new_versions: ChannelVersions,
     ) -> RunnableConfig:
-        """Asynchronous version of `put`.
+        """비동기 버전의 `put`입니다.
 
         Args:
-            config: The config to associate with the checkpoint.
-            checkpoint: The checkpoint to save.
-            metadata: Additional metadata to save with the checkpoint.
-            new_versions: New versions as of this write
+            config: 체크포인트와 연결할 config입니다.
+            checkpoint: 저장할 체크포인트입니다.
+            metadata: 체크포인트와 함께 저장할 추가 메타데이터입니다.
+            new_versions: 이 쓰기 시점의 새로운 버전입니다.
 
         Returns:
-            RunnableConfig: The updated config containing the saved checkpoint's timestamp.
+            RunnableConfig: 저장된 체크포인트의 타임스탬프를 포함하는 업데이트된 config입니다.
         """
         return self.put(config, checkpoint, metadata, new_versions)
 
@@ -485,16 +483,16 @@ class InMemorySaver(
         task_id: str,
         task_path: str = "",
     ) -> None:
-        """Asynchronous version of `put_writes`.
+        """비동기 버전의 `put_writes`입니다.
 
-        This method is an asynchronous wrapper around `put_writes` that runs the synchronous
-        method in a separate thread using asyncio.
+        이 메서드는 asyncio를 사용하여 별도의 스레드에서 동기 메서드를 실행하는
+        `put_writes`에 대한 비동기 래퍼입니다.
 
         Args:
-            config: The config to associate with the writes.
-            writes: The writes to save, each as a (channel, value) pair.
-            task_id: Identifier for the task creating the writes.
-            task_path: Path of the task creating the writes.
+            config: 쓰기 작업과 연결할 config입니다.
+            writes: 저장할 쓰기 작업으로, 각각 (channel, value) 쌍입니다.
+            task_id: 쓰기 작업을 생성하는 작업의 식별자입니다.
+            task_path: 쓰기 작업을 생성하는 작업의 경로입니다.
 
         Returns:
             None
@@ -502,10 +500,10 @@ class InMemorySaver(
         return self.put_writes(config, writes, task_id, task_path)
 
     async def adelete_thread(self, thread_id: str) -> None:
-        """Delete all checkpoints and writes associated with a thread ID.
+        """thread ID와 연결된 모든 체크포인트 및 쓰기 작업을 삭제합니다.
 
         Args:
-            thread_id: The thread ID to delete.
+            thread_id: 삭제할 thread ID입니다.
 
         Returns:
             None
@@ -524,34 +522,33 @@ class InMemorySaver(
         return f"{next_v:032}.{next_h:016}"
 
 
-MemorySaver = InMemorySaver  # Kept for backwards compatibility
+MemorySaver = InMemorySaver  # 하위 호환성을 위해 유지됨
 
 
 class PersistentDict(defaultdict):
-    """Persistent dictionary with an API compatible with shelve and anydbm.
+    """shelve 및 anydbm과 호환되는 API를 가진 영구 딕셔너리입니다.
 
-    The dict is kept in memory, so the dictionary operations run as fast as
-    a regular dictionary.
+    딕셔너리는 메모리에 보관되므로 딕셔너리 작업이 일반 딕셔너리만큼 빠르게 실행됩니다.
 
-    Write to disk is delayed until close or sync (similar to gdbm's fast mode).
+    디스크에 쓰기는 close 또는 sync까지 지연됩니다(gdbm의 fast 모드와 유사).
 
-    Input file format is automatically discovered.
-    Output file format is selectable between pickle, json, and csv.
-    All three serialization formats are backed by fast C implementations.
+    입력 파일 형식은 자동으로 검색됩니다.
+    출력 파일 형식은 pickle, json, csv 중에서 선택할 수 있습니다.
+    세 가지 직렬화 형식 모두 빠른 C 구현으로 지원됩니다.
 
-    Adapted from https://code.activestate.com/recipes/576642-persistent-dict-with-multiple-standard-file-format/
+    다음에서 수정됨: https://code.activestate.com/recipes/576642-persistent-dict-with-multiple-standard-file-format/
 
     """
 
     def __init__(self, *args: Any, filename: str, **kwds: Any) -> None:
-        self.flag = "c"  # r=readonly, c=create, or n=new
-        self.mode = None  # None or an octal triple like 0644
-        self.format = "pickle"  # 'csv', 'json', or 'pickle'
+        self.flag = "c"  # r=읽기 전용, c=생성, n=새로 만들기
+        self.mode = None  # None 또는 0644와 같은 8진수 트리플
+        self.format = "pickle"  # 'csv', 'json', 또는 'pickle'
         self.filename = filename
         super().__init__(*args, **kwds)
 
     def sync(self) -> None:
-        "Write dict to disk"
+        "딕셔너리를 디스크에 씁니다"
         if self.flag == "r":
             return
         tempname = self.filename + ".tmp"
@@ -563,7 +560,7 @@ class PersistentDict(defaultdict):
             raise
         finally:
             fileobj.close()
-        shutil.move(tempname, self.filename)  # atomic commit
+        shutil.move(tempname, self.filename)  # 원자적 커밋
         if self.mode is not None:
             os.chmod(self.filename, self.mode)
 
@@ -584,7 +581,7 @@ class PersistentDict(defaultdict):
             raise NotImplementedError("Unknown format: " + repr(self.format))
 
     def load(self) -> None:
-        # try formats from most restrictive to least restrictive
+        # 가장 제한적인 형식부터 가장 제한이 적은 형식까지 시도
         if self.flag == "n":
             return
         with open(self.filename, "rb" if self.format == "pickle" else "r") as fileobj:

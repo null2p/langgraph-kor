@@ -1,16 +1,16 @@
-# Time travel using Server API
+# Server API를 사용한 타임 트래블
 
-LangGraph provides the [**time travel**](../../concepts/time-travel.md) functionality to resume execution from a prior checkpoint, either replaying the same state or modifying it to explore alternatives. In all cases, resuming past execution produces a new fork in the history.
+LangGraph는 이전 체크포인트에서 실행을 재개하는 [**타임 트래블**](../../concepts/time-travel.md) 기능을 제공하며, 동일한 상태를 재생하거나 수정하여 대안을 탐색할 수 있습니다. 모든 경우에 과거 실행을 재개하면 히스토리에 새 분기가 생성됩니다.
 
-To time travel using the LangGraph Server API (via the LangGraph SDK):
+LangGraph Server API(LangGraph SDK를 통해)를 사용하여 타임 트래블하려면:
 
-1. **Run the graph** with initial inputs using [LangGraph SDK](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/)'s @[`client.runs.wait`][client.runs.wait] or @[`client.runs.stream`][client.runs.stream] APIs.
-2. **Identify a checkpoint in an existing thread**: Use @[`client.threads.get_history`][client.threads.get_history] method to retrieve the execution history for a specific `thread_id` and locate the desired `checkpoint_id`.
-   Alternatively, set a [breakpoint](./human_in_the_loop_breakpoint.md) before the node(s) where you want execution to pause. You can then find the most recent checkpoint recorded up to that breakpoint.
-3. **(Optional) modify the graph state**: Use the @[`client.threads.update_state`][client.threads.update_state] method to modify the graph’s state at the checkpoint and resume execution from alternative state.
-4. **Resume execution from the checkpoint**: Use the @[`client.runs.wait`][client.runs.wait] or @[`client.runs.stream`][client.runs.stream] APIs with an input of `None` and the appropriate `thread_id` and `checkpoint_id`.
+1. **그래프 실행**: [LangGraph SDK](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/)의 @[`client.runs.wait`][client.runs.wait] 또는 @[`client.runs.stream`][client.runs.stream] API를 사용하여 초기 입력으로 그래프를 실행합니다.
+2. **기존 스레드에서 체크포인트 식별**: @[`client.threads.get_history`][client.threads.get_history] 메서드를 사용하여 특정 `thread_id`에 대한 실행 히스토리를 검색하고 원하는 `checkpoint_id`를 찾습니다.
+   또는 실행을 일시 중지하려는 노드 앞에 [브레이크포인트](./human_in_the_loop_breakpoint.md)를 설정합니다. 그런 다음 해당 브레이크포인트까지 기록된 가장 최근 체크포인트를 찾을 수 있습니다.
+3. **(선택 사항) 그래프 상태 수정**: @[`client.threads.update_state`][client.threads.update_state] 메서드를 사용하여 체크포인트에서 그래프의 상태를 수정하고 대체 상태에서 실행을 재개합니다.
+4. **체크포인트에서 실행 재개**: `None` 입력과 적절한 `thread_id` 및 `checkpoint_id`와 함께 @[`client.runs.wait`][client.runs.wait] 또는 @[`client.runs.stream`][client.runs.stream] API를 사용합니다.
 
-## Use time travel in a workflow
+## 워크플로에서 타임 트래블 사용
 
 ??? example "Example graph"
 
@@ -54,7 +54,7 @@ To time travel using the LangGraph Server API (via the LangGraph SDK):
     graph = builder.compile()
     ```
 
-### 1. Run the graph
+### 1. 그래프 실행
 
 === "Python"
 
@@ -100,7 +100,7 @@ To time travel using the LangGraph Server API (via the LangGraph SDK):
 
 === "cURL"
 
-    Create a thread:
+    스레드 생성:
 
     ```bash
     curl --request POST \
@@ -109,7 +109,7 @@ To time travel using the LangGraph Server API (via the LangGraph SDK):
     --data '{}'
     ```
 
-    Run the graph:
+    그래프 실행:
 
     ```bash
     curl --request POST \
@@ -121,7 +121,7 @@ To time travel using the LangGraph Server API (via the LangGraph SDK):
     }"
     ```
 
-### 2. Identify a checkpoint
+### 2. 체크포인트 식별
 
 === "Python"
 
@@ -149,9 +149,9 @@ To time travel using the LangGraph Server API (via the LangGraph SDK):
     --header 'Content-Type: application/json'
     ```
 
-### 3. Update the state (optional)
+### 3. 상태 업데이트 (선택 사항)
 
-`update_state` will create a new checkpoint. The new checkpoint will be associated with the same thread, but a new checkpoint ID.
+`update_state`는 새 체크포인트를 생성합니다. 새 체크포인트는 동일한 스레드와 연결되지만 새 체크포인트 ID를 가집니다.
 
 === "Python"
 
@@ -191,7 +191,7 @@ To time travel using the LangGraph Server API (via the LangGraph SDK):
     }"
     ```
 
-### 4. Resume execution from the checkpoint
+### 4. 체크포인트에서 실행 재개
 
 === "Python"
 
@@ -233,6 +233,6 @@ To time travel using the LangGraph Server API (via the LangGraph SDK):
     }"
     ```
 
-## Learn more
+## 더 알아보기
 
-- [**LangGraph time travel guide**](../../how-tos/human_in_the_loop/time-travel.md): learn more about using time travel in LangGraph.
+- [**LangGraph 타임 트래블 가이드**](../../how-tos/human_in_the_loop/time-travel.md): LangGraph에서 타임 트래블을 사용하는 방법에 대해 자세히 알아보세요.

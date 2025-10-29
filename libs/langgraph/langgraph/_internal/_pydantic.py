@@ -41,7 +41,7 @@ def get_fields(model: BaseModel) -> dict[str, FieldInfo]: ...
 def get_fields(
     model: type[BaseModel] | BaseModel,
 ) -> dict[str, FieldInfo]:
-    """Get the field names of a Pydantic model."""
+    """Pydantic 모델의 필드 이름을 가져옵니다."""
     if hasattr(model, "model_fields"):
         return model.model_fields
 
@@ -64,14 +64,14 @@ def _create_root_model(
     module_name: str | None = None,
     default_: object = NO_DEFAULT,
 ) -> type[BaseModel]:
-    """Create a base class."""
+    """베이스 클래스를 생성합니다."""
 
     def schema(
         cls: type[BaseModel],
         by_alias: bool = True,  # noqa: FBT001,FBT002
         ref_template: str = DEFAULT_REF_TEMPLATE,
     ) -> dict[str, Any]:
-        # Complains about schema not being defined in superclass
+        # schema가 슈퍼클래스에 정의되지 않았다고 불평합니다
         schema_ = super(cls, cls).schema(  # type: ignore[misc]
             by_alias=by_alias, ref_template=ref_template
         )
@@ -85,7 +85,7 @@ def _create_root_model(
         schema_generator: type[GenerateJsonSchema] = GenerateJsonSchema,
         mode: JsonSchemaMode = "validation",
     ) -> dict[str, Any]:
-        # Complains about model_json_schema not being defined in superclass
+        # model_json_schema가 슈퍼클래스에 정의되지 않았다고 불평합니다
         schema_ = super(cls, cls).model_json_schema(  # type: ignore[misc]
             by_alias=by_alias,
             ref_template=ref_template,
@@ -136,9 +136,9 @@ def _create_model_cached(
     )
 
 
-# Reserved names should capture all the `public` names / methods that are
-# used by BaseModel internally. This will keep the reserved names up-to-date.
-# For reference, the reserved names are:
+# 예약된 이름은 BaseModel에서 내부적으로 사용하는 모든 `public` 이름/메서드를 포함해야 합니다.
+# 이렇게 하면 예약된 이름을 최신 상태로 유지할 수 있습니다.
+# 참고로 예약된 이름은 다음과 같습니다:
 # "construct", "copy", "dict", "from_orm", "json", "parse_file", "parse_obj",
 # "parse_raw", "schema", "schema_json", "update_forward_refs", "validate",
 # "model_computed_fields", "model_config", "model_construct", "model_copy",
@@ -150,12 +150,12 @@ _RESERVED_NAMES = {key for key in dir(BaseModel) if not key.startswith("_")}
 
 
 def _remap_field_definitions(field_definitions: dict[str, Any]) -> dict[str, Any]:
-    """This remaps fields to avoid colliding with internal pydantic fields."""
+    """내부 pydantic 필드와의 충돌을 피하기 위해 필드를 다시 매핑합니다."""
 
     remapped = {}
     for key, value in field_definitions.items():
         if key.startswith("_") or key in _RESERVED_NAMES:
-            # Let's add a prefix to avoid colliding with internal pydantic fields
+            # 내부 pydantic 필드와의 충돌을 피하기 위해 접두사를 추가합니다
             if isinstance(value, FieldInfo):
                 msg = (
                     f"Remapping for fields starting with '_' or fields with a name "
@@ -184,21 +184,21 @@ def create_model(
     field_definitions: dict[str, Any] | None = None,
     root: Any | None = None,
 ) -> type[BaseModel]:
-    """Create a pydantic model with the given field definitions.
+    """주어진 필드 정의로 pydantic 모델을 생성합니다.
 
-    Attention:
-        Please do not use outside of langchain packages. This API
-        is subject to change at any time.
+    주의:
+        langchain 패키지 외부에서는 사용하지 마세요. 이 API는
+        언제든지 변경될 수 있습니다.
 
     Args:
-        model_name: The name of the model.
-        module_name: The name of the module where the model is defined.
-            This is used by Pydantic to resolve any forward references.
-        field_definitions: The field definitions for the model.
-        root: Type for a root model (RootModel)
+        model_name: 모델의 이름입니다.
+        module_name: 모델이 정의된 모듈의 이름입니다.
+            Pydantic에서 forward reference를 해결하는 데 사용됩니다.
+        field_definitions: 모델의 필드 정의입니다.
+        root: 루트 모델(RootModel)의 타입입니다.
 
     Returns:
-        Type[BaseModel]: The created model.
+        Type[BaseModel]: 생성된 모델입니다.
     """
     field_definitions = field_definitions or {}
 
@@ -218,20 +218,20 @@ def create_model(
         try:
             named_root_model = _create_root_model_cached(model_name, **kwargs)
         except TypeError:
-            # something in the arguments into _create_root_model_cached is not hashable
+            # _create_root_model_cached에 전달된 인자 중 해시 가능하지 않은 것이 있습니다
             named_root_model = _create_root_model(
                 model_name,
                 **kwargs,
             )
         return named_root_model
 
-    # No root, just field definitions
+    # root가 없고 필드 정의만 있습니다
     names = set(field_definitions.keys())
 
     capture_warnings = False
 
     for name in names:
-        # Also if any non-reserved name is used (e.g., model_id or model_name)
+        # 또한 예약되지 않은 이름이 사용되는 경우(예: model_id 또는 model_name)
         if name.startswith("model"):
             capture_warnings = True
 
@@ -241,7 +241,7 @@ def create_model(
         try:
             return _create_model_cached(model_name, **field_definitions)
         except TypeError:
-            # something in field definitions is not hashable
+            # 필드 정의 중 해시 가능하지 않은 것이 있습니다
             return _create_model_base(
                 model_name,
                 __config__=_SchemaConfig,
@@ -250,11 +250,11 @@ def create_model(
 
 
 def is_supported_by_pydantic(type_: Any) -> bool:
-    """Check if a given "complex" type is supported by pydantic.
+    """주어진 "복잡한" 타입이 pydantic에서 지원되는지 확인합니다.
 
-    This will return False for primitive types like int, str, etc.
+    int, str 등의 원시 타입에 대해서는 False를 반환합니다.
 
-    The check is meant for container types like dataclasses, TypedDicts, etc.
+    이 확인은 dataclass, TypedDict 등의 컨테이너 타입을 위한 것입니다.
     """
     if is_dataclass(type_):
         return True
@@ -267,9 +267,9 @@ def is_supported_by_pydantic(type_: Any) -> bool:
             if base is TypedDict:
                 return True
             elif base is typing.TypedDict:  # noqa: TID251
-                # ignoring TID251 since it's OK to use typing.TypedDict in this case.
-                # Pydantic supports typing.TypedDict from Python 3.12
-                # For older versions, only typing_extensions.TypedDict is supported.
+                # 이 경우 typing.TypedDict를 사용하는 것이 괜찮으므로 TID251을 무시합니다.
+                # Pydantic은 Python 3.12부터 typing.TypedDict를 지원합니다.
+                # 이전 버전에서는 typing_extensions.TypedDict만 지원됩니다.
                 if sys.version_info >= (3, 12):
                     return True
     return False

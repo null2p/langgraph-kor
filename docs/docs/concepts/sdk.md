@@ -6,15 +6,15 @@ search:
 # LangGraph SDK
 
 :::python
-LangGraph Platform provides a python SDK for interacting with [LangGraph Server](./langgraph_server.md).
+LangGraph Platform은 [LangGraph Server](./langgraph_server.md)와 상호작용하기 위한 Python SDK를 제공합니다.
 
-!!! tip "Python SDK reference"
+!!! tip "Python SDK 레퍼런스"
 
-    For detailed information about the Python SDK, see [Python SDK reference docs](../cloud/reference/sdk/python_sdk_ref.md).
+    Python SDK에 대한 자세한 정보는 [Python SDK 레퍼런스 문서](../cloud/reference/sdk/python_sdk_ref.md)를 참조하세요.
 
-## Installation
+## 설치
 
-You can install the LangGraph SDK using the following command:
+다음 명령을 사용하여 LangGraph SDK를 설치할 수 있습니다:
 
 ```bash
 pip install langgraph-sdk
@@ -22,7 +22,7 @@ pip install langgraph-sdk
 
 ## Python sync vs. async
 
-The Python SDK provides both synchronous (`get_sync_client`) and asynchronous (`get_client`) clients for interacting with LangGraph Server:
+Python SDK는 LangGraph Server와 상호작용하기 위한 동기(`get_sync_client`) 및 비동기(`get_client`) 클라이언트를 모두 제공합니다:
 
 === "Sync"
 
@@ -42,24 +42,24 @@ The Python SDK provides both synchronous (`get_sync_client`) and asynchronous (`
     await client.assistants.search()
     ```
 
-## Learn more
+## 더 알아보기
 
-- [Python SDK Reference](../cloud/reference/sdk/python_sdk_ref.md)
-- [LangGraph CLI API Reference](../cloud/reference/cli.md)
+- [Python SDK 레퍼런스](../cloud/reference/sdk/python_sdk_ref.md)
+- [LangGraph CLI API 레퍼런스](../cloud/reference/cli.md)
   :::
 
 :::js
-LangGraph Platform provides a JS/TS SDK for interacting with [LangGraph Server](./langgraph_server.md).
+LangGraph Platform은 [LangGraph Server](./langgraph_server.md)와 상호작용하기 위한 JS/TS SDK를 제공합니다.
 
-## Installation
+## 설치
 
-You can add the LangGraph SDK to your project using the following command:
+다음 명령을 사용하여 프로젝트에 LangGraph SDK를 추가할 수 있습니다:
 
 ```bash
 npm install @langchain/langgraph-sdk
 ```
 
-## Learn more
+## 더 알아보기
 
-- [LangGraph CLI API Reference](../cloud/reference/cli.md)
+- [LangGraph CLI API 레퍼런스](../cloud/reference/cli.md)
   :::

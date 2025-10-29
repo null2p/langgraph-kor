@@ -11,7 +11,7 @@ from langgraph.checkpoint.serde.base import SerializerProtocol
 
 
 class SqliteCache(BaseCache[ValueT]):
-    """File-based cache using SQLite."""
+    """SQLite를 사용하는 파일 기반 캐시입니다."""
 
     def __init__(
         self,
@@ -19,18 +19,18 @@ class SqliteCache(BaseCache[ValueT]):
         path: str,
         serde: SerializerProtocol | None = None,
     ) -> None:
-        """Initialize the cache with a file path."""
+        """파일 경로로 캐시를 초기화합니다."""
         super().__init__(serde=serde)
-        # SQLite backing store
+        # SQLite 백업 저장소
         self._conn = sqlite3.connect(
             path,
             check_same_thread=False,
         )
-        # Serialize access to the shared connection across threads
+        # 스레드 간 공유 연결에 대한 액세스를 직렬화합니다
         self._lock = threading.RLock()
-        # Better concurrency & atomicity
+        # 더 나은 동시성 및 원자성
         self._conn.execute("PRAGMA journal_mode=WAL;")
-        # Schema: key -> (expiry, encoding, value)
+        # 스키마: key -> (expiry, encoding, value)
         self._conn.execute(
             """CREATE TABLE IF NOT EXISTS cache (
                 ns TEXT,
@@ -44,7 +44,7 @@ class SqliteCache(BaseCache[ValueT]):
         self._conn.commit()
 
     def get(self, keys: Sequence[FullKey]) -> dict[FullKey, ValueT]:
-        """Get the cached values for the given keys."""
+        """주어진 키에 대한 캐시된 값을 가져옵니다."""
         with self._lock, self._conn:
             now = datetime.datetime.now(datetime.timezone.utc).timestamp()
             if not keys:
@@ -61,7 +61,7 @@ class SqliteCache(BaseCache[ValueT]):
             rows = cursor.fetchall()
             for ns, key, expiry, encoding, raw in rows:
                 if expiry is not None and now > expiry:
-                    # purge expired entry
+                    # 만료된 항목 삭제
                     self._conn.execute(
                         "DELETE FROM cache WHERE (ns, key) = (?, ?)", (ns, key)
                     )
@@ -72,11 +72,11 @@ class SqliteCache(BaseCache[ValueT]):
             return values
 
     async def aget(self, keys: Sequence[FullKey]) -> dict[FullKey, ValueT]:
-        """Asynchronously get the cached values for the given keys."""
+        """주어진 키에 대한 캐시된 값을 비동기적으로 가져옵니다."""
         return await asyncio.to_thread(self.get, keys)
 
     def set(self, mapping: Mapping[FullKey, tuple[ValueT, int | None]]) -> None:
-        """Set the cached values for the given keys and TTLs."""
+        """주어진 키와 TTL에 대한 캐시 값을 설정합니다."""
         with self._lock, self._conn:
             now = datetime.datetime.now(datetime.timezone.utc)
             for key, (value, ttl) in mapping.items():
@@ -92,12 +92,12 @@ class SqliteCache(BaseCache[ValueT]):
                 )
 
     async def aset(self, mapping: Mapping[FullKey, tuple[ValueT, int | None]]) -> None:
-        """Asynchronously set the cached values for the given keys and TTLs."""
+        """주어진 키와 TTL에 대한 캐시 값을 비동기적으로 설정합니다."""
         await asyncio.to_thread(self.set, mapping)
 
     def clear(self, namespaces: Sequence[Namespace] | None = None) -> None:
-        """Delete the cached values for the given namespaces.
-        If no namespaces are provided, clear all cached values."""
+        """주어진 네임스페이스에 대한 캐시된 값을 삭제합니다.
+        네임스페이스가 제공되지 않으면 모든 캐시된 값을 삭제합니다."""
         with self._lock, self._conn:
             if namespaces is None:
                 self._conn.execute("DELETE FROM cache")
@@ -109,8 +109,8 @@ class SqliteCache(BaseCache[ValueT]):
                 )
 
     async def aclear(self, namespaces: Sequence[Namespace] | None = None) -> None:
-        """Asynchronously delete the cached values for the given namespaces.
-        If no namespaces are provided, clear all cached values."""
+        """주어진 네임스페이스에 대한 캐시된 값을 비동기적으로 삭제합니다.
+        네임스페이스가 제공되지 않으면 모든 캐시된 값을 삭제합니다."""
         await asyncio.to_thread(self.clear, namespaces)
 
     def __del__(self) -> None:

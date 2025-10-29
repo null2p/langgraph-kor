@@ -13,7 +13,7 @@ __all__ = ("EphemeralValue",)
 
 
 class EphemeralValue(Generic[Value], BaseChannel[Value, Value, Value]):
-    """Stores the value received in the step immediately preceding, clears after."""
+    """직전 단계에서 받은 값을 저장하고, 그 후에 지웁니다."""
 
     __slots__ = ("value", "guard")
 
@@ -30,16 +30,16 @@ class EphemeralValue(Generic[Value], BaseChannel[Value, Value, Value]):
 
     @property
     def ValueType(self) -> type[Value]:
-        """The type of the value stored in the channel."""
+        """채널에 저장된 값의 타입입니다."""
         return self.typ
 
     @property
     def UpdateType(self) -> type[Value]:
-        """The type of the update received by the channel."""
+        """채널이 받는 업데이트의 타입입니다."""
         return self.typ
 
     def copy(self) -> Self:
-        """Return a copy of the channel."""
+        """채널의 복사본을 반환합니다."""
         empty = self.__class__(self.typ, self.guard)
         empty.key = self.key
         empty.value = self.value

@@ -1,4 +1,4 @@
-"""Utility to convert a user provided function into a Runnable with a ChannelWrite."""
+"""사용자가 제공한 함수를 ChannelWrite가 포함된 Runnable로 변환하는 유틸리티입니다."""
 
 from __future__ import annotations
 
@@ -43,13 +43,11 @@ def _getattribute(obj: Any, name: str) -> Any:
 
 
 def _whichmodule(obj: Any, name: str) -> str | None:
-    """Find the module an object belongs to.
+    """객체가 속한 모듈을 찾습니다.
 
-    This function differs from ``pickle.whichmodule`` in two ways:
-    - it does not mangle the cases where obj's module is __main__ and obj was
-      not found in any module.
-    - Errors arising during module introspection are ignored, as those errors
-      are considered unwanted side effects.
+    이 함수는 ``pickle.whichmodule``과 두 가지 점에서 다릅니다:
+    - obj의 모듈이 __main__이고 어떤 모듈에서도 obj를 찾을 수 없는 경우를 처리하지 않습니다.
+    - 모듈 검사 중 발생하는 오류는 원하지 않는 부작용으로 간주되어 무시됩니다.
     """
     module_name = getattr(obj, "__module__", None)
 
@@ -77,7 +75,7 @@ def _whichmodule(obj: Any, name: str) -> str | None:
 
 
 def identifier(obj: Any, name: str | None = None) -> str | None:
-    """Return the module and name of an object."""
+    """객체의 모듈과 이름을 반환합니다."""
     from langgraph._internal._runnable import RunnableCallable, RunnableSeq
     from langgraph.pregel._read import PregelNode
 

@@ -1,17 +1,17 @@
 # Models
 
-LangGraph provides built-in support for [LLMs (language models)](https://python.langchain.com/docs/concepts/chat_models/) via the LangChain library. This makes it easy to integrate various LLMs into your agents and workflows.
+LangGraph는 LangChain 라이브러리를 통해 [LLM(언어 모델)](https://python.langchain.com/docs/concepts/chat_models/)에 대한 기본 지원을 제공합니다. 이를 통해 다양한 LLM을 에이전트와 워크플로우에 쉽게 통합할 수 있습니다.
 
 ## Initialize a model
 
 :::python
-Use [`init_chat_model`](https://python.langchain.com/docs/how_to/chat_models_universal_init/) to initialize models:
+[`init_chat_model`](https://python.langchain.com/docs/how_to/chat_models_universal_init/)을 사용하여 모델을 초기화합니다:
 
 {% include-markdown "../../snippets/chat_model_tabs.md" %}
 :::
 
 :::js
-Use model provider classes to initialize models:
+모델 제공자 클래스를 사용하여 모델을 초기화합니다:
 
 === "OpenAI"
 
@@ -64,7 +64,7 @@ Use model provider classes to initialize models:
 
 ### Instantiate a model directly
 
-If a model provider is not available via `init_chat_model`, you can instantiate the provider's model class directly. The model must implement the [BaseChatModel interface](https://python.langchain.com/api_reference/core/language_models/langchain_core.language_models.chat_models.BaseChatModel.html) and support tool calling:
+모델 제공자가 `init_chat_model`을 통해 사용할 수 없는 경우, 제공자의 모델 클래스를 직접 인스턴스화할 수 있습니다. 모델은 [BaseChatModel 인터페이스](https://python.langchain.com/api_reference/core/language_models/langchain_core.language_models.chat_models.BaseChatModel.html)를 구현하고 도구 호출을 지원해야 합니다:
 
 ```python
 # Anthropic is already supported by `init_chat_model`,
@@ -82,13 +82,12 @@ model = ChatAnthropic(
 
 !!! important "Tool calling support"
 
-    If you are building an agent or workflow that requires the model to call external tools, ensure that the underlying
-    language model supports [tool calling](../concepts/tools.md). Compatible models can be found in the [LangChain integrations directory](https://python.langchain.com/docs/integrations/chat/).
+    모델이 외부 도구를 호출해야 하는 에이전트나 워크플로우를 구축하는 경우, 기본 언어 모델이 [도구 호출](../concepts/tools.md)을 지원하는지 확인하세요. 호환 가능한 모델은 [LangChain 통합 디렉토리](https://python.langchain.com/docs/integrations/chat/)에서 찾을 수 있습니다.
 
 ## Use in an agent
 
 :::python
-When using `create_react_agent` you can specify the model by its name string, which is a shorthand for initializing the model using `init_chat_model`. This allows you to use the model without needing to import or instantiate it directly.
+`create_react_agent`를 사용할 때 모델 이름 문자열로 모델을 지정할 수 있으며, 이는 `init_chat_model`을 사용하여 모델을 초기화하는 단축 표기법입니다. 이를 통해 모델을 직접 임포트하거나 인스턴스화할 필요 없이 모델을 사용할 수 있습니다.
 
 === "model name"
 
@@ -126,7 +125,7 @@ When using `create_react_agent` you can specify the model by its name string, wh
 :::
 
 :::js
-When using `createReactAgent` you can pass the model instance directly:
+`createReactAgent`를 사용할 때 모델 인스턴스를 직접 전달할 수 있습니다:
 
 ```typescript
 import { ChatOpenAI } from "@langchain/openai";
@@ -149,9 +148,9 @@ const agent = createReactAgent({
 
 ### Dynamic model selection
 
-Pass a callable function to `create_react_agent` to dynamically select the model at runtime. This is useful for scenarios where you want to choose a model based on user input, configuration settings, or other runtime conditions.
+런타임에 동적으로 모델을 선택하려면 `create_react_agent`에 호출 가능한 함수를 전달합니다. 이는 사용자 입력, 구성 설정 또는 기타 런타임 조건을 기반으로 모델을 선택하려는 시나리오에 유용합니다.
 
-The selector function must return a chat model. If you're using tools, you must bind the tools to the model within the selector function.
+선택자 함수는 채팅 모델을 반환해야 합니다. 도구를 사용하는 경우, 선택자 함수 내에서 도구를 모델에 바인딩해야 합니다.
 
   ```python
 from dataclasses import dataclass
@@ -220,7 +219,7 @@ print(output["messages"][-1].text())
 ### Disable streaming
 
 :::python
-To disable streaming of the individual LLM tokens, set `disable_streaming=True` when initializing the model:
+개별 LLM 토큰의 스트리밍을 비활성화하려면 모델을 초기화할 때 `disable_streaming=True`를 설정합니다:
 
 === "`init_chat_model`"
 
@@ -246,11 +245,11 @@ To disable streaming of the individual LLM tokens, set `disable_streaming=True` 
     )
     ```
 
-Refer to the [API reference](https://python.langchain.com/api_reference/core/language_models/langchain_core.language_models.chat_models.BaseChatModel.html#langchain_core.language_models.chat_models.BaseChatModel.disable_streaming) for more information on `disable_streaming`
+`disable_streaming`에 대한 자세한 내용은 [API reference](https://python.langchain.com/api_reference/core/language_models/langchain_core.language_models.chat_models.BaseChatModel.html#langchain_core.language_models.chat_models.BaseChatModel.disable_streaming)를 참조하세요.
 :::
 
 :::js
-To disable streaming of the individual LLM tokens, set `streaming: false` when initializing the model:
+개별 LLM 토큰의 스트리밍을 비활성화하려면 모델을 초기화할 때 `streaming: false`를 설정합니다:
 
 ```typescript
 import { ChatOpenAI } from "@langchain/openai";
@@ -266,7 +265,7 @@ const model = new ChatOpenAI({
 ### Add model fallbacks
 
 :::python
-You can add a fallback to a different model or a different LLM provider using `model.with_fallbacks([...])`:
+`model.with_fallbacks([...])`를 사용하여 다른 모델 또는 다른 LLM 제공자로의 폴백을 추가할 수 있습니다:
 
 === "`init_chat_model`"
 
@@ -297,11 +296,11 @@ You can add a fallback to a different model or a different LLM provider using `m
     )
     ```
 
-See this [guide](https://python.langchain.com/docs/how_to/fallbacks/#fallback-to-better-model) for more information on model fallbacks.
+모델 폴백에 대한 자세한 내용은 이 [가이드](https://python.langchain.com/docs/how_to/fallbacks/#fallback-to-better-model)를 참조하세요.
 :::
 
 :::js
-You can add a fallback to a different model or a different LLM provider using `model.withFallbacks([...])`:
+`model.withFallbacks([...])`를 사용하여 다른 모델 또는 다른 LLM 제공자로의 폴백을 추가할 수 있습니다:
 
 ```typescript
 import { ChatOpenAI } from "@langchain/openai";
@@ -316,14 +315,14 @@ const modelWithFallbacks = new ChatOpenAI({
 ]);
 ```
 
-See this [guide](https://js.langchain.com/docs/how_to/fallbacks/#fallback-to-better-model) for more information on model fallbacks.
+모델 폴백에 대한 자세한 내용은 이 [가이드](https://js.langchain.com/docs/how_to/fallbacks/#fallback-to-better-model)를 참조하세요.
 :::
 
 :::python
 
 ### Use the built-in rate limiter
 
-Langchain includes a built-in in-memory rate limiter. This rate limiter is thread safe and can be shared by multiple threads in the same process.
+Langchain에는 내장된 인메모리 속도 제한기가 포함되어 있습니다. 이 속도 제한기는 스레드 안전하며 동일한 프로세스의 여러 스레드에서 공유될 수 있습니다.
 
 ```python
 from langchain_core.rate_limiters import InMemoryRateLimiter
@@ -341,27 +340,27 @@ model = ChatAnthropic(
 )
 ```
 
-See the LangChain docs for more information on how to [handle rate limiting](https://python.langchain.com/docs/how_to/chat_model_rate_limiting/).
+[속도 제한을 처리하는 방법](https://python.langchain.com/docs/how_to/chat_model_rate_limiting/)에 대한 자세한 내용은 LangChain 문서를 참조하세요.
 :::
 
 ## Bring your own model
 
-If your desired LLM isn't officially supported by LangChain, consider these options:
+원하는 LLM이 LangChain에서 공식적으로 지원되지 않는 경우 다음 옵션을 고려하세요:
 
 :::python
 
-1. **Implement a custom LangChain chat model**: Create a model conforming to the [LangChain chat model interface](https://python.langchain.com/docs/how_to/custom_chat_model/). This enables full compatibility with LangGraph's agents and workflows but requires understanding of the LangChain framework.
+1. **커스텀 LangChain 채팅 모델 구현**: [LangChain 채팅 모델 인터페이스](https://python.langchain.com/docs/how_to/custom_chat_model/)를 준수하는 모델을 생성합니다. 이를 통해 LangGraph의 에이전트 및 워크플로우와 완전히 호환되지만 LangChain 프레임워크에 대한 이해가 필요합니다.
 
    :::
 
 :::js
 
-1. **Implement a custom LangChain chat model**: Create a model conforming to the [LangChain chat model interface](https://js.langchain.com/docs/how_to/custom_chat/). This enables full compatibility with LangGraph's agents and workflows but requires understanding of the LangChain framework.
+1. **커스텀 LangChain 채팅 모델 구현**: [LangChain 채팅 모델 인터페이스](https://js.langchain.com/docs/how_to/custom_chat/)를 준수하는 모델을 생성합니다. 이를 통해 LangGraph의 에이전트 및 워크플로우와 완전히 호환되지만 LangChain 프레임워크에 대한 이해가 필요합니다.
 
    :::
 
-2. **Direct invocation with custom streaming**: Use your model directly by [adding custom streaming logic](../how-tos/streaming.md#use-with-any-llm) with `StreamWriter`.
-   Refer to the [custom streaming documentation](../how-tos/streaming.md#use-with-any-llm) for guidance. This approach suits custom workflows where prebuilt agent integration is not necessary.
+2. **커스텀 스트리밍을 사용한 직접 호출**: `StreamWriter`를 사용하여 [커스텀 스트리밍 로직을 추가](../how-tos/streaming.md#use-with-any-llm)하여 모델을 직접 사용합니다.
+   자세한 지침은 [커스텀 스트리밍 문서](../how-tos/streaming.md#use-with-any-llm)를 참조하세요. 이 접근 방식은 사전 구축된 에이전트 통합이 필요하지 않은 커스텀 워크플로우에 적합합니다.
 
 ## Additional resources
 

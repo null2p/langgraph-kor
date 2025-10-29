@@ -1,4 +1,4 @@
-"""Embedding utilities for testing."""
+"""테스트를 위한 임베딩 유틸리티입니다."""
 
 import math
 import random
@@ -9,13 +9,13 @@ from langchain_core.embeddings import Embeddings
 
 
 class CharacterEmbeddings(Embeddings):
-    """Simple character-frequency based embeddings using random projections."""
+    """랜덤 프로젝션을 사용한 간단한 문자 빈도 기반 임베딩입니다."""
 
     def __init__(self, dims: int = 50, seed: int = 42):
-        """Initialize with embedding dimensions and random seed."""
+        """임베딩 차원과 랜덤 시드로 초기화합니다."""
         self._rng = random.Random(seed)
         self.dims = dims
-        # Create projection vector for each character lazily
+        # 각 문자에 대한 프로젝션 벡터를 지연 생성합니다
         self._char_projections: defaultdict[str, list[float]] = defaultdict(
             lambda: [
                 self._rng.gauss(0, 1 / math.sqrt(self.dims)) for _ in range(self.dims)
@@ -23,7 +23,7 @@ class CharacterEmbeddings(Embeddings):
         )
 
     def _embed_one(self, text: str) -> list[float]:
-        """Embed a single text."""
+        """단일 텍스트를 임베딩합니다."""
         counts = Counter(text)
         total = sum(counts.values())
 
@@ -44,11 +44,11 @@ class CharacterEmbeddings(Embeddings):
         return embedding
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
-        """Embed a list of documents."""
+        """문서 목록을 임베딩합니다."""
         return [self._embed_one(text) for text in texts]
 
     def embed_query(self, text: str) -> list[float]:
-        """Embed a query string."""
+        """쿼리 문자열을 임베딩합니다."""
         return self._embed_one(text)
 
     def __eq__(self, other: Any) -> bool:

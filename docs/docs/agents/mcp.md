@@ -7,14 +7,14 @@ hide:
   - tags
 ---
 
-# Use MCP
+# MCP 사용하기
 
-[Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) is an open protocol that standardizes how applications provide tools and context to language models. LangGraph agents can use tools defined on MCP servers through the `langchain-mcp-adapters` library.
+[Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction)은 애플리케이션이 언어 모델에 도구와 컨텍스트를 제공하는 방식을 표준화하는 오픈 프로토콜입니다. LangGraph 에이전트는 `langchain-mcp-adapters` 라이브러리를 통해 MCP 서버에 정의된 도구를 사용할 수 있습니다.
 
 ![MCP](./assets/mcp.png)
 
 :::python
-Install the `langchain-mcp-adapters` library to use MCP tools in LangGraph:
+LangGraph에서 MCP 도구를 사용하려면 `langchain-mcp-adapters` 라이브러리를 설치하세요:
 
 ```bash
 pip install langchain-mcp-adapters
@@ -23,7 +23,7 @@ pip install langchain-mcp-adapters
 :::
 
 :::js
-Install the `@langchain/mcp-adapters` library to use MCP tools in LangGraph:
+LangGraph에서 MCP 도구를 사용하려면 `@langchain/mcp-adapters` 라이브러리를 설치하세요:
 
 ```bash
 npm install langchain-mcp-adapters
@@ -31,14 +31,14 @@ npm install langchain-mcp-adapters
 
 :::
 
-## Use MCP tools
+## MCP 도구 사용하기
 
 :::python
-The `langchain-mcp-adapters` package enables agents to use tools defined across one or more MCP servers.
+`langchain-mcp-adapters` 패키지를 사용하면 에이전트가 하나 이상의 MCP 서버에 정의된 도구를 사용할 수 있습니다.
 
-=== "In an agent"
+=== "에이전트에서 사용"
 
-    ```python title="Agent using tools defined on MCP servers"
+    ```python title="MCP 서버에 정의된 도구를 사용하는 에이전트"
     # highlight-next-line
     from langchain_mcp_adapters.client import MultiServerMCPClient
     from langgraph.prebuilt import create_react_agent
@@ -74,9 +74,9 @@ The `langchain-mcp-adapters` package enables agents to use tools defined across 
     )
     ```
 
-=== "In a workflow"
+=== "워크플로우에서 사용"
 
-    ```python title="Workflow using MCP tools with ToolNode"
+    ```python title="ToolNode와 함께 MCP 도구를 사용하는 워크플로우"
     from langchain_mcp_adapters.client import MultiServerMCPClient
     from langchain.chat_models import init_chat_model
     from langgraph.graph import StateGraph, MessagesState, START, END
@@ -149,11 +149,11 @@ The `langchain-mcp-adapters` package enables agents to use tools defined across 
 :::
 
 :::js
-The `@langchain/mcp-adapters` package enables agents to use tools defined across one or more MCP servers.
+`@langchain/mcp-adapters` 패키지를 사용하면 에이전트가 하나 이상의 MCP 서버에 정의된 도구를 사용할 수 있습니다.
 
-=== "In an agent"
+=== "에이전트에서 사용"
 
-    ```typescript title="Agent using tools defined on MCP servers"
+    ```typescript title="MCP 서버에 정의된 도구를 사용하는 에이전트"
     // highlight-next-line
     import { MultiServerMCPClient } from "langchain-mcp-adapters/client";
     import { ChatAnthropic } from "@langchain/langgraph/prebuilt";
@@ -191,7 +191,7 @@ The `@langchain/mcp-adapters` package enables agents to use tools defined across
     });
     ```
 
-=== "In a workflow"
+=== "워크플로우에서 사용"
 
     ```typescript
     import { MultiServerMCPClient } from "langchain-mcp-adapters/client";
@@ -248,12 +248,12 @@ The `@langchain/mcp-adapters` package enables agents to use tools defined across
 
 :::
 
-## Custom MCP servers
+## 커스텀 MCP 서버
 
 :::python
-To create your own MCP servers, you can use the `mcp` library. This library provides a simple way to define tools and run them as servers.
+자체 MCP 서버를 만들려면 `mcp` 라이브러리를 사용할 수 있습니다. 이 라이브러리는 도구를 정의하고 서버로 실행하는 간단한 방법을 제공합니다.
 
-Install the MCP library:
+MCP 라이브러리 설치:
 
 ```bash
 pip install mcp
@@ -262,9 +262,9 @@ pip install mcp
 :::
 
 :::js
-To create your own MCP servers, you can use the `@modelcontextprotocol/sdk` library. This library provides a simple way to define tools and run them as servers.
+자체 MCP 서버를 만들려면 `@modelcontextprotocol/sdk` 라이브러리를 사용할 수 있습니다. 이 라이브러리는 도구를 정의하고 서버로 실행하는 간단한 방법을 제공합니다.
 
-Install the MCP SDK:
+MCP SDK 설치:
 
 ```bash
 npm install @modelcontextprotocol/sdk
@@ -272,11 +272,11 @@ npm install @modelcontextprotocol/sdk
 
 :::
 
-Use the following reference implementations to test your agent with MCP tool servers.
+다음 참조 구현을 사용하여 MCP 도구 서버로 에이전트를 테스트하세요.
 
 :::python
 
-```python title="Example Math Server (stdio transport)"
+```python title="예제 Math 서버 (stdio transport)"
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("Math")
@@ -299,7 +299,7 @@ if __name__ == "__main__":
 
 :::js
 
-```typescript title="Example Math Server (stdio transport)"
+```typescript title="예제 Math 서버 (stdio transport)"
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -404,7 +404,7 @@ main();
 
 :::python
 
-```python title="Example Weather Server (Streamable HTTP transport)"
+```python title="예제 Weather 서버 (Streamable HTTP transport)"
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("Weather")
@@ -422,7 +422,7 @@ if __name__ == "__main__":
 
 :::js
 
-```typescript title="Example Weather Server (HTTP transport)"
+```typescript title="예제 Weather 서버 (HTTP transport)"
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import {
@@ -500,18 +500,18 @@ app.listen(PORT, () => {
 
 :::python
 
-## Additional resources
+## 추가 리소스
 
-- [MCP documentation](https://modelcontextprotocol.io/introduction)
-- [MCP Transport documentation](https://modelcontextprotocol.io/docs/concepts/transports)
+- [MCP 문서](https://modelcontextprotocol.io/introduction)
+- [MCP Transport 문서](https://modelcontextprotocol.io/docs/concepts/transports)
 - [langchain_mcp_adapters](https://github.com/langchain-ai/langchain-mcp-adapters)
   :::
 
 :::js
 
-## Additional resources
+## 추가 리소스
 
-- [MCP documentation](https://modelcontextprotocol.io/introduction)
-- [MCP Transport documentation](https://modelcontextprotocol.io/docs/concepts/transports)
+- [MCP 문서](https://modelcontextprotocol.io/introduction)
+- [MCP Transport 문서](https://modelcontextprotocol.io/docs/concepts/transports)
 - [`@langchain/mcp-adapters`](https://npmjs.com/package/@langchain/mcp-adapters)
   :::

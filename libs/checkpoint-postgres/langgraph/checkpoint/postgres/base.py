@@ -27,12 +27,12 @@ try:
             stacklevel=2,
         )
 except Exception:
-    # skip version check if running from source
+    # 소스에서 실행하는 경우 버전 확인 건너뛰기
     pass
 
 """
-To add a new migration, add a new string to the MIGRATIONS list.
-The position of the migration in the list is the version number.
+새 마이그레이션을 추가하려면 MIGRATIONS 목록에 새 문자열을 추가하세요.
+목록에서 마이그레이션의 위치가 버전 번호입니다.
 """
 MIGRATIONS = [
     """CREATE TABLE IF NOT EXISTS checkpoint_migrations (
@@ -69,8 +69,8 @@ MIGRATIONS = [
     PRIMARY KEY (thread_id, checkpoint_ns, checkpoint_id, task_id, idx)
 );""",
     "ALTER TABLE checkpoint_blobs ALTER COLUMN blob DROP not null;",
-    # NOTE: this is a no-op migration to ensure that the versions in the migrations table are correct.
-    # This is necessary due to an empty migration previously added to the list.
+    # 참고: 이것은 마이그레이션 테이블의 버전이 정확한지 확인하기 위한 no-op 마이그레이션입니다.
+    # 이전에 목록에 추가된 빈 마이그레이션으로 인해 필요합니다.
     "SELECT 1;",
     """
     CREATE INDEX CONCURRENTLY IF NOT EXISTS checkpoints_thread_id_idx ON checkpoints(thread_id);
@@ -172,12 +172,12 @@ class BasePostgresSaver(BaseCheckpointSaver[str]):
     ) -> None:
         if not pending_sends:
             return
-        # add to values
+        # 값에 추가
         enc, blob = self.serde.dumps_typed(
             [self.serde.loads_typed((c.decode(), b)) for c, b in pending_sends],
         )
         channel_values.append((TASKS.encode(), enc.encode(), blob))
-        # add to versions
+        # 버전에 추가
         checkpoint["channel_versions"][TASKS] = (
             max(checkpoint["channel_versions"].values())
             if checkpoint["channel_versions"]
@@ -276,17 +276,17 @@ class BasePostgresSaver(BaseCheckpointSaver[str]):
         filter: MetadataInput,
         before: RunnableConfig | None = None,
     ) -> tuple[str, list[Any]]:
-        """Return WHERE clause predicates for alist() given config, filter, before.
+        """config, filter, before가 주어진 alist()에 대한 WHERE 절 조건을 반환합니다.
 
-        This method returns a tuple of a string and a tuple of values. The string
-        is the parametered WHERE clause predicate (including the WHERE keyword):
-        "WHERE column1 = $1 AND column2 IS $2". The list of values contains the
-        values for each of the corresponding parameters.
+        이 메서드는 문자열과 값 튜플의 튜플을 반환합니다. 문자열은
+        (WHERE 키워드를 포함한) 파라미터화된 WHERE 절 조건입니다:
+        "WHERE column1 = $1 AND column2 IS $2". 값 목록에는
+        해당하는 각 파라미터의 값이 포함됩니다.
         """
         wheres = []
         param_values = []
 
-        # construct predicate for config filter
+        # config 필터에 대한 조건 구성
         if config:
             wheres.append("thread_id = %s ")
             param_values.append(config["configurable"]["thread_id"])
@@ -299,12 +299,12 @@ class BasePostgresSaver(BaseCheckpointSaver[str]):
                 wheres.append("checkpoint_id = %s ")
                 param_values.append(checkpoint_id)
 
-        # construct predicate for metadata filter
+        # 메타데이터 필터에 대한 조건 구성
         if filter:
             wheres.append("metadata @> %s ")
             param_values.append(Jsonb(filter))
 
-        # construct predicate for `before`
+        # `before`에 대한 조건 구성
         if before is not None:
             wheres.append("checkpoint_id < %s ")
             param_values.append(get_checkpoint_id(before))

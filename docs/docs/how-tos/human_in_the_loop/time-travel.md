@@ -1,36 +1,36 @@
-# Use time-travel
+# 타임 트래블 사용
 
-To use [time-travel](../../concepts/time-travel.md) in LangGraph:
+LangGraph에서 [타임 트래블](../../concepts/time-travel.md)을 사용하려면:
 
 :::python
 
-1. [Run the graph](#1-run-the-graph) with initial inputs using @[`invoke`][CompiledStateGraph.invoke] or @[`stream`][CompiledStateGraph.stream] methods.
-2. [Identify a checkpoint in an existing thread](#2-identify-a-checkpoint): Use the @[`get_state_history()`][get_state_history] method to retrieve the execution history for a specific `thread_id` and locate the desired `checkpoint_id`.  
-   Alternatively, set an [interrupt](../../how-tos/human_in_the_loop/add-human-in-the-loop.md) before the node(s) where you want execution to pause. You can then find the most recent checkpoint recorded up to that interrupt.
-3. [Update the graph state (optional)](#3-update-the-state-optional): Use the @[`update_state`][update_state] method to modify the graph's state at the checkpoint and resume execution from alternative state.
-4. [Resume execution from the checkpoint](#4-resume-execution-from-the-checkpoint): Use the `invoke` or `stream` methods with an input of `None` and a configuration containing the appropriate `thread_id` and `checkpoint_id`.
+1. [그래프 실행](#1-run-the-graph): @[`invoke`][CompiledStateGraph.invoke] 또는 @[`stream`][CompiledStateGraph.stream] 메서드를 사용하여 초기 입력으로 그래프를 실행합니다.
+2. [기존 스레드에서 체크포인트 식별](#2-identify-a-checkpoint): @[`get_state_history()`][get_state_history] 메서드를 사용하여 특정 `thread_id`에 대한 실행 히스토리를 가져오고 원하는 `checkpoint_id`를 찾습니다.
+   또는 실행을 일시 중지하려는 노드 앞에 [interrupt](../../how-tos/human_in_the_loop/add-human-in-the-loop.md)를 설정합니다. 그러면 해당 인터럽트까지 기록된 가장 최근 체크포인트를 찾을 수 있습니다.
+3. [그래프 상태 업데이트 (선택사항)](#3-update-the-state-optional): @[`update_state`][update_state] 메서드를 사용하여 체크포인트에서 그래프의 상태를 수정하고 대안 상태에서 실행을 재개합니다.
+4. [체크포인트에서 실행 재개](#4-resume-execution-from-the-checkpoint): 입력이 `None`이고 적절한 `thread_id` 및 `checkpoint_id`를 포함하는 구성과 함께 `invoke` 또는 `stream` 메서드를 사용합니다.
    :::
 
 :::js
 
-1. [Run the graph](#1-run-the-graph) with initial inputs using @[`invoke`][CompiledStateGraph.invoke] or @[`stream`][CompiledStateGraph.stream] methods.
-2. [Identify a checkpoint in an existing thread](#2-identify-a-checkpoint): Use the @[`getStateHistory()`][get_state_history] method to retrieve the execution history for a specific `thread_id` and locate the desired `checkpoint_id`.  
-   Alternatively, set a [breakpoint](../../concepts/breakpoints.md) before the node(s) where you want execution to pause. You can then find the most recent checkpoint recorded up to that breakpoint.
-3. [Update the graph state (optional)](#3-update-the-state-optional): Use the @[`updateState`][update_state] method to modify the graph's state at the checkpoint and resume execution from alternative state.
-4. [Resume execution from the checkpoint](#4-resume-execution-from-the-checkpoint): Use the `invoke` or `stream` methods with an input of `null` and a configuration containing the appropriate `thread_id` and `checkpoint_id`.
+1. [그래프 실행](#1-run-the-graph): @[`invoke`][CompiledStateGraph.invoke] 또는 @[`stream`][CompiledStateGraph.stream] 메서드를 사용하여 초기 입력으로 그래프를 실행합니다.
+2. [기존 스레드에서 체크포인트 식별](#2-identify-a-checkpoint): @[`getStateHistory()`][get_state_history] 메서드를 사용하여 특정 `thread_id`에 대한 실행 히스토리를 가져오고 원하는 `checkpoint_id`를 찾습니다.
+   또는 실행을 일시 중지하려는 노드 앞에 [breakpoint](../../concepts/breakpoints.md)를 설정합니다. 그러면 해당 breakpoint까지 기록된 가장 최근 체크포인트를 찾을 수 있습니다.
+3. [그래프 상태 업데이트 (선택사항)](#3-update-the-state-optional): @[`updateState`][update_state] 메서드를 사용하여 체크포인트에서 그래프의 상태를 수정하고 대안 상태에서 실행을 재개합니다.
+4. [체크포인트에서 실행 재개](#4-resume-execution-from-the-checkpoint): 입력이 `null`이고 적절한 `thread_id` 및 `checkpoint_id`를 포함하는 구성과 함께 `invoke` 또는 `stream` 메서드를 사용합니다.
    :::
 
 !!! tip
 
-    For a conceptual overview of time-travel, see [Time travel](../../concepts/time-travel.md).
+    타임 트래블에 대한 개념적 개요는 [Time travel](../../concepts/time-travel.md)을 참조하세요.
 
-## In a workflow
+## 워크플로우에서
 
-This example builds a simple LangGraph workflow that generates a joke topic and writes a joke using an LLM. It demonstrates how to run the graph, retrieve past execution checkpoints, optionally modify the state, and resume execution from a chosen checkpoint to explore alternate outcomes.
+이 예제는 농담 주제를 생성하고 LLM을 사용하여 농담을 작성하는 간단한 LangGraph 워크플로우를 구축합니다. 그래프를 실행하고, 과거 실행 체크포인트를 검색하고, 선택적으로 상태를 수정하고, 선택한 체크포인트에서 실행을 재개하여 대안 결과를 탐색하는 방법을 보여줍니다.
 
-### Setup
+### 설정
 
-First we need to install the packages required
+먼저 필요한 패키지를 설치해야 합니다
 
 :::python
 

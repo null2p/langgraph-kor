@@ -1,10 +1,10 @@
-# How to run multiple agents on the same thread
+# 동일한 thread에서 여러 에이전트 실행하기
 
-In LangGraph Platform, a thread is not explicitly associated with a particular agent.
-This means that you can run multiple agents on the same thread, which allows a different agent to continue from an initial agent's progress.
+LangGraph Platform에서 thread는 특정 에이전트와 명시적으로 연결되어 있지 않습니다.
+이는 동일한 thread에서 여러 에이전트를 실행할 수 있음을 의미하며, 다른 에이전트가 초기 에이전트의 진행 상황을 이어받을 수 있습니다.
 
-In this example, we will create two agents and then call them both on the same thread.
-You'll see that the second agent will respond using information from the [checkpoint](https://langchain-ai.github.io/langgraph/concepts/low_level/#checkpointer-state) generated in the thread by the first agent as context.
+이 예제에서는 두 개의 에이전트를 생성한 다음 동일한 thread에서 두 에이전트를 모두 호출합니다.
+두 번째 에이전트가 첫 번째 에이전트에 의해 thread에 생성된 [checkpoint](https://langchain-ai.github.io/langgraph/concepts/low_level/#checkpointer-state)의 정보를 컨텍스트로 사용하여 응답하는 것을 볼 수 있습니다.
 
 ## Setup
 
@@ -30,7 +30,7 @@ You'll see that the second agent will respond using information from the [checkp
     import { Client } from "@langchain/langgraph-sdk";
 
     const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
-    
+
     const openAIAssistant = await client.assistants.create(
       { graphId: "agent", config: {"configurable": {"model_name": "openai"}}}
     );
@@ -58,7 +58,7 @@ You'll see that the second agent will respond using information from the [checkp
         }' | jq -c 'map(select(.config == null or .config == {})) | .[0]'
     ```
 
-We can see that these agents are different:
+이 에이전트들이 다르다는 것을 확인할 수 있습니다:
 
 === "Python"
 
@@ -79,7 +79,7 @@ We can see that these agents are different:
         --url <DEPLOYMENT_URL>/assistants/<OPENAI_ASSISTANT_ID>
     ```
 
-Output:
+출력:
 
     {
         "assistant_id": "db87f39d-b2b1-4da8-ac65-cf81beb3c766",
@@ -113,7 +113,7 @@ Output:
         --url <DEPLOYMENT_URL>/assistants/<DEFAULT_ASSISTANT_ID>
     ```
 
-Output:
+출력:
 
     {
         "assistant_id": "fe096781-5601-53d2-b2f6-0d3403f7e9ca",
@@ -126,11 +126,11 @@ Output:
         }
     }
 
-## Run assistants on thread
+## thread에서 어시스턴트 실행
 
-### Run OpenAI assistant
+### OpenAI 어시스턴트 실행
 
-We can now run the OpenAI assistant on the thread first.
+먼저 thread에서 OpenAI 어시스턴트를 실행할 수 있습니다.
 
 === "Python"
 
@@ -215,7 +215,7 @@ We can now run the OpenAI assistant on the thread first.
     '
     ```
 
-Output:
+출력:
 
     Receiving event of type: metadata
     {'run_id': '1ef671c5-fb83-6e70-b698-44dba2d9213e'}
@@ -224,9 +224,9 @@ Output:
     Receiving event of type: updates
     {'agent': {'messages': [{'content': 'I was created by OpenAI, a research organization focused on developing and advancing artificial intelligence technology.', 'additional_kwargs': {}, 'response_metadata': {'finish_reason': 'stop', 'model_name': 'gpt-4o-2024-05-13', 'system_fingerprint': 'fp_157b3831f5'}, 'type': 'ai', 'name': None, 'id': 'run-f5735b86-b80d-4c71-8dc3-4782b5a9c7c8', 'example': False, 'tool_calls': [], 'invalid_tool_calls': [], 'usage_metadata': None}]}}
 
-### Run default assistant
+### 기본 어시스턴트 실행
 
-Now, we can run it on the default assistant and see that this second assistant is aware of the initial question, and can answer the question, "and you?":
+이제 기본 어시스턴트에서 실행하면, 이 두 번째 어시스턴트가 초기 질문을 인식하고 "and you?"라는 질문에 답변할 수 있는 것을 볼 수 있습니다:
 
 === "Python"
 
@@ -305,7 +305,7 @@ Now, we can run it on the default assistant and see that this second assistant i
     '
     ```
 
-Output:
+출력:
 
     Receiving event of type: metadata
     {'run_id': '1ef6722d-80b3-6fbb-9324-253796b1cd13'}

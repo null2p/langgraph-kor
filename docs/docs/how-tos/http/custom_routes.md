@@ -1,22 +1,22 @@
-# How to add custom routes
+# 커스텀 라우트 추가 방법
 
-When deploying agents to LangGraph platform, your server automatically exposes routes for creating runs and threads, interacting with the long-term memory store, managing configurable assistants, and other core functionality ([see all default API endpoints](../../cloud/reference/api/api_ref.md)).
+에이전트를 LangGraph Platform에 배포할 때, 서버는 자동으로 run 및 thread 생성, 장기 메모리 저장소와의 상호 작용, 구성 가능한 assistant 관리 및 기타 핵심 기능을 위한 라우트를 노출합니다([모든 기본 API 엔드포인트 보기](../../cloud/reference/api/api_ref.md)).
 
-You can add custom routes by providing your own [`Starlette`](https://www.starlette.io/applications/) app (including [`FastAPI`](https://fastapi.tiangolo.com/), [`FastHTML`](https://fastht.ml/) and other compatible apps). You make LangGraph Platform aware of this by providing a path to the app in your `langgraph.json` configuration file.
+자신만의 [`Starlette`](https://www.starlette.io/applications/) 앱([ `FastAPI`](https://fastapi.tiangolo.com/), [`FastHTML`](https://fastht.ml/) 및 기타 호환 가능한 앱 포함)을 제공하여 커스텀 라우트를 추가할 수 있습니다. `langgraph.json` 구성 파일에 앱 경로를 제공하여 LangGraph Platform에 이를 알립니다.
 
-Defining a custom app object lets you add any routes you'd like, so you can do anything from adding a `/login` endpoint to writing an entire full-stack web-app, all deployed in a single LangGraph Server.
+커스텀 앱 객체를 정의하면 원하는 라우트를 추가할 수 있으므로 `/login` 엔드포인트 추가부터 전체 풀스택 웹앱 작성까지 모든 것을 단일 LangGraph Server에 배포할 수 있습니다.
 
-Below is an example using FastAPI.
+다음은 FastAPI를 사용한 예제입니다.
 
-## Create app
+## 앱 생성
 
-Starting from an **existing** LangGraph Platform application, add the following custom route code to your webapp file. If you are starting from scratch, you can create a new app from a template using the CLI.
+**기존** LangGraph Platform 애플리케이션에서 시작하여 webapp 파일에 다음 커스텀 라우트 코드를 추가합니다. 처음부터 시작하는 경우 CLI를 사용하여 템플릿에서 새 앱을 생성할 수 있습니다.
 
 ```bash
 langgraph new --template=new-langgraph-project-python my_new_project
 ```
 
-Once you have a LangGraph project, add the following app code:
+LangGraph 프로젝트가 있으면 다음 앱 코드를 추가합니다:
 
 ```python
 # ./src/agent/webapp.py
@@ -32,9 +32,9 @@ def read_root():
 
 ```
 
-## Configure `langgraph.json`
+## `langgraph.json` 구성
 
-Add the following to your `langgraph.json` configuration file. Make sure the path points to the FastAPI application instance `app` in the `webapp.py` file you created above.
+`langgraph.json` 구성 파일에 다음을 추가합니다. 경로가 위에서 만든 `webapp.py` 파일의 FastAPI 애플리케이션 인스턴스 `app`을 가리키는지 확인하세요.
 
 ```json
 {
@@ -46,28 +46,28 @@ Add the following to your `langgraph.json` configuration file. Make sure the pat
   "http": {
     "app": "./src/agent/webapp.py:app"
   }
-  // Other configuration options like auth, store, etc.
+  // 인증, 저장소 등과 같은 기타 구성 옵션
 }
 ```
 
-## Start server
+## 서버 시작
 
-Test the server out locally:
+로컬에서 서버를 테스트합니다:
 
 ```bash
 langgraph dev --no-browser
 ```
 
-If you navigate to `localhost:2024/hello` in your browser (`2024` is the default development port), you should see the `/hello` endpoint returning `{"Hello": "World"}`.
+브라우저에서 `localhost:2024/hello`로 이동하면(`2024`는 기본 개발 포트) `/hello` 엔드포인트가 `{"Hello": "World"}`를 반환하는 것을 볼 수 있습니다.
 
-!!! note "Shadowing default endpoints"
+!!! note "기본 엔드포인트 shadowing"
 
-    The routes you create in the app are given priority over the system defaults, meaning you can shadow and redefine the behavior of any default endpoint.
+    앱에서 생성하는 라우트는 시스템 기본값보다 우선순위가 높습니다. 즉, 모든 기본 엔드포인트의 동작을 shadow하고 재정의할 수 있습니다.
 
-## Deploying
+## 배포
 
-You can deploy this app as-is to LangGraph Platform or to your self-hosted platform.
+이 앱을 그대로 LangGraph Platform 또는 self-hosted platform에 배포할 수 있습니다.
 
-## Next steps
+## 다음 단계
 
-Now that you've added a custom route to your deployment, you can use this same technique to further customize how your server behaves, such as defining custom [custom middleware](./custom_middleware.md) and [custom lifespan events](./custom_lifespan.md).
+이제 배포에 커스텀 라우트를 추가했으므로 동일한 기술을 사용하여 [커스텀 미들웨어](./custom_middleware.md) 및 [커스텀 lifespan 이벤트](./custom_lifespan.md) 정의와 같이 서버의 동작을 추가로 커스터마이징할 수 있습니다.

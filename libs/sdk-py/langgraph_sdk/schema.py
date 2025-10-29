@@ -1,4 +1,4 @@
-"""Data models for interacting with the LangGraph API."""
+"""LangGraph API와 상호작용하기 위한 데이터 모델입니다."""
 
 from __future__ import annotations
 
@@ -13,34 +13,34 @@ from typing import (
 )
 
 Json = dict[str, Any] | None
-"""Represents a JSON-like structure, which can be None or a dictionary with string keys and any values."""
+"""None이거나 문자열 키와 임의 값을 가진 딕셔너리일 수 있는 JSON과 유사한 구조를 나타냅니다."""
 
 RunStatus = Literal["pending", "running", "error", "success", "timeout", "interrupted"]
 """
-Represents the status of a run:
-- "pending": The run is waiting to start.
-- "running": The run is currently executing.
-- "error": The run encountered an error and stopped.
-- "success": The run completed successfully.
-- "timeout": The run exceeded its time limit.
-- "interrupted": The run was manually stopped or interrupted.
+실행의 상태를 나타냅니다:
+- "pending": 실행이 시작을 대기 중입니다.
+- "running": 실행이 현재 실행 중입니다.
+- "error": 실행이 오류를 만나 중지되었습니다.
+- "success": 실행이 성공적으로 완료되었습니다.
+- "timeout": 실행이 시간 제한을 초과했습니다.
+- "interrupted": 실행이 수동으로 중지되거나 중단되었습니다.
 """
 
 ThreadStatus = Literal["idle", "busy", "interrupted", "error"]
 """
-Represents the status of a thread:
-- "idle": The thread is not currently processing any task.
-- "busy": The thread is actively processing a task.
-- "interrupted": The thread's execution was interrupted.
-- "error": An exception occurred during task processing.
+스레드의 상태를 나타냅니다:
+- "idle": 스레드가 현재 작업을 처리하지 않습니다.
+- "busy": 스레드가 작업을 활발히 처리 중입니다.
+- "interrupted": 스레드의 실행이 중단되었습니다.
+- "error": 작업 처리 중 예외가 발생했습니다.
 """
 
 ThreadStreamMode = Literal["run_modes", "lifecycle", "state_update"]
 """
-Defines the mode of streaming:
-- "run_modes": Stream the same events as the runs on thread, as well as run_done events.
-- "lifecycle": Stream only run start/end events.
-- "state_update": Stream state updates on the thread.
+스트리밍 모드를 정의합니다:
+- "run_modes": 스레드의 실행과 동일한 이벤트 및 run_done 이벤트를 스트림합니다.
+- "lifecycle": 실행 시작/종료 이벤트만 스트림합니다.
+- "state_update": 스레드의 상태 업데이트를 스트림합니다.
 """
 
 StreamMode = Literal[
@@ -55,55 +55,55 @@ StreamMode = Literal[
     "messages-tuple",
 ]
 """
-Defines the mode of streaming:
-- "values": Stream only the values.
-- "messages": Stream complete messages.
-- "updates": Stream updates to the state.
-- "events": Stream events occurring during execution.
-- "checkpoints": Stream checkpoints as they are created.
-- "tasks": Stream task start and finish events.
-- "debug": Stream detailed debug information.
-- "custom": Stream custom events.
+스트리밍 모드를 정의합니다:
+- "values": 값만 스트림합니다.
+- "messages": 완전한 메시지를 스트림합니다.
+- "updates": 상태에 대한 업데이트를 스트림합니다.
+- "events": 실행 중 발생하는 이벤트를 스트림합니다.
+- "checkpoints": 생성되는 체크포인트를 스트림합니다.
+- "tasks": 작업 시작 및 완료 이벤트를 스트림합니다.
+- "debug": 상세한 디버그 정보를 스트림합니다.
+- "custom": 커스텀 이벤트를 스트림합니다.
 """
 
 DisconnectMode = Literal["cancel", "continue"]
 """
-Specifies behavior on disconnection:
-- "cancel": Cancel the operation on disconnection.
-- "continue": Continue the operation even if disconnected.
+연결 해제 시 동작을 지정합니다:
+- "cancel": 연결 해제 시 작업을 취소합니다.
+- "continue": 연결이 해제되어도 작업을 계속합니다.
 """
 
 MultitaskStrategy = Literal["reject", "interrupt", "rollback", "enqueue"]
 """
-Defines how to handle multiple tasks:
-- "reject": Reject new tasks when busy.
-- "interrupt": Interrupt current task for new ones.
-- "rollback": Roll back current task and start new one.
-- "enqueue": Queue new tasks for later execution.
+여러 작업을 처리하는 방법을 정의합니다:
+- "reject": 사용 중일 때 새 작업을 거부합니다.
+- "interrupt": 새 작업을 위해 현재 작업을 중단합니다.
+- "rollback": 현재 작업을 롤백하고 새 작업을 시작합니다.
+- "enqueue": 나중에 실행하기 위해 새 작업을 대기열에 추가합니다.
 """
 
 OnConflictBehavior = Literal["raise", "do_nothing"]
 """
-Specifies behavior on conflict:
-- "raise": Raise an exception when a conflict occurs.
-- "do_nothing": Ignore conflicts and proceed.
+충돌 시 동작을 지정합니다:
+- "raise": 충돌이 발생하면 예외를 발생시킵니다.
+- "do_nothing": 충돌을 무시하고 계속합니다.
 """
 
 OnCompletionBehavior = Literal["delete", "keep"]
 """
-Defines action after completion:
-- "delete": Delete resources after completion.
-- "keep": Retain resources after completion.
+완료 후 액션을 정의합니다:
+- "delete": 완료 후 리소스를 삭제합니다.
+- "keep": 완료 후 리소스를 유지합니다.
 """
 
 Durability = Literal["sync", "async", "exit"]
-"""Durability mode for the graph execution.
-- `"sync"`: Changes are persisted synchronously before the next step starts.
-- `"async"`: Changes are persisted asynchronously while the next step executes.
-- `"exit"`: Changes are persisted only when the graph exits."""
+"""그래프 실행을 위한 내구성 모드입니다.
+- `"sync"`: 다음 단계가 시작되기 전에 변경 사항이 동기적으로 유지됩니다.
+- `"async"`: 다음 단계가 실행되는 동안 변경 사항이 비동기적으로 유지됩니다.
+- `"exit"`: 그래프가 종료될 때만 변경 사항이 유지됩니다."""
 
 All = Literal["*"]
-"""Represents a wildcard or 'all' selector."""
+"""와일드카드 또는 '모두' 선택자를 나타냅니다."""
 
 IfNotExists = Literal["create", "reject"]
 """

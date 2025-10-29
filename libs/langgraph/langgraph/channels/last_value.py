@@ -18,7 +18,7 @@ __all__ = ("LastValue", "LastValueAfterFinish")
 
 
 class LastValue(Generic[Value], BaseChannel[Value, Value, Value]):
-    """Stores the last value received, can receive at most one value per step."""
+    """수신된 마지막 값을 저장하며, 단계당 최대 하나의 값을 받을 수 있습니다."""
 
     __slots__ = ("value",)
 
@@ -33,16 +33,16 @@ class LastValue(Generic[Value], BaseChannel[Value, Value, Value]):
 
     @property
     def ValueType(self) -> type[Value]:
-        """The type of the value stored in the channel."""
+        """채널에 저장된 값의 타입입니다."""
         return self.typ
 
     @property
     def UpdateType(self) -> type[Value]:
-        """The type of the update received by the channel."""
+        """채널이 받는 업데이트의 타입입니다."""
         return self.typ
 
     def copy(self) -> Self:
-        """Return a copy of the channel."""
+        """채널의 복사본을 반환합니다."""
         empty = self.__class__(self.typ, self.key)
         empty.value = self.value
         return empty
@@ -81,8 +81,8 @@ class LastValue(Generic[Value], BaseChannel[Value, Value, Value]):
 class LastValueAfterFinish(
     Generic[Value], BaseChannel[Value, Value, tuple[Value, bool]]
 ):
-    """Stores the last value received, but only made available after finish().
-    Once made available, clears the value."""
+    """수신된 마지막 값을 저장하지만, finish() 후에만 사용 가능합니다.
+    사용 가능하게 되면 값을 지웁니다."""
 
     __slots__ = ("value", "finished")
 
@@ -99,12 +99,12 @@ class LastValueAfterFinish(
 
     @property
     def ValueType(self) -> type[Value]:
-        """The type of the value stored in the channel."""
+        """채널에 저장된 값의 타입입니다."""
         return self.typ
 
     @property
     def UpdateType(self) -> type[Value]:
-        """The type of the update received by the channel."""
+        """채널이 받는 업데이트의 타입입니다."""
         return self.typ
 
     def checkpoint(self) -> tuple[Value | Any, bool] | Any:

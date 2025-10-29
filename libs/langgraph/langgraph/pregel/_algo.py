@@ -85,8 +85,8 @@ SUPPORTS_EXC_NOTES = sys.version_info >= (3, 11)
 
 
 class WritesProtocol(Protocol):
-    """Protocol for objects containing writes to be applied to checkpoint.
-    Implemented by PregelTaskWrites and PregelExecutableTask."""
+    """체크포인트에 적용할 쓰기를 포함하는 객체의 프로토콜입니다.
+    PregelTaskWrites 및 PregelExecutableTask에 의해 구현됩니다."""
 
     @property
     def path(self) -> tuple[str | int | tuple, ...]: ...
@@ -102,8 +102,8 @@ class WritesProtocol(Protocol):
 
 
 class PregelTaskWrites(NamedTuple):
-    """Simplest implementation of WritesProtocol, for usage with writes that
-    don't originate from a runnable task, eg. graph input, update_state, etc."""
+    """WritesProtocol의 가장 간단한 구현으로, runnable 태스크에서 유래하지 않은 쓰기
+    (예: 그래프 입력, update_state 등)와 함께 사용하기 위한 것입니다."""
 
     path: tuple[str | int | tuple, ...]
     name: str
@@ -141,16 +141,16 @@ def should_interrupt(
     interrupt_nodes: All | Sequence[str],
     tasks: Iterable[PregelExecutableTask],
 ) -> list[PregelExecutableTask]:
-    """Check if the graph should be interrupted based on current state."""
+    """현재 상태를 기반으로 그래프를 중단해야 하는지 확인합니다."""
     version_type = type(next(iter(checkpoint["channel_versions"].values()), None))
     null_version = version_type()  # type: ignore[misc]
     seen = checkpoint["versions_seen"].get(INTERRUPT, {})
-    # interrupt if any channel has been updated since last interrupt
+    # 마지막 인터럽트 이후 채널이 업데이트된 경우 인터럽트합니다
     any_updates_since_prev_interrupt = any(
         version > seen.get(chan, null_version)  # type: ignore[operator]
         for chan, version in checkpoint["channel_versions"].items()
     )
-    # and any triggered node is in interrupt_nodes list
+    # 그리고 트리거된 노드가 interrupt_nodes 목록에 있는 경우
     return (
         [
             task
@@ -177,9 +177,8 @@ def local_read(
     select: list[str] | str,
     fresh: bool = False,
 ) -> dict[str, Any] | Any:
-    """Function injected under CONFIG_KEY_READ in task config, to read current state.
-    Used by conditional edges to read a copy of the state with reflecting the writes
-    from that node only."""
+    """태스크 config의 CONFIG_KEY_READ 아래에 주입되어 현재 상태를 읽는 함수입니다.
+    조건부 엣지가 해당 노드의 쓰기만 반영된 상태의 복사본을 읽을 때 사용됩니다."""
     updated: dict[str, list[Any]] = defaultdict(list)
     if isinstance(select, str):
         managed_keys = []
@@ -193,13 +192,13 @@ def local_read(
             if c in select:
                 updated[c].append(v)
     if fresh:
-        # apply writes
+        # 쓰기를 적용합니다
         local_channels: dict[str, BaseChannel] = {}
         for k in channels:
             cc = channels[k].copy()
             cc.update(updated[k])
             local_channels[k] = cc
-        # read fresh values
+        # 최신 값을 읽습니다
         values = read_channels(local_channels, select)
     else:
         values = read_channels(channels, select)
@@ -209,7 +208,7 @@ def local_read(
 
 
 def increment(current: int | None, channel: None) -> int:
-    """Default channel versioning function, increments the current int version."""
+    """기본 채널 버저닝 함수로, 현재 int 버전을 증가시킵니다."""
     return current + 1 if current is not None else 1
 
 
@@ -220,29 +219,28 @@ def apply_writes(
     get_next_version: GetNextVersion | None,
     trigger_to_nodes: Mapping[str, Sequence[str]],
 ) -> set[str]:
-    """Apply writes from a set of tasks (usually the tasks from a Pregel step)
-    to the checkpoint and channels, and return managed values writes to be applied
-    externally.
+    """태스크 집합(보통 Pregel 단계의 태스크)의 쓰기를 체크포인트 및 채널에 적용하고,
+    외부적으로 적용할 관리 값 쓰기를 반환합니다.
 
     Args:
-        checkpoint: The checkpoint to update.
-        channels: The channels to update.
-        tasks: The tasks to apply writes from.
-        get_next_version: Optional function to determine the next version of a channel.
-        trigger_to_nodes: Mapping of channel names to the set of nodes that can be triggered by updates to that channel.
+        checkpoint: 업데이트할 체크포인트입니다.
+        channels: 업데이트할 채널입니다.
+        tasks: 쓰기를 적용할 태스크입니다.
+        get_next_version: 채널의 다음 버전을 결정하는 선택적 함수입니다.
+        trigger_to_nodes: 채널 이름을 해당 채널에 대한 업데이트에 의해 트리거될 수 있는 노드 집합에 매핑합니다.
 
     Returns:
-        Set of channels that were updated in this step.
+        이 단계에서 업데이트된 채널의 집합입니다.
     """
-    # sort tasks on path, to ensure deterministic order for update application
-    # any path parts after the 3rd are ignored for sorting
-    # (we use them for eg. task ids which aren't good for sorting)
+    # 업데이트 적용 순서가 결정적이도록 경로별로 태스크를 정렬합니다
+    # 세 번째 이후의 경로 부분은 정렬에서 무시됩니다
+    # (예: 정렬에 적합하지 않은 태스크 ID에 사용합니다)
     tasks = sorted(tasks, key=lambda t: task_path_str(t.path[:3]))
-    # if no task has triggers this is applying writes from the null task only
-    # so we don't do anything other than update the channels written to
+    # 트리거가 있는 태스크가 없으면 null 태스크의 쓰기만 적용하는 것이므로
+    # 쓰기된 채널을 업데이트하는 것 외에는 아무것도 하지 않습니다
     bump_step = any(t.triggers for t in tasks)
 
-    # update seen versions
+    # 확인된 버전을 업데이트합니다
     for task in tasks:
         checkpoint["versions_seen"].setdefault(task.name, {}).update(
             {
@@ -252,7 +250,7 @@ def apply_writes(
             }
         )
 
-    # Find the highest version of all channels
+    # 모든 채널의 가장 높은 버전을 찾습니다
     if get_next_version is None:
         next_version = None
     else:
@@ -382,37 +380,36 @@ def prepare_next_tasks(
     retry_policy: Sequence[RetryPolicy] = (),
     cache_policy: CachePolicy | None = None,
 ) -> dict[str, PregelTask] | dict[str, PregelExecutableTask]:
-    """Prepare the set of tasks that will make up the next Pregel step.
+    """다음 Pregel 단계를 구성할 태스크 집합을 준비합니다.
 
     Args:
-        checkpoint: The current checkpoint.
-        pending_writes: The list of pending writes.
-        processes: The mapping of process names to PregelNode instances.
-        channels: The mapping of channel names to BaseChannel instances.
-        managed: The mapping of managed value names to functions.
-        config: The `Runnable` configuration.
-        step: The current step.
-        for_execution: Whether the tasks are being prepared for execution.
-        store: An instance of BaseStore to make it available for usage within tasks.
-        checkpointer: `Checkpointer` instance used for saving checkpoints.
-        manager: The parent run manager to use for the tasks.
-        trigger_to_nodes: Optional: Mapping of channel names to the set of nodes
-            that are can be triggered by that channel.
-        updated_channels: Optional. Set of channel names that have been updated during
-            the previous step. Using in conjunction with trigger_to_nodes to speed
-            up the process of determining which nodes should be triggered in the next
-            step.
+        checkpoint: 현재 체크포인트입니다.
+        pending_writes: 보류 중인 쓰기 목록입니다.
+        processes: 프로세스 이름을 PregelNode 인스턴스에 매핑합니다.
+        channels: 채널 이름을 BaseChannel 인스턴스에 매핑합니다.
+        managed: 관리 값 이름을 함수에 매핑합니다.
+        config: `Runnable` 구성입니다.
+        step: 현재 단계입니다.
+        for_execution: 태스크가 실행을 위해 준비되고 있는지 여부입니다.
+        store: 태스크 내에서 사용할 수 있도록 하는 BaseStore의 인스턴스입니다.
+        checkpointer: 체크포인트 저장에 사용되는 `Checkpointer` 인스턴스입니다.
+        manager: 태스크에 사용할 부모 run manager입니다.
+        trigger_to_nodes: 선택사항: 채널 이름을 해당 채널에 의해 트리거될 수 있는
+            노드 집합에 매핑합니다.
+        updated_channels: 선택사항. 이전 단계에서 업데이트된 채널 이름 집합입니다.
+            trigger_to_nodes와 함께 사용하여 다음 단계에서 트리거되어야 하는
+            노드를 결정하는 프로세스를 가속화합니다.
 
     Returns:
-        A dictionary of tasks to be executed. The keys are the task ids and the values
-        are the tasks themselves. This is the union of all PUSH tasks (Sends)
-        and PULL tasks (nodes triggered by edges).
+        실행할 태스크의 딕셔너리입니다. 키는 태스크 ID이고 값은
+        태스크 자체입니다. 이것은 모든 PUSH 태스크(Send)와
+        PULL 태스크(엣지에 의해 트리거된 노드)의 합집합입니다.
     """
     input_cache: dict[INPUT_CACHE_KEY_TYPE, Any] = {}
     checkpoint_id_bytes = binascii.unhexlify(checkpoint["id"].replace("-", ""))
     null_version = checkpoint_null_version(checkpoint)
     tasks: list[PregelTask | PregelExecutableTask] = []
-    # Consume pending tasks
+    # 보류 중인 태스크를 소비합니다
     tasks_channel = cast(Topic[Send] | None, channels.get(TASKS))
     if tasks_channel and tasks_channel.is_available():
         for idx, _ in enumerate(tasks_channel.get()):
@@ -512,8 +509,8 @@ def prepare_single_task(
     cache_policy: CachePolicy | None = None,
     retry_policy: Sequence[RetryPolicy] = (),
 ) -> None | PregelTask | PregelExecutableTask:
-    """Prepares a single task for the next Pregel step, given a task path, which
-    uniquely identifies a PUSH or PULL task within the graph."""
+    """그래프 내에서 PUSH 또는 PULL 태스크를 고유하게 식별하는 태스크 경로가 주어지면
+    다음 Pregel 단계를 위한 단일 태스크를 준비합니다."""
     configurable = config.get(CONF, {})
     parent_ns = configurable.get(CONFIG_KEY_CHECKPOINT_NS, "")
     task_id_func = _xxhash_str if checkpoint["v"] > 1 else _uuid5_str

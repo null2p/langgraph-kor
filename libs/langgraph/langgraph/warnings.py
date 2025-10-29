@@ -1,4 +1,4 @@
-"""LangGraph specific warnings."""
+"""LangGraph 전용 경고입니다."""
 
 from __future__ import annotations
 
@@ -10,15 +10,15 @@ __all__ = (
 
 
 class LangGraphDeprecationWarning(DeprecationWarning):
-    """A LangGraph specific deprecation warning.
+    """LangGraph 전용 지원 중단 경고입니다.
 
-    Attributes:
-        message: Description of the warning.
-        since: LangGraph version in which the deprecation was introduced.
-        expected_removal: LangGraph version in what the corresponding functionality expected to be removed.
+    속성:
+        message: 경고에 대한 설명입니다.
+        since: 지원 중단이 도입된 LangGraph 버전입니다.
+        expected_removal: 해당 기능이 제거될 것으로 예상되는 LangGraph 버전입니다.
 
-    Inspired by the Pydantic `PydanticDeprecationWarning` class, which sets a great standard
-    for deprecation warnings with clear versioning information.
+    명확한 버전 정보가 포함된 지원 중단 경고의 훌륭한 표준을 설정한
+    Pydantic의 `PydanticDeprecationWarning` 클래스에서 영감을 받았습니다.
     """
 
     message: str
@@ -48,14 +48,14 @@ class LangGraphDeprecationWarning(DeprecationWarning):
 
 
 class LangGraphDeprecatedSinceV05(LangGraphDeprecationWarning):
-    """A specific `LangGraphDeprecationWarning` subclass defining functionality deprecated since LangGraph v0.5.0"""
+    """LangGraph v0.5.0부터 지원이 중단된 기능을 정의하는 `LangGraphDeprecationWarning`의 특정 서브클래스입니다"""
 
     def __init__(self, message: str, *args: object) -> None:
         super().__init__(message, *args, since=(0, 5), expected_removal=(2, 0))
 
 
 class LangGraphDeprecatedSinceV10(LangGraphDeprecationWarning):
-    """A specific `LangGraphDeprecationWarning` subclass defining functionality deprecated since LangGraph v1.0.0"""
+    """LangGraph v1.0.0부터 지원이 중단된 기능을 정의하는 `LangGraphDeprecationWarning`의 특정 서브클래스입니다"""
 
     def __init__(self, message: str, *args: object) -> None:
         super().__init__(message, *args, since=(1, 0), expected_removal=(2, 0))

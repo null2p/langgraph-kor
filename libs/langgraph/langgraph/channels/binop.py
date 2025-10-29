@@ -11,9 +11,9 @@ from langgraph.errors import EmptyChannelError
 __all__ = ("BinaryOperatorAggregate",)
 
 
-# Adapted from typing_extensions
+# typing_extensions에서 가져옴
 def _strip_extras(t):  # type: ignore[no-untyped-def]
-    """Strips Annotated, Required and NotRequired from a given type."""
+    """주어진 타입에서 Annotated, Required, NotRequired를 제거합니다."""
     if hasattr(t, "__origin__"):
         return _strip_extras(t.__origin__)
     if hasattr(t, "__origin__") and t.__origin__ in (Required, NotRequired):
@@ -23,7 +23,7 @@ def _strip_extras(t):  # type: ignore[no-untyped-def]
 
 
 class BinaryOperatorAggregate(Generic[Value], BaseChannel[Value, Value, Value]):
-    """Stores the result of applying a binary operator to the current value and each new value.
+    """현재 값과 각 새 값에 이진 연산자를 적용한 결과를 저장합니다.
 
     ```python
     import operator
@@ -37,8 +37,8 @@ class BinaryOperatorAggregate(Generic[Value], BaseChannel[Value, Value, Value]):
     def __init__(self, typ: type[Value], operator: Callable[[Value, Value], Value]):
         super().__init__(typ)
         self.operator = operator
-        # special forms from typing or collections.abc are not instantiable
-        # so we need to replace them with their concrete counterparts
+        # typing이나 collections.abc의 특수 형태는 인스턴스화할 수 없으므로
+        # 구체적인 대응 형태로 교체해야 합니다
         typ = _strip_extras(typ)
         if typ in (collections.abc.Sequence, collections.abc.MutableSequence):
             typ = list
@@ -61,16 +61,16 @@ class BinaryOperatorAggregate(Generic[Value], BaseChannel[Value, Value, Value]):
 
     @property
     def ValueType(self) -> type[Value]:
-        """The type of the value stored in the channel."""
+        """채널에 저장된 값의 타입입니다."""
         return self.typ
 
     @property
     def UpdateType(self) -> type[Value]:
-        """The type of the update received by the channel."""
+        """채널이 받는 업데이트의 타입입니다."""
         return self.typ
 
     def copy(self) -> Self:
-        """Return a copy of the channel."""
+        """채널의 복사본을 반환합니다."""
         empty = self.__class__(self.typ, self.operator)
         empty.key = self.key
         empty.value = self.value

@@ -32,7 +32,7 @@ def create_checkpoint(
     id: str | None = None,
     updated_channels: set[str] | None = None,
 ) -> Checkpoint:
-    """Create a checkpoint for the given channels."""
+    """주어진 채널들에 대한 체크포인트를 생성합니다."""
     ts = datetime.now(timezone.utc).isoformat()
     if channels is None:
         values = checkpoint["channel_values"]
@@ -59,7 +59,7 @@ def channels_from_checkpoint(
     specs: Mapping[str, BaseChannel | ManagedValueSpec],
     checkpoint: Checkpoint,
 ) -> tuple[Mapping[str, BaseChannel], ManagedValueMapping]:
-    """Get channels from a checkpoint."""
+    """체크포인트에서 채널을 가져옵니다."""
     channel_specs: dict[str, BaseChannel] = {}
     managed_specs: dict[str, ManagedValueSpec] = {}
     for k, v in specs.items():

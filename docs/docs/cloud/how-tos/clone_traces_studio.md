@@ -1,36 +1,35 @@
-# Debug LangSmith traces
+# LangSmith 추적 디버그
 
-This guide explains how to open LangSmith traces in LangGraph Studio for interactive investigation and debugging.
+이 가이드는 대화형 조사 및 디버깅을 위해 LangGraph Studio에서 LangSmith 추적을 여는 방법을 설명합니다.
 
-## Open deployed threads
+## 배포된 thread 열기
 
-1. Open the LangSmith trace, selecting the root run.
-2. Click "Run in Studio".
+1. LangSmith 추적을 열고 루트 run을 선택합니다.
+2. "Run in Studio"를 클릭합니다.
 
-This will open LangGraph Studio connected to the associated LangGraph Platform deployment with the trace's parent thread selected.
+그러면 추적의 부모 thread가 선택된 상태로 관련 LangGraph Platform 배포에 연결된 LangGraph Studio가 열립니다.
 
-## Testing local agents with remote traces
+## 원격 추적으로 로컬 에이전트 테스트
 
-This section explains how to test a local agent against remote traces from LangSmith. This enables you to use production traces as input for local testing, allowing you to debug and verify agent modifications in your development environment.
+이 섹션에서는 LangSmith의 원격 추적에 대해 로컬 에이전트를 테스트하는 방법을 설명합니다. 이를 통해 프로덕션 추적을 로컬 테스트 입력으로 사용할 수 있으며, 개발 환경에서 에이전트 수정 사항을 디버그하고 검증할 수 있습니다.
 
-### Requirements
+### 요구 사항
 
-- A LangSmith traced thread
-- A locally running agent. See [here](../how-tos/studio/quick_start.md#local-development-server) for setup
-  instructions.
+- LangSmith 추적 thread
+- 로컬에서 실행되는 에이전트. 설정 지침은 [여기](../how-tos/studio/quick_start.md#local-development-server)를 참조하세요.
 
-!!! info "Local agent requirements"
+!!! info "로컬 에이전트 요구 사항"
 
     - langgraph>=0.3.18
     - langgraph-api>=0.0.32
-    - Contains the same set of nodes present in the remote trace
+    - 원격 추적에 있는 동일한 노드 집합 포함
 
-### Cloning Thread
+### Thread 복제
 
-1. Open the LangSmith trace, selecting the root run.
-2. Click the dropdown next to "Run in Studio".
-3. Enter your local agent's URL.
-4. Select "Clone thread locally".
-5. If multiple graphs exist, select the target graph.
+1. LangSmith 추적을 열고 루트 run을 선택합니다.
+2. "Run in Studio" 옆의 드롭다운을 클릭합니다.
+3. 로컬 에이전트의 URL을 입력합니다.
+4. "Clone thread locally"를 선택합니다.
+5. 여러 그래프가 있는 경우 대상 그래프를 선택합니다.
 
-A new thread will be created in your local agent with the thread history inferred and copied from the remote thread, and you will be navigated to LangGraph Studio for your locally running application.
+원격 thread에서 추론되고 복사된 thread 히스토리로 로컬 에이전트에 새 thread가 생성되며, 로컬로 실행 중인 애플리케이션의 LangGraph Studio로 이동합니다.

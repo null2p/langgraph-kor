@@ -1,12 +1,12 @@
-# Enqueue
+# 대기열 추가
 
-This guide assumes knowledge of what double-texting is, which you can learn about in the [double-texting conceptual guide](../../concepts/double_texting.md).
+이 가이드는 더블 텍스팅이 무엇인지에 대한 지식을 가정하며, [더블 텍스팅 개념 가이드](../../concepts/double_texting.md)에서 이에 대해 배울 수 있습니다.
 
-The guide covers the `enqueue` option for double texting, which adds the interruptions to a queue and executes them in the order they are received by the client. Below is a quick example of using the `enqueue` option.
+이 가이드는 더블 텍스팅을 위한 `enqueue` 옵션을 다루며, 이는 인터럽션을 대기열에 추가하고 클라이언트가 수신한 순서대로 실행합니다. 다음은 `enqueue` 옵션 사용의 간단한 예제입니다.
 
-## Setup
+## 설정
 
-First, we will define a quick helper function for printing out JS and CURL model outputs (you can skip this if using Python):
+먼저 JS 및 CURL 모델 출력을 출력하기 위한 간단한 헬퍼 함수를 정의합니다(Python을 사용하는 경우 건너뛸 수 있습니다):
 
 === "Javascript"
 
@@ -45,7 +45,7 @@ First, we will define a quick helper function for printing out JS and CURL model
     }
     ```
 
-Then, let's import our required packages and instantiate our client, assistant, and thread.
+그런 다음 필요한 패키지를 가져오고 클라이언트, 어시스턴트 및 스레드를 인스턴스화합니다.
 
 === "Python"
 
@@ -83,9 +83,9 @@ Then, let's import our required packages and instantiate our client, assistant, 
       --data '{}'
     ```
 
-## Create runs
+## 실행 생성
 
-Now let's start two runs, with the second interrupting the first one with a multitask strategy of "enqueue":
+이제 두 개의 실행을 시작하고, 두 번째 실행이 "enqueue"라는 멀티태스크 전략으로 첫 번째 실행을 중단하도록 합니다:
 
 === "Python"
 
@@ -139,9 +139,9 @@ Now let's start two runs, with the second interrupting the first one with a mult
     }"
     ```
 
-## View run results
+## 실행 결과 보기
 
-Verify that the thread has data from both runs:
+스레드에 두 실행의 데이터가 모두 있는지 확인합니다:
 
 === "Python"
 
@@ -180,7 +180,7 @@ Verify that the thread has data from both runs:
     done
     ```
 
-Output:
+출력:
 
     ================================ Human Message =================================
     

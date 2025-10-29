@@ -1,12 +1,12 @@
-# Reject
+# 거부
 
-This guide assumes knowledge of what double-texting is, which you can learn about in the [double-texting conceptual guide](../../concepts/double_texting.md).
+이 가이드는 더블 텍스팅이 무엇인지에 대한 지식을 가정하며, [더블 텍스팅 개념 가이드](../../concepts/double_texting.md)에서 이에 대해 배울 수 있습니다.
 
-The guide covers the `reject` option for double texting, which rejects the new run of the graph by throwing an error and continues with the original run until completion. Below is a quick example of using the `reject` option.
+이 가이드는 더블 텍스팅을 위한 `reject` 옵션을 다루며, 이는 오류를 발생시켜 그래프의 새 실행을 거부하고 원래 실행이 완료될 때까지 계속합니다. 다음은 `reject` 옵션 사용의 간단한 예제입니다.
 
-## Setup
+## 설정
 
-First, we will define a quick helper function for printing out JS and CURL model outputs (you can skip this if using Python):
+먼저 JS 및 CURL 모델 출력을 출력하기 위한 간단한 헬퍼 함수를 정의합니다(Python을 사용하는 경우 건너뛸 수 있습니다):
 
 === "Javascript"
 
@@ -45,7 +45,7 @@ First, we will define a quick helper function for printing out JS and CURL model
     }
     ```
 
-Now, let's import our required packages and instantiate our client, assistant, and thread.
+이제 필요한 패키지를 가져오고 클라이언트, 어시스턴트 및 스레드를 인스턴스화합니다.
 
 === "Python"
 
@@ -80,9 +80,9 @@ Now, let's import our required packages and instantiate our client, assistant, a
       --data '{}'
     ```
 
-## Create runs
+## 실행 생성
 
-Now we can run a thread and try to run a second one with the "reject" option, which should fail since we have already started a run:
+이제 스레드를 실행하고 "reject" 옵션으로 두 번째 스레드를 실행하려고 시도할 수 있습니다. 이미 실행을 시작했기 때문에 실패해야 합니다:
 
 
 === "Python"
@@ -148,14 +148,14 @@ Now we can run a thread and try to run a second one with the "reject" option, wh
     }" || { echo "Failed to start concurrent run"; echo "Error: $?" >&2; }
     ```
 
-Output:
+출력:
 
     Failed to start concurrent run Client error '409 Conflict' for url 'http://localhost:8123/threads/f9e7088b-8028-4e5c-88d2-9cc9a2870e50/runs'
     For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/409
 
-## View run results
+## 실행 결과 보기
 
-We can verify that the original thread finished executing:
+원래 스레드가 실행을 완료했는지 확인할 수 있습니다:
 
 === "Python"
 
@@ -194,7 +194,7 @@ We can verify that the original thread finished executing:
     done
     ```
 
-Output:
+출력:
 
     ================================ Human Message =================================
     

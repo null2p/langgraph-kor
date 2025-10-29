@@ -1,31 +1,31 @@
-# Add tools
+# 도구 추가
 
-To handle queries that your chatbot can't answer "from memory", integrate a web search tool. The chatbot can use this tool to find relevant information and provide better responses.
+챗봇이 "기억"만으로는 답할 수 없는 질문을 처리하려면 웹 검색 도구를 통합하세요. 챗봇은 이 도구를 사용하여 관련 정보를 찾고 더 나은 응답을 제공할 수 있습니다.
 
 !!! note
 
-    This tutorial builds on [Build a basic chatbot](./1-build-basic-chatbot.md).
+    이 튜토리얼은 [기본 챗봇 만들기](./1-build-basic-chatbot.md)를 기반으로 합니다.
 
-## Prerequisites
+## 사전 요구 사항
 
-Before you start this tutorial, ensure you have the following:
+이 튜토리얼을 시작하기 전에 다음이 있는지 확인하세요:
 
 :::python
 
-- An API key for the [Tavily Search Engine](https://python.langchain.com/docs/integrations/tools/tavily_search/).
+- [Tavily Search Engine](https://python.langchain.com/docs/integrations/tools/tavily_search/)용 API 키
 
 :::
 
 :::js
 
-- An API key for the [Tavily Search Engine](https://js.langchain.com/docs/integrations/tools/tavily_search/).
+- [Tavily Search Engine](https://js.langchain.com/docs/integrations/tools/tavily_search/)용 API 키
 
 :::
 
-## 1. Install the search engine
+## 1. 검색 엔진 설치
 
 :::python
-Install the requirements to use the [Tavily Search Engine](https://python.langchain.com/docs/integrations/tools/tavily_search/):
+[Tavily Search Engine](https://python.langchain.com/docs/integrations/tools/tavily_search/)을 사용하기 위한 요구 사항을 설치합니다:
 
 ```bash
 pip install -U langchain-tavily
@@ -34,7 +34,7 @@ pip install -U langchain-tavily
 :::
 
 :::js
-Install the requirements to use the [Tavily Search Engine](https://docs.tavily.com/):
+[Tavily Search Engine](https://docs.tavily.com/)을 사용하기 위한 요구 사항을 설치합니다:
 
 === "npm"
 
@@ -62,9 +62,9 @@ Install the requirements to use the [Tavily Search Engine](https://docs.tavily.c
 
 :::
 
-## 2. Configure your environment
+## 2. 환경 구성
 
-Configure your environment with your search engine API key:
+검색 엔진 API 키로 환경을 구성합니다:
 
 :::python
 ```python
@@ -82,9 +82,9 @@ process.env.TAVILY_API_KEY = "tvly-...";
 
 :::
 
-## 3. Define the tool
+## 3. 도구 정의
 
-Define the web search tool:
+웹 검색 도구를 정의합니다:
 
 :::python
 
@@ -111,7 +111,7 @@ await tool.invoke({ query: "What's a 'node' in LangGraph?" });
 
 :::
 
-The results are page summaries our chat bot can use to answer questions:
+결과는 챗봇이 질문에 답하는 데 사용할 수 있는 페이지 요약입니다:
 
 :::python
 
@@ -165,17 +165,17 @@ The results are page summaries our chat bot can use to answer questions:
 
 :::
 
-## 4. Define the graph
+## 4. 그래프 정의
 
 :::python
-For the `StateGraph` you created in the [first tutorial](./1-build-basic-chatbot.md), add `bind_tools` on the LLM. This lets the LLM know the correct JSON format to use if it wants to use the search engine.
+[첫 번째 튜토리얼](./1-build-basic-chatbot.md)에서 생성한 `StateGraph`에 대해 LLM에 `bind_tools`를 추가합니다. 이를 통해 LLM이 검색 엔진을 사용하려는 경우 사용할 올바른 JSON 형식을 알 수 있습니다.
 :::
 
 :::js
-For the `StateGraph` you created in the [first tutorial](./1-build-basic-chatbot.md), add `bindTools` on the LLM. This lets the LLM know the correct JSON format to use if it wants to use the search engine.
+[첫 번째 튜토리얼](./1-build-basic-chatbot.md)에서 생성한 `StateGraph`에 대해 LLM에 `bindTools`를 추가합니다. 이를 통해 LLM이 검색 엔진을 사용하려는 경우 사용할 올바른 JSON 형식을 알 수 있습니다.
 :::
 
-Let's first select our LLM:
+먼저 LLM을 선택합니다:
 
 :::python
 {% include-markdown "../../../snippets/chat_model_tabs.md" %}
@@ -200,7 +200,7 @@ const llm = new ChatAnthropic({ model: "claude-3-5-sonnet-latest" });
 
 :::
 
-We can now incorporate it into a `StateGraph`:
+이제 이를 `StateGraph`에 통합할 수 있습니다:
 
 :::python
 
@@ -217,7 +217,7 @@ class State(TypedDict):
 
 graph_builder = StateGraph(State)
 
-# Modification: tell the LLM which tools it can call
+# 수정: LLM이 호출할 수 있는 도구를 알려줍니다
 # highlight-next-line
 llm_with_tools = llm.bind_tools(tools)
 
@@ -238,7 +238,7 @@ import { z } from "zod";
 const State = z.object({ messages: MessagesZodState.shape.messages });
 
 const chatbot = async (state: z.infer<typeof State>) => {
-  // Modification: tell the LLM which tools it can call
+  // 수정: LLM이 호출할 수 있는 도구를 알려줍니다
   const llmWithTools = llm.bindTools(tools);
 
   return { messages: [await llmWithTools.invoke(state.messages)] };
@@ -247,11 +247,11 @@ const chatbot = async (state: z.infer<typeof State>) => {
 
 :::
 
-## 5. Create a function to run the tools
+## 5. 도구를 실행하는 함수 생성
 
 :::python
 
-Now, create a function to run the tools if they are called. Do this by adding the tools to a new node called `BasicToolNode` that checks the most recent message in the state and calls tools if the message contains `tool_calls`. It relies on the LLM's `tool_calling` support, which is available in Anthropic, OpenAI, Google Gemini, and a number of other LLM providers.
+이제 도구가 호출되면 도구를 실행하는 함수를 생성합니다. 상태의 가장 최근 메시지를 확인하고 메시지에 `tool_calls`가 포함되어 있으면 도구를 호출하는 `BasicToolNode`라는 새 노드에 도구를 추가하여 이를 수행합니다. 이는 Anthropic, OpenAI, Google Gemini 및 기타 여러 LLM 제공업체에서 사용할 수 있는 LLM의 `tool_calling` 지원에 의존합니다.
 
 ```python
 import json
@@ -260,7 +260,7 @@ from langchain_core.messages import ToolMessage
 
 
 class BasicToolNode:
-    """A node that runs the tools requested in the last AIMessage."""
+    """마지막 AIMessage에서 요청된 도구를 실행하는 노드입니다."""
 
     def __init__(self, tools: list) -> None:
         self.tools_by_name = {tool.name: tool for tool in tools}
@@ -291,13 +291,13 @@ graph_builder.add_node("tools", tool_node)
 
 !!! note
 
-    If you do not want to build this yourself in the future, you can use LangGraph's prebuilt [ToolNode](https://langchain-ai.github.io/langgraph/reference/agents/#langgraph.prebuilt.tool_node.ToolNode).
+    나중에 이를 직접 구축하고 싶지 않다면 LangGraph의 사전 빌드된 [ToolNode](https://langchain-ai.github.io/langgraph/reference/agents/#langgraph.prebuilt.tool_node.ToolNode)를 사용할 수 있습니다.
 
 :::
 
 :::js
 
-Now, create a function to run the tools if they are called. Do this by adding the tools to a new node called `"tools"` that checks the most recent message in the state and calls tools if the message contains `tool_calls`. It relies on the LLM's tool calling support, which is available in Anthropic, OpenAI, Google Gemini, and a number of other LLM providers.
+이제 도구가 호출되면 도구를 실행하는 함수를 생성합니다. 상태의 가장 최근 메시지를 확인하고 메시지에 `tool_calls`가 포함되어 있으면 도구를 호출하는 `"tools"`라는 새 노드에 도구를 추가하여 이를 수행합니다. 이는 Anthropic, OpenAI, Google Gemini 및 기타 여러 LLM 제공업체에서 사용할 수 있는 LLM의 도구 호출 지원에 의존합니다.
 
 ```typescript
 import type { StructuredToolInterface } from "@langchain/core/tools";
@@ -345,25 +345,25 @@ function createToolNode(tools: StructuredToolInterface[]) {
 
 !!! note
 
-    If you do not want to build this yourself in the future, you can use LangGraph's prebuilt [ToolNode](https://langchain-ai.github.io/langgraphjs/reference/classes/langgraph_prebuilt.ToolNode.html).
+    나중에 이를 직접 구축하고 싶지 않다면 LangGraph의 사전 빌드된 [ToolNode](https://langchain-ai.github.io/langgraphjs/reference/classes/langgraph_prebuilt.ToolNode.html)를 사용할 수 있습니다.
 
 :::
 
-## 6. Define the `conditional_edges`
+## 6. `conditional_edges` 정의
 
-With the tool node added, now you can define the `conditional_edges`.
+도구 노드가 추가되면 이제 `conditional_edges`를 정의할 수 있습니다.
 
-**Edges** route the control flow from one node to the next. **Conditional edges** start from a single node and usually contain "if" statements to route to different nodes depending on the current graph state. These functions receive the current graph `state` and return a string or list of strings indicating which node(s) to call next.
+**Edges**는 한 노드에서 다음 노드로 제어 흐름을 라우팅합니다. **Conditional edges**는 단일 노드에서 시작하며 일반적으로 현재 그래프 상태에 따라 다른 노드로 라우팅하는 "if" 문을 포함합니다. 이러한 함수는 현재 그래프 `state`를 받아 다음에 호출할 노드를 나타내는 문자열 또는 문자열 목록을 반환합니다.
 
 :::python
-Next, define a router function called `route_tools` that checks for `tool_calls` in the chatbot's output. Provide this function to the graph by calling `add_conditional_edges`, which tells the graph that whenever the `chatbot` node completes to check this function to see where to go next.
+다음으로, 챗봇의 출력에서 `tool_calls`를 확인하는 `route_tools`라는 라우터 함수를 정의합니다. `add_conditional_edges`를 호출하여 그래프에 이 함수를 제공하면, `chatbot` 노드가 완료될 때마다 이 함수를 확인하여 다음에 어디로 갈지 결정하도록 그래프에 지시합니다.
 :::
 
 :::js
-Next, define a router function called `routeTools` that checks for `tool_calls` in the chatbot's output. Provide this function to the graph by calling `addConditionalEdges`, which tells the graph that whenever the `chatbot` node completes to check this function to see where to go next.
+다음으로, 챗봇의 출력에서 `tool_calls`를 확인하는 `routeTools`라는 라우터 함수를 정의합니다. `addConditionalEdges`를 호출하여 그래프에 이 함수를 제공하면, `chatbot` 노드가 완료될 때마다 이 함수를 확인하여 다음에 어디로 갈지 결정하도록 그래프에 지시합니다.
 :::
 
-The condition will route to `tools` if tool calls are present and `END` if not. Because the condition can return `END`, you do not need to explicitly set a `finish_point` this time.
+조건은 도구 호출이 있으면 `tools`로 라우팅하고 없으면 `END`로 라우팅합니다. 조건이 `END`를 반환할 수 있으므로 이번에는 명시적으로 `finish_point`를 설정할 필요가 없습니다.
 
 :::python
 
@@ -372,8 +372,8 @@ def route_tools(
     state: State,
 ):
     """
-    Use in the conditional_edge to route to the ToolNode if the last message
-    has tool calls. Otherwise, route to the end.
+    마지막 메시지에 도구 호출이 있는 경우 ToolNode로 라우팅하기 위해
+    conditional_edge에서 사용합니다. 그렇지 않으면 종료로 라우팅합니다.
     """
     if isinstance(state, list):
         ai_message = state[-1]
@@ -386,19 +386,19 @@ def route_tools(
     return END
 
 
-# The `tools_condition` function returns "tools" if the chatbot asks to use a tool, and "END" if
-# it is fine directly responding. This conditional routing defines the main agent loop.
+# `tools_condition` 함수는 챗봇이 도구를 사용하려고 하면 "tools"를 반환하고,
+# 직접 응답해도 괜찮으면 "END"를 반환합니다. 이 조건부 라우팅은 주요 에이전트 루프를 정의합니다.
 graph_builder.add_conditional_edges(
     "chatbot",
     route_tools,
-    # The following dictionary lets you tell the graph to interpret the condition's outputs as a specific node
-    # It defaults to the identity function, but if you
-    # want to use a node named something else apart from "tools",
-    # You can update the value of the dictionary to something else
-    # e.g., "tools": "my_tools"
+    # 다음 딕셔너리를 사용하면 조건의 출력을 특정 노드로 해석하도록 그래프에 지시할 수 있습니다
+    # 기본값은 identity 함수이지만,
+    # "tools"가 아닌 다른 이름의 노드를 사용하려면
+    # 딕셔너리의 값을 다른 것으로 업데이트할 수 있습니다
+    # 예: "tools": "my_tools"
     {"tools": "tools", END: END},
 )
-# Any time a tool is called, we return to the chatbot to decide the next step
+# 도구가 호출될 때마다 챗봇으로 돌아가서 다음 단계를 결정합니다
 graph_builder.add_edge("tools", "chatbot")
 graph_builder.add_edge(START, "chatbot")
 graph = graph_builder.compile()
@@ -406,7 +406,7 @@ graph = graph_builder.compile()
 
 !!! note
 
-    You can replace this with the prebuilt [tools_condition](https://langchain-ai.github.io/langgraph/reference/prebuilt/#tools_condition) to be more concise.
+    더 간결하게 하려면 사전 빌드된 [tools_condition](https://langchain-ai.github.io/langgraph/reference/prebuilt/#tools_condition)으로 대체할 수 있습니다.
 
 :::
 
@@ -417,8 +417,8 @@ import { END, START } from "@langchain/langgraph";
 
 const routeTools = (state: z.infer<typeof State>) => {
   /**
-   * Use as conditional edge to route to the ToolNode if the last message
-   * has tool calls.
+   * 마지막 메시지에 도구 호출이 있는 경우 ToolNode로 라우팅하기 위해
+   * 조건부 엣지로 사용합니다.
    */
   const lastMessage = state.messages.at(-1);
   if (
@@ -429,39 +429,39 @@ const routeTools = (state: z.infer<typeof State>) => {
     return "tools";
   }
 
-  /** Otherwise, route to the end. */
+  /** 그렇지 않으면 종료로 라우팅합니다. */
   return END;
 };
 
 const graph = new StateGraph(State)
   .addNode("chatbot", chatbot)
 
-  // The `routeTools` function returns "tools" if the chatbot asks to use a tool, and "END" if
-  // it is fine directly responding. This conditional routing defines the main agent loop.
+  // `routeTools` 함수는 챗봇이 도구를 사용하려고 하면 "tools"를 반환하고,
+  // 직접 응답해도 괜찮으면 "END"를 반환합니다. 이 조건부 라우팅은 주요 에이전트 루프를 정의합니다.
   .addNode("tools", createToolNode(tools))
 
-  // Start the graph with the chatbot
+  // 챗봇으로 그래프를 시작합니다
   .addEdge(START, "chatbot")
 
-  // The `routeTools` function returns "tools" if the chatbot asks to use a tool, and "END" if
-  // it is fine directly responding.
+  // `routeTools` 함수는 챗봇이 도구를 사용하려고 하면 "tools"를 반환하고,
+  // 직접 응답해도 괜찮으면 "END"를 반환합니다.
   .addConditionalEdges("chatbot", routeTools, ["tools", END])
 
-  // Any time a tool is called, we need to return to the chatbot
+  // 도구가 호출될 때마다 챗봇으로 돌아가야 합니다
   .addEdge("tools", "chatbot")
   .compile();
 ```
 
 !!! note
 
-    You can replace this with the prebuilt [toolsCondition](https://langchain-ai.github.io/langgraphjs/reference/functions/langgraph_prebuilt.toolsCondition.html) to be more concise.
+    더 간결하게 하려면 사전 빌드된 [toolsCondition](https://langchain-ai.github.io/langgraphjs/reference/functions/langgraph_prebuilt.toolsCondition.html)으로 대체할 수 있습니다.
 
 :::
 
-## 7. Visualize the graph (optional)
+## 7. 그래프 시각화 (선택사항)
 
 :::python
-You can visualize the graph using the `get_graph` method and one of the "draw" methods, like `draw_ascii` or `draw_png`. The `draw` methods each require additional dependencies.
+`get_graph` 메서드와 `draw_ascii` 또는 `draw_png`와 같은 "draw" 메서드 중 하나를 사용하여 그래프를 시각화할 수 있습니다. `draw` 메서드는 각각 추가 종속성이 필요합니다.
 
 ```python
 from IPython.display import Image, display
@@ -469,14 +469,14 @@ from IPython.display import Image, display
 try:
     display(Image(graph.get_graph().draw_mermaid_png()))
 except Exception:
-    # This requires some extra dependencies and is optional
+    # 이것은 추가 종속성이 필요하며 선택사항입니다
     pass
 ```
 
 :::
 
 :::js
-You can visualize the graph using the `getGraph` method and render the graph with the `drawMermaidPng` method.
+`getGraph` 메서드를 사용하여 그래프를 시각화하고 `drawMermaidPng` 메서드로 그래프를 렌더링할 수 있습니다.
 
 ```typescript
 import * as fs from "node:fs/promises";
@@ -492,9 +492,9 @@ await fs.writeFile("chatbot-with-tools.png", imageBuffer);
 
 ![chatbot-with-tools-diagram](chatbot-with-tools.png)
 
-## 8. Ask the bot questions
+## 8. 봇에게 질문하기
 
-Now you can ask the chatbot questions outside its training data:
+이제 챗봇에게 훈련 데이터 외부의 질문을 할 수 있습니다:
 
 :::python
 
@@ -513,7 +513,7 @@ while True:
 
         stream_graph_updates(user_input)
     except:
-        # fallback if input() is not available
+        # input()을 사용할 수 없는 경우 대체
         user_input = "What do you know about LangGraph?"
         print("User: " + user_input)
         stream_graph_updates(user_input)
@@ -626,14 +626,14 @@ This makes LangGraph a significant tool in the evolving landscape of LLM-based a
 
 :::
 
-## 9. Use prebuilts
+## 9. 사전 빌드 사용
 
-For ease of use, adjust your code to replace the following with LangGraph prebuilt components. These have built in functionality like parallel API execution.
+사용 편의성을 위해 코드를 조정하여 다음을 LangGraph 사전 빌드 컴포넌트로 교체합니다. 이들은 병렬 API 실행과 같은 내장 기능을 가지고 있습니다.
 
 :::python
 
-- `BasicToolNode` is replaced with the prebuilt [ToolNode](https://langchain-ai.github.io/langgraph/reference/prebuilt/#toolnode)
-- `route_tools` is replaced with the prebuilt [tools_condition](https://langchain-ai.github.io/langgraph/reference/prebuilt/#tools_condition)
+- `BasicToolNode`는 사전 빌드된 [ToolNode](https://langchain-ai.github.io/langgraph/reference/prebuilt/#toolnode)로 대체됩니다
+- `route_tools`는 사전 빌드된 [tools_condition](https://langchain-ai.github.io/langgraph/reference/prebuilt/#tools_condition)으로 대체됩니다
 
 {% include-markdown "../../../snippets/chat_model_tabs.md" %}
 
@@ -685,7 +685,7 @@ graph_builder.add_conditional_edges(
     "chatbot",
     tools_condition,
 )
-# Any time a tool is called, we return to the chatbot to decide the next step
+# 도구가 호출될 때마다 챗봇으로 돌아가서 다음 단계를 결정합니다
 graph_builder.add_edge("tools", "chatbot")
 graph_builder.add_edge(START, "chatbot")
 graph = graph_builder.compile()
@@ -695,8 +695,8 @@ graph = graph_builder.compile()
 
 :::js
 
-- `createToolNode` is replaced with the prebuilt [ToolNode](https://langchain-ai.github.io/langgraphjs/reference/classes/langgraph_prebuilt.ToolNode.html)
-- `routeTools` is replaced with the prebuilt [toolsCondition](https://langchain-ai.github.io/langgraphjs/reference/functions/langgraph_prebuilt.toolsCondition.html)
+- `createToolNode`는 사전 빌드된 [ToolNode](https://langchain-ai.github.io/langgraphjs/reference/classes/langgraph_prebuilt.ToolNode.html)로 대체됩니다
+- `routeTools`는 사전 빌드된 [toolsCondition](https://langchain-ai.github.io/langgraphjs/reference/functions/langgraph_prebuilt.toolsCondition.html)으로 대체됩니다
 
 ```typescript
 import { TavilySearch } from "@langchain/tavily";
@@ -724,14 +724,14 @@ const graph = new StateGraph(State)
 
 :::
 
-**Congratulations!** You've created a conversational agent in LangGraph that can use a search engine to retrieve updated information when needed. Now it can handle a wider range of user queries.
+**축하합니다!** 필요할 때 검색 엔진을 사용하여 업데이트된 정보를 검색할 수 있는 LangGraph 대화형 에이전트를 만들었습니다. 이제 더 광범위한 사용자 쿼리를 처리할 수 있습니다.
 
 :::python
 
-To inspect all the steps your agent just took, check out this [LangSmith trace](https://smith.langchain.com/public/4fbd7636-25af-4638-9587-5a02fdbb0172/r).
+에이전트가 방금 수행한 모든 단계를 검사하려면 이 [LangSmith trace](https://smith.langchain.com/public/4fbd7636-25af-4638-9587-5a02fdbb0172/r)를 확인하세요.
 
 :::
 
-## Next steps
+## 다음 단계
 
-The chatbot cannot remember past interactions on its own, which limits its ability to have coherent, multi-turn conversations. In the next part, you will [add **memory**](./3-add-memory.md) to address this.
+챗봇은 자체적으로 과거 상호작용을 기억할 수 없으므로 일관된 다중 턴 대화를 나누는 능력이 제한됩니다. 다음 파트에서는 이를 해결하기 위해 [**메모리**를 추가](./3-add-memory.md)합니다.
