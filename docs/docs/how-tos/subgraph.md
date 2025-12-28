@@ -25,7 +25,7 @@ npm install @langchain/langgraph
 
     [LangSmith](https://smith.langchain.com)에 가입하여 LangGraph 프로젝트의 문제를 빠르게 발견하고 성능을 개선하세요. LangSmith를 사용하면 추적 데이터를 활용하여 LangGraph로 구축한 LLM 앱을 디버그, 테스트 및 모니터링할 수 있습니다 — 시작하는 방법에 대한 자세한 내용은 [여기](https://docs.smith.langchain.com)를 참조하세요.
 
-## 공유 상태 스키마
+## 공유 상태 스키마 {#shared-state-schemas}
 
 부모 그래프와 서브그래프가 [스키마](../concepts/low_level.md#state)에서 공유 상태 키(채널)를 통해 통신하는 것이 일반적인 경우입니다. 예를 들어, [멀티 에이전트](../concepts/multi_agent.md) 시스템에서는 에이전트들이 공유 [messages](https://langchain-ai.github.io/langgraph/concepts/low_level.md#why-use-messages) 키를 통해 통신하는 경우가 많습니다.
 
@@ -199,7 +199,7 @@ const graph = builder.compile();
     ```
     :::
 
-## 다른 상태 스키마
+## 다른 상태 스키마 {#different-state-schemas}
 
 더 복잡한 시스템의 경우 부모 그래프와 **완전히 다른 스키마**를 가진 서브그래프를 정의하고 싶을 수 있습니다(공유 키 없음). 예를 들어, [멀티 에이전트](../concepts/multi_agent.md) 시스템의 각 에이전트에 대해 비공개 메시지 히스토리를 유지하고 싶을 수 있습니다.
 

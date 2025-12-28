@@ -158,7 +158,7 @@ my-app/
 └── pyproject.toml
 ```
 
-## LangGraph 구성 파일 생성
+## LangGraph 구성 파일 생성 {#create-langgraph-configuration-file}
 
 `langgraph.json`이라는 [LangGraph 구성 파일](../reference/cli.md#configuration-file)을 생성합니다. 구성 파일의 JSON 객체에서 각 키에 대한 자세한 설명은 [LangGraph 구성 파일 레퍼런스](../reference/cli.md#configuration-file)를 참조하세요.
 

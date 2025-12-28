@@ -5,7 +5,7 @@ search:
 
 # 그래프 API 개념
 
-## 그래프
+## 그래프 {#graphs}
 
 LangGraph의 핵심은 에이전트 워크플로우를 그래프로 모델링하는 것입니다. 세 가지 주요 구성 요소를 사용하여 에이전트의 동작을 정의합니다:
 
@@ -27,7 +27,7 @@ super-step은 그래프 노드에 대한 단일 반복으로 간주될 수 있�
 
 `StateGraph` 클래스는 사용할 메인 그래프 클래스입니다. 사용자 정의 `State` 객체로 매개변수화됩니다.
 
-### 그래프 컴파일하기
+### 그래프 컴파일하기 {#compiling-your-graph}
 
 그래프를 빌드하려면 먼저 [state](#state)를 정의하고, [nodes](#nodes)와 [edges](#edges)를 추가한 다음 컴파일합니다. 그래프를 컴파일한다는 것은 정확히 무엇이며 왜 필요할까요?
 
@@ -286,9 +286,9 @@ const State = z.object({
 이 예제에서는 `withLangGraph` 함수를 사용하여 두 번째 키(`bar`)에 대한 reducer 함수를 지정했습니다. 첫 번째 키는 변경되지 않은 상태로 유지됩니다. 그래프에 대한 입력이 `{ foo: 1, bar: ["hi"] }`라고 가정해 봅시다. 그리고 첫 번째 `Node`가 `{ foo: 2 }`를 반환한다고 가정해 봅시다. 이는 상태에 대한 업데이트로 처리됩니다. `Node`가 전체 `State` 스키마를 반환할 필요가 없고 업데이트만 반환하면 된다는 점에 주목하세요. 이 업데이트를 적용한 후 `State`는 `{ foo: 2, bar: ["hi"] }`가 됩니다. 두 번째 노드가 `{ bar: ["bye"] }`를 반환하면 `State`는 `{ foo: 2, bar: ["hi", "bye"] }`가 됩니다. 여기서 `bar` 키는 두 배열을 함께 추가하여 업데이트된다는 점에 주목하세요.
 :::
 
-### 그래프 상태에서 메시지 다루기
+### 그래프 상태에서 메시지 다루기 {#working-with-messages-in-graph-state}
 
-#### 왜 메시지를 사용하나요?
+#### 왜 메시지를 사용하나요? {#why-use-messages}
 
 :::python
 대부분의 최신 LLM 제공자는 메시지 리스트를 입력으로 받는 채팅 모델 인터페이스를 가지고 있습니다. 특히 LangChain의 [`ChatModel`](https://python.langchain.com/docs/concepts/#chat-models)은 `Message` 객체의 리스트를 입력으로 받습니다. 이러한 메시지는 `HumanMessage`(사용자 입력) 또는 `AIMessage`(LLM 응답)와 같은 다양한 형태로 제공됩니다. 메시지 객체에 대한 자세한 내용은 [이 개념 가이드](https://python.langchain.com/docs/concepts/#messages)를 참조하세요.
@@ -298,7 +298,7 @@ const State = z.object({
 대부분의 최신 LLM 제공자는 메시지 리스트를 입력으로 받는 채팅 모델 인터페이스를 가지고 있습니다. 특히 LangChain의 [`ChatModel`](https://js.langchain.com/docs/concepts/#chat-models)은 `Message` 객체의 리스트를 입력으로 받습니다. 이러한 메시지는 `HumanMessage`(사용자 입력) 또는 `AIMessage`(LLM 응답)와 같은 다양한 형태로 제공됩니다. 메시지 객체에 대한 자세한 내용은 [이 개념 가이드](https://js.langchain.com/docs/concepts/#messages)를 참조하세요.
 :::
 
-#### 그래프에서 메시지 사용하기
+#### 그래프에서 메시지 사용하기 {#using-messages-in-your-graph}
 
 :::python
 많은 경우 이전 대화 기록을 그래프 상태에 메시지 리스트로 저장하는 것이 유용합니다. 이를 위해 `Message` 객체의 리스트를 저장하는 키(채널)를 그래프 상태에 추가하고 reducer 함수로 어노테이션할 수 있습니다(아래 예제의 `messages` 키 참조). Reducer 함수는 각 상태 업데이트(예: 노드가 업데이트를 보낼 때)마다 상태의 `Message` 객체 리스트를 어떻게 업데이트할지 그래프에 알려주는 데 필수적입니다. Reducer를 지정하지 않으면 모든 상태 업데이트가 가장 최근에 제공된 값으로 메시지 리스트를 덮어씁니다. 기존 리스트에 메시지를 단순히 추가하려면 `operator.add`를 reducer로 사용할 수 있습니다.
@@ -389,7 +389,7 @@ class State(MessagesState):
 
 :::
 
-## 노드
+## 노드 {#nodes}
 
 :::python
 
@@ -493,7 +493,7 @@ builder.addNode(myNode);
 
 :::
 
-### `START` 노드
+### `START` 노드 {#start-node}
 
 `START` 노드는 사용자 입력을 그래프에 보내는 노드를 나타내는 특수 노드입니다. 이 노드를 참조하는 주요 목적은 어떤 노드가 먼저 호출되어야 하는지 결정하는 것입니다.
 
@@ -517,7 +517,7 @@ graph.addEdge(START, "nodeA");
 
 :::
 
-### `END` 노드
+### `END` 노드 {#end-node}
 
 `END` 노드는 터미널 노드를 나타내는 특수 노드입니다. 이 노드는 완료 후 어떤 엣지에도 액션이 없음을 나타내고 싶을 때 참조됩니다.
 
@@ -624,7 +624,7 @@ await graph.invoke({ x: 5 }, { streamMode: "updates" }); // (2)!
 
 :::
 
-## 엣지
+## 엣지 {#edges}
 
 엣지는 로직이 라우팅되는 방식과 그래프가 중지하는 방식을 정의합니다. 이것은 에이전트가 작동하는 방식과 서로 다른 노드가 서로 통신하는 방식의 큰 부분입니다. 몇 가지 주요 엣지 유형이 있습니다:
 
@@ -635,7 +635,7 @@ await graph.invoke({ x: 5 }, { streamMode: "updates" }); // (2)!
 
 노드는 여러 개의 나가는 엣지를 가질 수 있습니다. 노드에 여러 개의 나가는 엣지가 있는 경우, 해당 대상 노드 **모두**가 다음 슈퍼스텝의 일부로 병렬로 실행됩니다.
 
-### 일반 엣지
+### 일반 엣지 {#normal-edges}
 
 :::python
 노드 A에서 노드 B로 **항상** 이동하려면 @[add_edge][add_edge] 메서드를 직접 사용할 수 있습니다.
@@ -655,7 +655,7 @@ graph.addEdge("nodeA", "nodeB");
 
 :::
 
-### 조건부 엣지
+### 조건부 엣지 {#conditional-edges}
 
 :::python
 1개 이상의 엣지로 **선택적으로** 라우팅하거나 선택적으로 종료하려면 @[add_conditional_edges][add_conditional_edges] 메서드를 사용할 수 있습니다. 이 메서드는 노드 이름과 해당 노드가 실행된 후 호출할 "라우팅 함수"를 받습니다:
@@ -949,7 +949,7 @@ graph.addNode("myNode", (state) => {
 
 자세한 내용은 [이 가이드](../how-tos/graph-api.md#navigate-to-a-node-in-a-parent-graph)를 확인하세요.
 
-### 도구 내부에서 사용하기
+### 도구 내부에서 사용하기 {#use-inside-tools}
 
 일반적인 사용 사례는 도구 내부에서 그래프 상태를 업데이트하는 것입니다. 예를 들어, 고객 지원 애플리케이션에서 대화 시작 시 계정 번호 또는 ID를 기반으로 고객 정보를 조회하고 싶을 수 있습니다.
 
@@ -977,7 +977,7 @@ LangGraph는 체크포인터를 사용하여 상태를 추적할 때도 그래�
 
 :::python
 
-## 런타임 컨텍스트
+## 런타임 컨텍스트 {#runtime-context}
 
 그래프를 생성할 때 노드에 전달되는 런타임 컨텍스트에 대한 `context_schema`를 지정할 수 있습니다. 이는 그래프 상태의 일부가 아닌 정보를 노드에 전달하는 데 유용합니다. 예를 들어, 모델 이름이나 데이터베이스 연결과 같은 종속성을 전달하고 싶을 수 있습니다.
 
@@ -1054,7 +1054,7 @@ graph.addNode("myNode", (state, config) => {
 
 :::
 
-### 재귀 제한
+### 재귀 제한 {#recursion-limit}
 
 :::python
 재귀 제한은 단일 실행 중에 그래프가 실행할 수 있는 최대 [슈퍼스텝](#graphs) 수를 설정합니다. 제한에 도달하면 LangGraph는 `GraphRecursionError`를 발생시킵니다. 기본적으로 이 값은 25단계로 설정됩니다. 재귀 제한은 런타임에 모든 그래프에 설정할 수 있으며 구성 딕셔너리를 통해 `.invoke`/`.stream`에 전달됩니다. 중요한 점은 `recursion_limit`은 독립 실행형 `config` 키이며 다른 모든 사용자 정의 구성처럼 `configurable` 키 내부에 전달되어서는 안 된다는 것입니다. 아래 예제를 참조하세요:

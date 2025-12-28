@@ -53,7 +53,7 @@ const State = z.object({
 
 :::python
 
-이제 `human_assistance` 도구 내부에서 상태 키를 채웁니다. 이를 통해 사람이 상태에 저장되기 전에 정보를 검토할 수 있습니다. 도구 내부에서 상태 업데이트를 발행하려면 [`Command`](../../concepts/low_level.md#using-inside-tools)를 사용합니다.
+이제 `human_assistance` 도구 내부에서 상태 키를 채웁니다. 이를 통해 사람이 상태에 저장되기 전에 정보를 검토할 수 있습니다. 도구 내부에서 상태 업데이트를 발행하려면 [`Command`](../../concepts/low_level.md#use-inside-tools)를 사용합니다.
 
 ```python
 from langchain_core.messages import ToolMessage
@@ -102,7 +102,7 @@ def human_assistance(
 
 :::js
 
-Now, populate the state keys inside of the `humanAssistance` tool. This allows a human to review the information before it is stored in the state. Use [`Command`](../../concepts/low_level.md#using-inside-tools) to issue a state update from inside the tool.
+Now, populate the state keys inside of the `humanAssistance` tool. This allows a human to review the information before it is stored in the state. Use [`Command`](../../concepts/low_level.md#use-inside-tools) to issue a state update from inside the tool.
 
 ```typescript
 import { tool } from "@langchain/core/tools";

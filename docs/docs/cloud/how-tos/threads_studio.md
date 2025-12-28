@@ -20,7 +20,7 @@ thread에서 더 세부적인 정보를 보려면 페이지 상단의 슬라이�
 2. 원하는 thread를 선택하면 thread 히스토리가 중앙 패널에 채워집니다.
 3. 새 thread를 생성하려면 더하기 버튼을 클릭하고 [run을 제출](../how-tos/invoke_studio.md#chat-mode)합니다.
 
-## Thread 히스토리 편집
+## Thread 히스토리 편집 {#edit-thread-history}
 
 ### 그래프 모드
 

@@ -1,7 +1,7 @@
 site_name: "LangGraph"
 site_description: Build reliable, stateful AI systems, without giving up control
-site_url: https://langchain-ai.github.io/langgraph/
-repo_url: https://github.com/langchain-ai/langgraph
+site_url: https://null2p.github.io/langgraph-kor/
+repo_url: https://github.com/null2p/langgraph-kor
 edit_uri: edit/main/docs/docs/
 theme:
   name: material
@@ -157,7 +157,7 @@ plugins:
         python:
           import:
             - https://docs.python.org/3/objects.inv
-            - https://python.langchain.com/api_reference/objects.inv
+            # - https://python.langchain.com/api_reference/objects.inv  # 한글 패치에서 비활성화
           options:
             preload_modules:
               - langchain

@@ -5,7 +5,7 @@
 
 이 가이드는 애플리케이션에 [run](../../concepts/assistants.md#execution)을 제출하는 방법을 보여줍니다.
 
-## 그래프 모드
+## 그래프 모드 {#graph-mode}
 
 ### 입력 지정
 먼저 페이지 왼쪽의 그래프 인터페이스 아래 "Input" 섹션에서 그래프에 대한 입력을 정의합니다.
@@ -38,7 +38,7 @@ breakpoint에 대한 자세한 내용은 [여기](../../concepts/human_in_the_lo
 진행 중인 run을 취소하려면 "Cancel" 버튼을 클릭합니다.
 
 
-## 챗 모드
+## 챗 모드 {#chat-mode}
 대화 패널 하단에서 챗 애플리케이션에 대한 입력을 지정합니다. "Send message" 버튼을 클릭하면 입력이 사람 메시지로 제출되고 응답이 스트리밍됩니다.
 
 진행 중인 run을 취소하려면 "Cancel" 버튼을 클릭합니다. "Show tool calls" 토글을 클릭하면 대화에서 tool call을 숨기거나 표시할 수 있습니다.

@@ -15,7 +15,7 @@ LangGraph Platform에 [배포된](../../quick_start.md) 애플리케이션의 �
 
 이렇게 하면 실시간 배포에 연결된 Studio UI가 로드되어, 해당 배포의 [threads](../../../concepts/persistence.md#threads), [assistants](../../../concepts/assistants.md), [memory](../../../concepts//memory.md)를 생성, 읽기, 업데이트할 수 있습니다.
 
-## 로컬 개발 서버
+## 로컬 개발 서버 {#local-development-server}
 
 LangGraph Studio를 사용하여 로컬에서 실행 중인 애플리케이션을 테스트하려면 [이 가이드](https://langchain-ai.github.io/langgraph/cloud/deployment/setup/)에 따라 애플리케이션을 설정하세요.
 

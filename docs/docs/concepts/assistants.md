@@ -27,7 +27,7 @@ LangGraph Cloud API는 어시스턴트 및 해당 버전을 생성하고 관리�
 어시스턴트는 시간이 지남에 따라 변경 사항을 추적하기 위한 버전 관리를 지원합니다.
 어시스턴트를 만든 후 해당 어시스턴트에 대한 후속 편집은 새 버전을 생성합니다. 어시스턴트 버전을 관리하는 방법에 대한 자세한 내용은 [이 how-to](../cloud/how-tos/configuration_cloud.md#create-a-new-version-for-your-assistant)를 참조하세요.
 
-## 실행
+## 실행 {#execution}
 
 **run**은 어시스턴트의 호출입니다. 각 run은 고유한 입력, 구성, 컨텍스트 및 메타데이터를 가질 수 있으며, 이는 기본 그래프의 실행 및 출력에 영향을 줄 수 있습니다. run은 선택적으로 [thread](./persistence.md#threads)에서 실행될 수 있습니다.
 

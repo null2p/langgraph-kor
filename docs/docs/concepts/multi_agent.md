@@ -26,7 +26,7 @@
 - **계층적**: [슈퍼바이저의 슈퍼바이저](../tutorials/multi_agent/hierarchical_agent_teams.ipynb/)가 있는 멀티 에이전트 시스템을 정의할 수 있습니다. 이것은 슈퍼바이저 아키텍처의 일반화이며 더 복잡한 제어 흐름을 허용합니다.
 - **커스텀 멀티 에이전트 워크플로우**: 각 에이전트는 에이전트의 하위 집합과만 통신합니다. 흐름의 일부는 결정론적이며 일부 에이전트만 다음에 호출할 다른 에이전트를 결정할 수 있습니다.
 
-### 핸드오프
+### 핸드오프 {#handoffs}
 
 멀티 에이전트 아키텍처에서 에이전트는 그래프 노드로 표현될 수 있습니다. 각 에이전트 노드는 단계를 실행하고 실행을 완료할지 다른 에이전트로 라우팅할지 결정하며, 자기 자신으로 라우팅할 수도 있습니다(예: 루프에서 실행). 멀티 에이전트 상호 작용의 일반적인 패턴은 **핸드오프**로, 한 에이전트가 다른 에이전트에게 제어를 _넘겨주는_ 것입니다. 핸드오프를 사용하면 다음을 지정할 수 있습니다:
 
@@ -138,7 +138,7 @@ alice.addNode((state) => {
 
     :::
 
-#### 도구로서의 핸드오프
+#### 도구로서의 핸드오프 {#handoffs-as-tools}
 
 가장 일반적인 에이전트 유형 중 하나는 [도구 호출 에이전트](../agents/overview.md)입니다. 이러한 유형의 에이전트의 경우 일반적인 패턴은 핸드오프를 도구 호출로 래핑하는 것입니다:
 
@@ -330,7 +330,7 @@ const network = builder.compile();
 
 :::
 
-### 슈퍼바이저
+### 슈퍼바이저 {#supervisor}
 
 이 아키텍처에서는 에이전트를 노드로 정의하고 다음에 호출해야 하는 에이전트 노드를 결정하는 슈퍼바이저 노드(LLM)를 추가합니다. 슈퍼바이저의 결정에 따라 적절한 에이전트 노드로 실행을 라우팅하기 위해 [`Command`](./low_level.md#command)를 사용합니다. 이 아키텍처는 여러 에이전트를 병렬로 실행하거나 [map-reduce](../how-tos/graph-api.md#map-reduce-and-the-send-api) 패턴을 사용하는 데 적합합니다.
 
@@ -491,7 +491,7 @@ const supervisorGraph = builder.compile();
 
 슈퍼바이저 멀티 에이전트 아키텍처의 예는 이 [튜토리얼](../tutorials/multi_agent/agent_supervisor.md)을 확인하세요.
 
-### 슈퍼바이저 (도구 호출)
+### 슈퍼바이저 (도구 호출) {#supervisor-tool-calling}
 
 [슈퍼바이저](#supervisor) 아키텍처의 이 변형에서는 하위 에이전트를 호출하는 역할을 하는 슈퍼바이저 [에이전트](./agentic_concepts.md#agent-architectures)를 정의합니다. 하위 에이전트는 슈퍼바이저에게 도구로 노출되며 슈퍼바이저 에이전트는 다음에 호출할 도구를 결정합니다. 슈퍼바이저 에이전트는 중지하기로 결정할 때까지 while 루프에서 도구를 호출하는 LLM으로 실행되는 [표준 구현](./agentic_concepts.md#tool-calling-agent)을 따릅니다.
 
@@ -808,7 +808,7 @@ const builder = new StateGraph(MessagesZodState)
 
 :::
 
-## 통신 및 상태 관리
+## 통신 및 상태 관리 {#communication-and-state-management}
 
 멀티 에이전트 시스템을 구축할 때 가장 중요한 것은 에이전트가 통신하는 방법을 파악하는 것입니다.
 
@@ -821,23 +821,23 @@ const builder = new StateGraph(MessagesZodState)
 
 또한 더 복잡한 에이전트를 다루거나 개별 에이전트 상태를 멀티 에이전트 시스템 상태와 별도로 유지하려는 경우 [**다른 상태 스키마**](#using-different-state-schemas)를 사용해야 할 수 있습니다.
 
-### 핸드오프 vs 도구 호출
+### 핸드오프 vs 도구 호출 {#handoffs-vs-tool-calls}
 
 에이전트 간에 전달되는 "페이로드"는 무엇입니까? 위에서 논의한 대부분의 아키텍처에서 에이전트는 [핸드오프](#handoffs)를 통해 통신하고 핸드오프 페이로드의 일부로 [그래프 상태](./low_level.md#state)를 전달합니다. 특히 에이전트는 그래프 상태의 일부로 메시지 목록을 전달합니다. [도구 호출을 사용하는 슈퍼바이저](#supervisor-tool-calling)의 경우 페이로드는 도구 호출 인수입니다.
 
 ![](./img/multi_agent/request.png)
 
-### 에이전트 간 메시지 전달
+### 에이전트 간 메시지 전달 {#message-passing-between-agents}
 
 에이전트가 통신하는 가장 일반적인 방법은 공유 상태 채널, 일반적으로 메시지 목록을 통하는 것입니다. 이것은 에이전트가 공유하는 상태에 항상 적어도 하나의 채널(키)이 있다고 가정합니다(예: `messages`). 공유 메시지 목록을 통해 통신할 때 추가 고려 사항이 있습니다: 에이전트가 사고 프로세스의 [전체 기록을 공유](#sharing-full-thought-process)해야 합니까, 아니면 [최종 결과만](#sharing-only-final-results) 공유해야 합니까?
 
 ![](./img/multi_agent/response.png)
 
-#### 전체 사고 프로세스 공유
+#### 전체 사고 프로세스 공유 {#sharing-full-thought-process}
 
 에이전트는 사고 프로세스의 **전체 기록**(즉, "스크래치패드")을 다른 모든 에이전트와 공유할 수 있습니다. 이 "스크래치패드"는 일반적으로 [메시지 목록](./low_level.md#why-use-messages)처럼 보일 것입니다. 전체 사고 프로세스를 공유하는 이점은 다른 에이전트가 더 나은 결정을 내리고 시스템 전체의 추론 능력을 향상시키는 데 도움이 될 수 있다는 것입니다. 단점은 에이전트의 수와 복잡성이 증가함에 따라 "스크래치패드"가 빠르게 증가하여 [메모리 관리](../how-tos/memory/add-memory.md)를 위한 추가 전략이 필요할 수 있다는 것입니다.
 
-#### 최종 결과만 공유
+#### 최종 결과만 공유 {#sharing-only-final-results}
 
 에이전트는 자체 개인 "스크래치패드"를 가질 수 있으며 나머지 에이전트와 **최종 결과만 공유**할 수 있습니다. 이 접근 방식은 많은 에이전트가 있거나 더 복잡한 에이전트가 있는 시스템에서 더 잘 작동할 수 있습니다. 이 경우 [다른 상태 스키마](#using-different-state-schemas)로 에이전트를 정의해야 합니다.
 
@@ -847,7 +847,7 @@ const builder = new StateGraph(MessagesZodState)
 
 특히 긴 메시지 기록의 경우 특정 AI 메시지가 어떤 에이전트에서 온 것인지 표시하는 것이 유용할 수 있습니다. 일부 LLM 제공자(예: OpenAI)는 메시지에 `name` 매개변수 추가를 지원합니다 — 이를 사용하여 에이전트 이름을 메시지에 첨부할 수 있습니다. 지원되지 않는 경우 에이전트 이름을 메시지 콘텐츠에 수동으로 삽입하는 것을 고려할 수 있습니다(예: `<agent>alice</agent><message>message from alice</message>`).
 
-### 메시지 기록에서 핸드오프 표현
+### 메시지 기록에서 핸드오프 표현 {#representing-handoffs-in-message-history}
 
 :::python
 핸드오프는 일반적으로 LLM이 전용 [핸드오프 도구](#handoffs-as-tools)를 호출하여 수행됩니다. 이것은 다음 에이전트(LLM)에 전달되는 도구 호출이 있는 [AI 메시지](https://python.langchain.com/docs/concepts/messages/#aimessage)로 표현됩니다. 대부분의 LLM 제공자는 해당 도구 메시지 **없이** 도구 호출이 있는 AI 메시지 수신을 지원하지 않습니다.
@@ -873,7 +873,7 @@ const builder = new StateGraph(MessagesZodState)
 
 실제로 대부분의 개발자는 옵션 (1)을 선택합니다.
 
-### 하위 에이전트의 상태 관리
+### 하위 에이전트의 상태 관리 {#state-management-for-subagents}
 
 일반적인 관행은 공유 메시지 목록에서 여러 에이전트가 통신하지만 [목록에 최종 메시지만 추가](#sharing-only-final-results)하는 것입니다. 이것은 중간 메시지(예: 도구 호출)가 이 목록에 저장되지 않음을 의미합니다.
 
@@ -893,7 +893,7 @@ const builder = new StateGraph(MessagesZodState)
 2. 하위 에이전트의 그래프 상태에서 각 에이전트에 대한 별도의 메시지 목록(예: `aliceMessages`)을 저장합니다. 이것은 메시지 기록이 어떻게 보이는지에 대한 그들의 "뷰"가 될 것입니다.
 :::
 
-### 다른 상태 스키마 사용
+### 다른 상태 스키마 사용 {#using-different-state-schemas}
 
 에이전트는 나머지 에이전트와 다른 상태 스키마를 가져야 할 수 있습니다. 예를 들어, 검색 에이전트는 쿼리와 검색된 문서만 추적하면 될 수 있습니다. LangGraph에서 이를 달성하는 두 가지 방법이 있습니다:
 

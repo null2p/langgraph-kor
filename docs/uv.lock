@@ -1,6 +1,6 @@
 version = 1
-revision = 3
-requires-python = ">=3.11, <4"
+revision = 2
+requires-python = ">=3.11.0, <4.0.0"
 resolution-markers = [
     "python_full_version >= '3.13' and platform_python_implementation != 'PyPy'",
     "python_full_version == '3.12.*' and platform_python_implementation != 'PyPy'",
@@ -2337,7 +2337,7 @@ wheels = [
 
 [[package]]
 name = "langgraph"
-version = "0.6.7"
+version = "1.0.1"
 source = { editable = "../libs/langgraph" }
 dependencies = [
     { name = "langchain-core" },
@@ -2362,10 +2362,12 @@ requires-dist = [
 dev = [
     { name = "httpx" },
     { name = "jupyter" },
+    { name = "langchain-core", specifier = "==1.0.0a1" },
     { name = "langgraph-checkpoint", editable = "../libs/checkpoint" },
     { name = "langgraph-checkpoint-postgres", editable = "../libs/checkpoint-postgres" },
     { name = "langgraph-checkpoint-sqlite", editable = "../libs/checkpoint-sqlite" },
-    { name = "langgraph-cli", extras = ["inmem"], editable = "../libs/cli" },
+    { name = "langgraph-cli", marker = "python_full_version < '3.14'", editable = "../libs/cli" },
+    { name = "langgraph-cli", extras = ["inmem"], marker = "python_full_version < '3.14'", editable = "../libs/cli" },
     { name = "langgraph-prebuilt", editable = "../libs/prebuilt" },
     { name = "langgraph-sdk", editable = "../libs/sdk-py" },
     { name = "mypy" },
@@ -2386,10 +2388,40 @@ dev = [
     { name = "types-requests" },
     { name = "uvloop", specifier = "==0.21.0b1" },
 ]
+lint = [
+    { name = "mypy" },
+    { name = "ruff" },
+    { name = "types-requests" },
+]
+test = [
+    { name = "httpx" },
+    { name = "langchain-core", specifier = "==1.0.0a1" },
+    { name = "langgraph-checkpoint", editable = "../libs/checkpoint" },
+    { name = "langgraph-checkpoint-postgres", editable = "../libs/checkpoint-postgres" },
+    { name = "langgraph-checkpoint-sqlite", editable = "../libs/checkpoint-sqlite" },
+    { name = "langgraph-cli", marker = "python_full_version < '3.14'", editable = "../libs/cli" },
+    { name = "langgraph-cli", extras = ["inmem"], marker = "python_full_version < '3.14'", editable = "../libs/cli" },
+    { name = "langgraph-prebuilt", editable = "../libs/prebuilt" },
+    { name = "langgraph-sdk", editable = "../libs/sdk-py" },
+    { name = "psycopg", extras = ["binary"] },
+    { name = "py-spy" },
+    { name = "pycryptodome" },
+    { name = "pyperf" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "pytest-dotenv" },
+    { name = "pytest-mock" },
+    { name = "pytest-repeat" },
+    { name = "pytest-watcher" },
+    { name = "pytest-xdist", extras = ["psutil"] },
+    { name = "redis" },
+    { name = "syrupy" },
+    { name = "uvloop", specifier = "==0.21.0b1" },
+]
 
 [[package]]
 name = "langgraph-checkpoint"
-version = "2.1.1"
+version = "3.0.0"
 source = { editable = "../libs/checkpoint" }
 dependencies = [
     { name = "langchain-core" },
@@ -2417,25 +2449,40 @@ dev = [
     { name = "redis" },
     { name = "ruff" },
 ]
+lint = [
+    { name = "codespell" },
+    { name = "mypy" },
+    { name = "ruff" },
+]
+test = [
+    { name = "dataclasses-json" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "pandas-stubs", specifier = ">=2.2.2.240807" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-mock" },
+    { name = "pytest-watcher" },
+    { name = "redis" },
+]
 
 [[package]]
 name = "langgraph-checkpoint-mongodb"
-version = "0.1.4"
+version = "0.2.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "langchain-mongodb" },
     { name = "langgraph-checkpoint" },
-    { name = "motor" },
     { name = "pymongo" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f5/c8/062bef92e96a36ea14658f16c43b87892a98c65137b4e088044790960e91/langgraph_checkpoint_mongodb-0.1.4.tar.gz", hash = "sha256:cae9a63a80d8259388b23e941438b7ae56e20570c1f39f640ccb9f28f77a67fe", size = 144572, upload-time = "2025-06-13T20:20:06.563Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2f/28/6c9a13c57b4af6f53cf6fb012ae7eb1b7efe0d5ed5ea28d18a9d09a6b451/langgraph_checkpoint_mongodb-0.2.2.tar.gz", hash = "sha256:aa125b87f8c117d1e866d69d0531f6fcbeef8871b37497977ce7d14b904a1768", size = 138604, upload-time = "2025-11-13T02:11:52.493Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/65/9b/b78c4366cf21bb908f90e348999b9353f85d7c2e40a4e169bb9ebe6ff37a/langgraph_checkpoint_mongodb-0.1.4-py3-none-any.whl", hash = "sha256:5edfa15e0fc03c27b7dda840a001bd210f16abc75b25b64405bf901ca655fdb5", size = 11226, upload-time = "2025-06-13T20:20:05.855Z" },
+    { url = "https://files.pythonhosted.org/packages/80/92/9c16a93ed3680a950a5d8000ca646f0729e7114a69306c6a12969f9b5d51/langgraph_checkpoint_mongodb-0.2.2-py3-none-any.whl", hash = "sha256:114a97542c79a1832e48f97ae30306c3f1d650a85122030fa87b436f1901386b", size = 12220, upload-time = "2025-11-13T02:11:51.508Z" },
 ]
 
 [[package]]
 name = "langgraph-checkpoint-postgres"
-version = "2.0.23"
+version = "3.0.0"
 source = { editable = "../libs/checkpoint-postgres" }
 dependencies = [
     { name = "langgraph-checkpoint" },
@@ -2465,10 +2512,24 @@ dev = [
     { name = "pytest-watcher" },
     { name = "ruff" },
 ]
+lint = [
+    { name = "codespell" },
+    { name = "mypy" },
+    { name = "ruff" },
+]
+test = [
+    { name = "anyio" },
+    { name = "langgraph-checkpoint", editable = "../libs/checkpoint" },
+    { name = "psycopg", extras = ["binary"] },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-mock" },
+    { name = "pytest-watcher" },
+]
 
 [[package]]
 name = "langgraph-checkpoint-sqlite"
-version = "2.0.11"
+version = "3.0.0"
 source = { editable = "../libs/checkpoint-sqlite" }
 dependencies = [
     { name = "aiosqlite" },
@@ -2494,6 +2555,19 @@ dev = [
     { name = "pytest-retry", specifier = ">=1.7.0" },
     { name = "pytest-watcher" },
     { name = "ruff" },
+]
+lint = [
+    { name = "codespell" },
+    { name = "mypy" },
+    { name = "ruff" },
+]
+test = [
+    { name = "langgraph-checkpoint", editable = "../libs/checkpoint" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-mock" },
+    { name = "pytest-retry", specifier = ">=1.7.0" },
+    { name = "pytest-watcher" },
 ]
 
 [[package]]
@@ -2574,9 +2648,9 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "aiohappyeyeballs", specifier = "==2.4.3" },
-    { name = "black", specifier = ">=25.1.0,<26" },
-    { name = "hub", specifier = ">=3.0.1,<4" },
-    { name = "xxhash", specifier = ">=3.5.0,<4" },
+    { name = "black", specifier = ">=25.1.0,<26.0.0" },
+    { name = "hub", specifier = ">=3.0.1,<4.0.0" },
+    { name = "xxhash", specifier = ">=3.5.0,<4.0.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -2645,7 +2719,7 @@ test = [
 
 [[package]]
 name = "langgraph-prebuilt"
-version = "0.6.4"
+version = "1.0.1"
 source = { editable = "../libs/prebuilt" }
 dependencies = [
     { name = "langchain-core" },
@@ -2661,6 +2735,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "codespell" },
+    { name = "langchain-core" },
     { name = "langgraph", editable = "../libs/langgraph" },
     { name = "langgraph-checkpoint", editable = "../libs/checkpoint" },
     { name = "langgraph-checkpoint-postgres", editable = "../libs/checkpoint-postgres" },
@@ -2671,6 +2746,23 @@ dev = [
     { name = "pytest-mock" },
     { name = "pytest-watcher" },
     { name = "ruff" },
+    { name = "syrupy" },
+]
+lint = [
+    { name = "codespell" },
+    { name = "mypy" },
+    { name = "ruff" },
+]
+test = [
+    { name = "langchain-core" },
+    { name = "langgraph", editable = "../libs/langgraph" },
+    { name = "langgraph-checkpoint", editable = "../libs/checkpoint" },
+    { name = "langgraph-checkpoint-postgres", editable = "../libs/checkpoint-postgres" },
+    { name = "langgraph-checkpoint-sqlite", editable = "../libs/checkpoint-sqlite" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-mock" },
+    { name = "pytest-watcher" },
     { name = "syrupy" },
 ]
 
@@ -2697,6 +2789,17 @@ dev = [
     { name = "pytest-mock" },
     { name = "pytest-watch" },
     { name = "ruff" },
+]
+lint = [
+    { name = "codespell" },
+    { name = "mypy" },
+    { name = "ruff" },
+]
+test = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-mock" },
+    { name = "pytest-watch" },
 ]
 
 [[package]]

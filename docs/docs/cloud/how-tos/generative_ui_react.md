@@ -251,7 +251,7 @@ const clientComponents = {
 />
 ```
 
-### UI 컴포넌트의 네임스페이스 커스터마이징
+### UI 컴포넌트의 네임스페이스 커스터마이징 {#customise-the-namespace-of-ui-components}
 
 기본적으로 `LoadExternalComponent`는 `useStream()` 훅의 `assistantId`를 사용하여 UI 컴포넌트의 코드를 가져옵니다. `LoadExternalComponent` 컴포넌트에 `namespace` prop을 제공하여 이를 커스터마이징할 수 있습니다.
 

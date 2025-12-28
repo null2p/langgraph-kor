@@ -33,7 +33,7 @@ LangGraph에서 내구성 실행을 활용하려면 다음이 필요합니다:
 
 :::
 
-## 결정론과 일관된 재생
+## 결정론과 일관된 재생 {#determinism-and-consistent-replay}
 
 워크플로우 실행을 재개할 때 코드는 실행이 중지된 **동일한 코드 줄**에서 재개되지 **않습니다**. 대신 중단한 지점을 다시 시작할 적절한 [시작 지점](#starting-points-for-resuming-workflows)을 식별합니다. 이는 워크플로우가 [시작 지점](#starting-points-for-resuming-workflows)부터 중지된 지점에 도달할 때까지 모든 단계를 재생한다는 것을 의미합니다.
 
@@ -324,7 +324,7 @@ graph.stream(
 
   :::
 
-## 워크플로우 재개를 위한 시작 지점
+## 워크플로우 재개를 위한 시작 지점 {#starting-points-for-resuming-workflows}
 
 :::python
 

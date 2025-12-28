@@ -14,7 +14,7 @@ LangGraph **CLI**는 LangGraph 애플리케이션을 구축하고 실행하기 �
 
 [LangGraph Server](../../concepts/langgraph_server.md)는 애플리케이션 상태의 checkpoint, 장기 메모리, thread 메타데이터, assistant 및 유사한 리소스를 로컬 파일 시스템이나 데이터베이스에 지속적으로 유지하는 내구성 있는 실행 런타임을 제공합니다. 저장 위치를 의도적으로 사용자 지정하지 않는 한, 이 정보는 로컬 디스크(`langgraph dev`의 경우) 또는 PostgreSQL 데이터베이스(`langgraph up` 및 모든 배포의 경우)에 기록됩니다.
 
-### LangSmith 추적
+### LangSmith 추적 {#langsmith-tracing}
 
 LangGraph 서버(인메모리 또는 Docker 모두)를 실행할 때 LangSmith 추적을 활성화하여 더 빠른 디버깅을 촉진하고 프로덕션에서 그래프 상태 및 LLM 프롬프트에 대한 관찰 가능성을 제공할 수 있습니다. 서버의 런타임 환경에서 `LANGSMITH_TRACING=false`를 설정하여 언제든지 추적을 비활성화할 수 있습니다.
 

@@ -5,7 +5,7 @@ AI 애플리케이션은 여러 상호작용 간에 컨텍스트를 공유하기
 - 멀티 턴 대화를 활성화하기 위해 에이전트의 [상태](../../concepts/low_level.md#state)의 일부로 [단기 메모리 추가](#add-short-term-memory)하기.
 - 세션 간에 사용자별 또는 애플리케이션 레벨 데이터를 저장하기 위해 [장기 메모리 추가](#add-long-term-memory)하기.
 
-## 단기 메모리 추가
+## 단기 메모리 추가 {#add-short-term-memory}
 
 **단기** 메모리(스레드 레벨 [영속성](../../concepts/persistence.md))는 에이전트가 멀티 턴 대화를 추적할 수 있게 합니다. 단기 메모리를 추가하려면:
 
@@ -765,7 +765,7 @@ await agent.invoke(
 
 :::
 
-## 장기 메모리 추가
+## 장기 메모리 추가 {#add-long-term-memory}
 
 Use long-term memory to store user-specific or application-specific data across conversations.
 
@@ -1706,7 +1706,7 @@ const items = await store.search(["user_123", "memories"], {
 
 See [this guide](../../cloud/deployment/semantic_search.md) for more information on how to use semantic search with LangGraph memory store.
 
-## 단기 메모리 관리
+## 단기 메모리 관리 {#manage-short-term-memory}
 
 With [short-term memory](#add-short-term-memory) enabled, long conversations can exceed the LLM's context window. Common solutions are:
 

@@ -132,7 +132,7 @@ JSON 파일에서 지원되는 모든 키에 대한 자세한 내용은 [LangGra
 
 :::
 
-## 의존성
+## 의존성 {#dependencies}
 
 :::python
 LangGraph 애플리케이션은 다른 Python 패키지에 의존할 수 있습니다.
@@ -157,13 +157,13 @@ LangGraph 애플리케이션은 다른 TypeScript/JavaScript 라이브러리에 
 2. LangGraph 애플리케이션 실행에 필요한 의존성을 지정하는 [LangGraph 구성 파일](#configuration-file-concepts)의 `dependencies` 키
 3. 추가 바이너리 또는 시스템 라이브러리는 [LangGraph 구성 파일](#configuration-file-concepts)의 `dockerfile_lines` 키를 사용하여 지정할 수 있습니다.
 
-## 그래프
+## 그래프 {#graphs}
 
 배포된 LangGraph 애플리케이션에서 사용할 수 있는 그래프를 지정하려면 [LangGraph 구성 파일](#configuration-file-concepts)의 `graphs` 키를 사용합니다.
 
 구성 파일에서 하나 이상의 그래프를 지정할 수 있습니다. 각 그래프는 이름(고유해야 함)과 다음 중 하나에 대한 경로로 식별됩니다: (1) 컴파일된 그래프 또는 (2) 그래프를 생성하는 함수가 정의된 경로
 
-## 환경 변수
+## 환경 변수 {#environment-variables}
 
 로컬에서 배포된 LangGraph 애플리케이션으로 작업하는 경우 [LangGraph 구성 파일](#configuration-file-concepts)의 `env` 키에서 환경 변수를 구성할 수 있습니다.
 

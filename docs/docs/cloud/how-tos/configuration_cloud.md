@@ -227,7 +227,7 @@ LangGraph Platform UI에서도 어시스턴트를 생성할 수 있습니다.
 
 배포 내에서 "Assistants" 탭을 선택하세요. 사용하려는 어시스턴트의 "Studio" 버튼을 클릭하세요. 그러면 선택한 어시스턴트와 함께 LangGraph Studio가 열립니다. (Graph 또는 Chat 모드에서) 입력을 제출하면 선택한 어시스턴트와 해당 구성이 사용됩니다.
 
-## 어시스턴트의 새 버전 생성
+## 어시스턴트의 새 버전 생성 {#create-a-new-version-for-your-assistant}
 
 ### LangGraph SDK
 

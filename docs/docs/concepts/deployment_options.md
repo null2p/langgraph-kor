@@ -5,7 +5,7 @@ search:
 
 # 배포 옵션
 
-## 무료 배포
+## 무료 배포 {#free-deployment}
 
 [로컬](../tutorials/langgraph-platform/local-server.md): 로컬 테스트 및 개발을 위한 배포
 

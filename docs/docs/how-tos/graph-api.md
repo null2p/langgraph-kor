@@ -24,7 +24,7 @@ npm install @langchain/langgraph
 
     [LangSmith](https://smith.langchain.com)에 가입하여 LangGraph 프로젝트의 문제를 빠르게 발견하고 성능을 개선하세요. LangSmith를 사용하면 추적 데이터를 활용하여 LangGraph로 구축한 LLM 앱을 디버그, 테스트 및 모니터링할 수 있습니다 — 시작하는 방법에 대한 자세한 내용은 [문서](https://docs.smith.langchain.com)를 참조하세요.
 
-## 상태 정의 및 업데이트
+## 상태 정의 및 업데이트 {#define-and-update-state}
 
 여기서는 LangGraph에서 [상태](../concepts/low_level.md#state)를 정의하고 업데이트하는 방법을 보여줍니다. 다음을 보여줍니다:
 
@@ -879,7 +879,7 @@ const workflowWithChannels = new StateGraph<WorkflowChannelsState>({
 ```
 :::
 
-## 런타임 구성 추가
+## 런타임 구성 추가 {#add-runtime-configuration}
 
 때때로 그래프를 호출할 때 구성할 수 있기를 원할 수 있습니다. 예를 들어, _그래프 상태를 이러한 매개변수로 오염시키지 않고_ 런타임에 사용할 LLM이나 시스템 프롬프트를 지정할 수 있기를 원할 수 있습니다.
 
@@ -1367,7 +1367,7 @@ graph = builder.compile(cache=InMemoryCache())
 ```
 :::
 
-## 단계 시퀀스 생성
+## 단계 시퀀스 생성 {#create-a-sequence-of-steps}
 
 !!! info "필수 조건"
 
@@ -1657,7 +1657,7 @@ Note that:
     ```
 :::
 
-## 브랜치 생성
+## 브랜치 생성 {#create-branches}
 
 노드의 병렬 실행은 전체 그래프 작업 속도를 높이는 데 필수적입니다. LangGraph는 노드의 병렬 실행을 기본적으로 지원하여 그래프 기반 워크플로의 성능을 크게 향상시킬 수 있습니다. 이 병렬화는 표준 엣지와 [conditional_edges](https://langchain-ai.github.io/langgraph/reference/graphs.md#langgraph.graph.MessageGraph.add_conditional_edges)를 모두 활용하여 팬아웃(fan-out) 및 팬인(fan-in) 메커니즘을 통해 달성됩니다. 아래는 작동하는 분기 데이터 플로우를 생성하는 방법을 보여주는 몇 가지 예제입니다.
 
@@ -2068,7 +2068,7 @@ Adding "C" to ['A']
     ```
     :::
 
-## Map-Reduce와 Send API
+## Map-Reduce와 Send API {#map-reduce-and-the-send-api}
 
 LangGraph는 Send API를 사용하여 map-reduce 및 기타 고급 분기 패턴을 지원합니다. 사용 방법의 예제는 다음과 같습니다:
 
@@ -2207,7 +2207,7 @@ for await (const step of await graph.stream({ topic: "animals" })) {
 ```
 :::
 
-## 루프 생성 및 제어
+## 루프 생성 및 제어 {#create-and-control-loops}
 
 루프가 있는 그래프를 생성할 때 실행을 종료하는 메커니즘이 필요합니다. 이는 일반적으로 종료 조건에 도달하면 [END](../concepts/low_level.md#end-node) 노드로 라우팅하는 [조건부 엣지](../concepts/low_level.md#conditional-edges)를 추가하여 수행됩니다.
 
@@ -2425,7 +2425,7 @@ Node A sees ['A', 'B', 'A', 'B', 'A', 'B']
 ```
 :::
 
-### 재귀 제한 설정
+### 재귀 제한 설정 {#impose-a-recursion-limit}
 
 일부 애플리케이션에서는 주어진 종료 조건에 도달할 것이라는 보장이 없을 수 있습니다. 이러한 경우 그래프의 [재귀 제한](../concepts/low_level.md#recursion-limit)을 설정할 수 있습니다. 이렇게 하면 주어진 수의 [슈퍼스텝](../concepts/low_level.md#graphs) 후에 `GraphRecursionError`가 발생합니다. 그런 다음 이 예외를 포착하고 처리할 수 있습니다:
 
@@ -2869,7 +2869,7 @@ Called C
 ```
 :::
 
-### 부모 그래프의 노드로 이동
+### 부모 그래프의 노드로 이동 {#navigate-to-a-node-in-a-parent-graph}
 
 [서브그래프](../concepts/subgraphs.md)를 사용하는 경우, 서브그래프 내의 노드에서 다른 서브그래프(즉, 부모 그래프의 다른 노드)로 이동하고 싶을 수 있습니다. 이렇게 하려면 `Command`에서 `graph=Command.PARENT`를 지정할 수 있습니다:
 
@@ -3032,7 +3032,7 @@ Called C
 ```
 :::
 
-### 도구 내에서 사용
+### 도구 내에서 사용 {#use-inside-tools}
 
 일반적인 사용 사례는 도구 내부에서 그래프 상태를 업데이트하는 것입니다. 예를 들어, 고객 지원 애플리케이션에서 대화 시작 시 계정 번호나 ID를 기반으로 고객 정보를 조회하고 싶을 수 있습니다. 도구에서 그래프 상태를 업데이트하려면 도구에서 `Command(update={"my_custom_key": "foo", "messages": [...]})`를 반환할 수 있습니다:
 

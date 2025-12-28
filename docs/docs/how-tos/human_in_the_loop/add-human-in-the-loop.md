@@ -17,7 +17,7 @@ hide:
 
     human-in-the-loop 워크플로우에 대한 자세한 내용은 [Human-in-the-Loop](../../concepts/human_in_the_loop.md) 개념 가이드를 참조하세요.
 
-## `interrupt`를 사용하여 일시 중지
+## `interrupt`를 사용하여 일시 중지 {#pause-using-interrupt}
 
 :::python
 [동적 인터럽트](../../concepts/human_in_the_loop.md#key-capabilities) (동적 브레이크포인트라고도 함)는 그래프의 현재 상태를 기반으로 트리거됩니다. 적절한 위치에서 @[`interrupt` 함수][interrupt]를 호출하여 동적 인터럽트를 설정할 수 있습니다. 그래프가 일시 중지되어 사람의 개입이 가능하고, 사람의 입력으로 그래프를 재개합니다. 승인, 편집 또는 추가 컨텍스트 수집과 같은 작업에 유용합니다.

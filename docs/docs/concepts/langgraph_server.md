@@ -23,7 +23,7 @@ LangGraph Server 애플리케이션을 배포하려면 배포하려는 그래프
 
 LangGraph Server를 배포할 때 하나 이상의 [그래프](#graphs), [지속성](persistence.md)을 위한 데이터베이스 및 작업 큐를 배포합니다.
 
-### 그래프
+### 그래프 {#graphs}
 
 LangGraph Server로 그래프를 배포할 때 [어시스턴트](assistants.md)의 "blueprint"를 배포하는 것입니다.
 
@@ -35,7 +35,7 @@ LangGraph Server로 그래프를 배포할 때 [어시스턴트](assistants.md)�
 
     우리는 종종 그래프를 [에이전트](agentic_concepts.md)를 구현하는 것으로 생각하지만, 그래프가 반드시 에이전트를 구현할 필요는 없습니다. 예를 들어, 그래프는 애플리케이션 제어 흐름에 영향을 미칠 수 있는 능력 없이 앞뒤 대화만 지원하는 간단한 챗봇을 구현할 수 있습니다. 실제로 애플리케이션이 더 복잡해지면 그래프는 종종 함께 작동하는 [여러 에이전트](./multi_agent.md)를 사용하는 더 복잡한 흐름을 구현합니다.
 
-### 지속성 및 작업 큐
+### 지속성 및 작업 큐 {#persistence-and-task-queue}
 
 LangGraph Server는 [지속성](persistence.md)을 위한 데이터베이스와 작업 큐를 활용합니다.
 

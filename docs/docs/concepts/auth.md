@@ -95,7 +95,7 @@ LangGraph의 [`@auth.authenticate`](../cloud/reference/sdk/python_sdk_ref.md#lan
 LangGraph의 [`auth.authenticate`](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#authenticate) 핸들러는 4-6단계를 처리하고, [`auth.on`](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/js_ts_sdk_ref/#on>) 핸들러는 7단계를 구현합니다.
 :::
 
-## 인증
+## 인증 {#authentication}
 
 :::python
 LangGraph의 인증은 모든 요청에 대해 미들웨어로 실행됩니다. [`@auth.authenticate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.authenticate) 핸들러는 요청 정보를 받아 다음을 수행해야 합니다:
@@ -255,7 +255,7 @@ For more information, see the [Use custom auth](../how-tos/auth/custom_auth.md#e
 
 MCP 서버에 에이전트를 인증하는 방법에 대한 정보는 [MCP 개념 가이드](../concepts/mcp.md)를 참조하세요.
 
-## 권한 부여
+## 권한 부여 {#authorization}
 
 인증 후 LangGraph는 권한 부여 핸들러를 호출하여 특정 리소스(예: threads, assistants, crons)에 대한 액세스를 제어합니다. 이러한 핸들러는 다음을 수행할 수 있습니다:
 
@@ -573,7 +573,7 @@ See the reference [here](../cloud/reference/sdk/typescript_sdk_ref.md#auth.types
 
 다음은 일반적인 권한 부여 패턴입니다:
 
-### 단일 소유자 리소스
+### 단일 소유자 리소스 {#single-owner-resources}
 
 이 일반적인 패턴을 사용하면 모든 threads, assistants, crons 및 runs의 범위를 단일 사용자로 지정할 수 있습니다. 일반 챗봇 스타일 앱과 같은 일반적인 단일 사용자 사용 사례에 유용합니다.
 
@@ -688,7 +688,7 @@ export const auth = new Auth()
 
 :::
 
-## 지원되는 리소스
+## 지원되는 리소스 {#supported-resources}
 
 LangGraph는 가장 일반적인 것부터 가장 구체적인 것까지 세 가지 수준의 권한 부여 핸들러를 제공합니다:
 

@@ -51,7 +51,7 @@ LangGraph는 에이전트 워크플로에 향상된 제어를 제공하는 상�
 
 자세한 내용은 [LangGraph Platform 가격 책정 페이지](https://www.langchain.com/pricing-langgraph-platform)를 참조하세요.
 
-## LangGraph는 툴 호출을 지원하지 않는 LLM과 함께 작동하나요?
+## LangGraph는 툴 호출을 지원하지 않는 LLM과 함께 작동하나요? {#does-langgraph-work-with-llms-that-dont-support-tool-calling}
 
 예! 모든 LLM과 함께 LangGraph를 사용할 수 있습니다. 우리가 툴 호출을 지원하는 LLM을 사용하는 주요 이유는 이것이 LLM이 무엇을 할지 결정하도록 하는 가장 편리한 방법이기 때문입니다. LLM이 툴 호출을 지원하지 않는 경우에도 사용할 수 있습니다 - 원시 LLM 문자열 응답을 무엇을 할지에 대한 결정으로 변환하는 약간의 로직을 작성하기만 하면 됩니다.
 

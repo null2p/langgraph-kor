@@ -211,7 +211,7 @@
     ```
 
 
-### 지원되는 스트림 모드
+### 지원되는 스트림 모드 {#supported-stream-modes}
 
 | Mode                             | Description                                                                                                                                                                         | LangGraph Library Method                                                                                 |
 |----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
@@ -272,7 +272,7 @@ The streamed outputs will be tuples of `(mode, chunk)` where `mode` is the name 
      }"
     ```
 
-## 그래프 상태 스트리밍
+## 그래프 상태 스트리밍 {#stream-graph-state}
 
 Use the stream modes `updates` and `values` to stream the state of the graph as it executes.
 
@@ -742,7 +742,7 @@ The streamed output from [`messages-tuple` mode](#supported-stream-modes) is a t
 * LLM 호출별로 스트리밍된 토큰을 필터링하려면 [LLM 호출에 `tags`를 연결](../../how-tos/streaming.md#filter-by-llm-invocation)할 수 있습니다.
 * 특정 노드에서만 토큰을 스트리밍하려면 `stream_mode="messages"`를 사용하고 스트리밍된 메타데이터의 [`langgraph_node` 필드로 출력을 필터링](../../how-tos/streaming.md#filter-by-node)합니다.
 
-## 커스텀 데이터 스트리밍
+## 커스텀 데이터 스트리밍 {#stream-custom-data}
 
 To send **custom user-defined data**:
 
@@ -789,7 +789,7 @@ To send **custom user-defined data**:
     }"
     ```
 
-## 이벤트 스트리밍
+## 이벤트 스트리밍 {#stream-events}
 
 To stream all events, including the state of the graph:
 

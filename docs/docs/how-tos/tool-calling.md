@@ -4,7 +4,7 @@
 
 [자체 도구를 정의](#define-a-tool)하거나 [사전 빌드된 도구](#prebuilt-tools)를 사용할 수 있습니다.
 
-## 도구 정의
+## 도구 정의 {#define-a-tool}
 
 :::python
 [@tool](https://python.langchain.com/api_reference/core/tools/langchain_core.tools.convert.tool.html) 데코레이터로 기본 도구를 정의합니다:
@@ -1014,7 +1014,7 @@ LangGraph 내의 도구는 때때로 사용자 ID나 세션 세부 정보와 같
 | [단기 메모리](#short-term-memory) | 호출 중 동적으로 변경되는 데이터 | ✅      | 단일 호출        |
 | [장기 메모리](#long-term-memory)   | 영구적인 세션 간 데이터           | ✅      | 여러 세션에 걸쳐 |
 
-### 구성
+### 구성 {#configuration}
 
 :::python
 사용자 식별자와 같이 도구에 필요한 **불변** 런타임 데이터가 있는 경우 구성을 사용합니다. 호출 시 [`RunnableConfig`](https://python.langchain.com/docs/concepts/runnables/#runnableconfig)를 통해 이러한 인수를 전달하고 도구에서 액세스합니다:
@@ -1680,7 +1680,7 @@ const saveUserInfo = tool(
 
 ## 고급 도구 기능
 
-### 즉시 반환
+### 즉시 반환 {#immediate-return}
 
 :::python
 추가 로직을 실행하지 않고 도구의 결과를 즉시 반환하려면 `return_direct=True`를 사용합니다.
@@ -2312,7 +2312,7 @@ To address this, you can dynamically adjust the tools available to a model by re
 
 See [`langgraph-bigtool`](https://github.com/langchain-ai/langgraph-bigtool) prebuilt library for a ready-to-use implementation.
 
-## 사전 빌드된 도구
+## 사전 빌드된 도구 {#prebuilt-tools}
 
 ### LLM 제공자 도구
 

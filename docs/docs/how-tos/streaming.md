@@ -2,7 +2,7 @@
 
 LangGraph 에이전트 또는 워크플로에서 [출력을 스트리밍](../concepts/streaming.md)할 수 있습니다.
 
-## 지원되는 스트림 모드
+## 지원되는 스트림 모드 {#supported-stream-modes}
 
 :::python
 다음 스트림 모드 중 하나 이상을 리스트로 @[`stream()`][CompiledStateGraph.stream] 또는 @[`astream()`][CompiledStateGraph.astream] 메서드에 전달하세요:
@@ -266,7 +266,7 @@ for await (const chunk of await agent.stream(
       If you add the `writer` parameter to your tool, you won't be able to invoke the tool outside of a LangGraph execution context without providing a writer function.
 :::
 
-### 여러 모드 스트리밍
+### 여러 모드 스트리밍 {#stream-multiple-modes}
 
 :::python
 스트림 모드를 리스트로 전달하여 여러 스트리밍 모드를 지정할 수 있습니다: `stream_mode=["updates", "messages", "custom"]`:
@@ -485,7 +485,7 @@ for await (const [mode, chunk] of await graph.stream(inputs, {
 
 :::
 
-### 그래프 상태 스트리밍
+### 그래프 상태 스트리밍 {#stream-graph-state}
 
 그래프가 실행될 때 상태를 스트리밍하려면 `updates` 및 `values` 스트림 모드를 사용하세요.
 
@@ -602,7 +602,7 @@ const graph = new StateGraph(State)
     ```
     :::
 
-### 서브그래프 출력 스트리밍
+### 서브그래프 출력 스트리밍 {#stream-subgraph-outputs}
 
 :::python
 스트리밍된 출력에 [서브그래프](../concepts/subgraphs.md)의 출력을 포함하려면 부모 그래프의 `.stream()` 메서드에서 `subgraphs=True`를 설정할 수 있습니다. 이렇게 하면 부모 그래프와 모든 서브그래프의 출력이 스트리밍됩니다.
@@ -902,7 +902,7 @@ for await (const [messageChunk, metadata] of await graph.stream(
 2. The "messages" stream mode returns an iterator of tuples `[messageChunk, metadata]` where `messageChunk` is the token streamed by the LLM and `metadata` is a dictionary with information about the graph node where the LLM was called and other information.
    :::
 
-#### LLM 호출별 필터링
+#### LLM 호출별 필터링 {#filter-by-llm-invocation}
 
 LLM 호출과 `tags`를 연결하여 LLM 호출별로 스트리밍된 토큰을 필터링할 수 있습니다.
 
@@ -1080,7 +1080,7 @@ for await (const [msg, metadata] of await graph.stream( // (3)!
       4. Filter the streamed tokens by the `tags` field in the metadata to only include the tokens from the LLM invocation with the "joke" tag.
       :::
 
-#### 노드별 필터링
+#### 노드별 필터링 {#filter-by-node}
 
 특정 노드에서만 토큰을 스트리밍하려면 `stream_mode="messages"`를 사용하고 스트리밍된 메타데이터의 `langgraph_node` 필드로 출력을 필터링하세요:
 
@@ -1225,7 +1225,7 @@ for await (const [msg, metadata] of await graph.stream(
       2. Filter the streamed tokens by the `langgraph_node` field in the metadata to only include the tokens from the `writePoem` node.
       :::
 
-### 커스텀 데이터 스트리밍
+### 커스텀 데이터 스트리밍 {#stream-custom-data}
 
 :::python
 LangGraph 노드 또는 도구 내부에서 **사용자 정의 커스텀 데이터**를 전송하려면 다음 단계를 따르세요:
@@ -1376,7 +1376,7 @@ LangGraph 노드 또는 도구 내부에서 **사용자 정의 커스텀 데이�
 
 :::
 
-### 모든 LLM과 사용
+### 모든 LLM과 사용 {#use-with-any-llm}
 
 :::python
 **모든 LLM API**에서 데이터를 스트리밍하기 위해 `stream_mode="custom"`을 사용할 수 있습니다 — 해당 API가 LangChain 채팅 모델 인터페이스를 구현하지 **않더라도** 말입니다.

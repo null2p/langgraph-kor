@@ -16,13 +16,13 @@ search:
 ![](img/memory/short-vs-long.png)
 
 
-## 단기 메모리
+## 단기 메모리 {#short-term-memory}
 
 [단기 메모리](../how-tos/memory/add-memory.md#add-short-term-memory)는 애플리케이션이 단일 [스레드](persistence.md#threads) 또는 대화 내에서 이전 상호작용을 기억할 수 있게 합니다. [스레드](persistence.md#threads)는 이메일이 단일 대화에서 메시지를 그룹화하는 방식과 유사하게 세션 내에서 여러 상호작용을 구성합니다.
 
 LangGraph는 단기 메모리를 에이전트 상태의 일부로 관리하며, 스레드 범위 체크포인트를 통해 영속화합니다. 이 상태는 일반적으로 대화 히스토리와 함께 업로드된 파일, 검색된 문서 또는 생성된 아티팩트와 같은 기타 상태 데이터를 포함할 수 있습니다. 이를 그래프의 상태에 저장함으로써, 봇은 서로 다른 스레드 간의 분리를 유지하면서 주어진 대화에 대한 전체 컨텍스트에 액세스할 수 있습니다.
 
-### 단기 메모리 관리
+### 단기 메모리 관리 {#manage-short-term-memory}
 
 대화 히스토리는 단기 메모리의 가장 일반적인 형태이며, 긴 대화는 오늘날의 LLM에게 도전 과제가 됩니다. 전체 히스토리가 LLM의 컨텍스트 윈도우에 맞지 않을 수 있어 복구 불가능한 오류가 발생할 수 있습니다. LLM이 전체 컨텍스트 길이를 지원하더라도, 대부분의 LLM은 여전히 긴 컨텍스트에서 성능이 저하됩니다. 오래되거나 주제에서 벗어난 콘텐츠에 "산만해지며", 동시에 응답 시간이 느려지고 비용이 높아집니다.
 
@@ -32,7 +32,7 @@ LangGraph는 단기 메모리를 에이전트 상태의 일부로 관리하며, 
 
 메시지 관리를 위한 일반적인 기술에 대한 자세한 내용은 [메모리 추가 및 관리](../how-tos/memory/add-memory.md#manage-short-term-memory) 가이드를 참조하세요.
 
-## 장기 메모리
+## 장기 메모리 {#long-term-memory}
 
 LangGraph의 [장기 메모리](../how-tos/memory/add-memory.md#add-long-term-memory)는 시스템이 서로 다른 대화 또는 세션 간에 정보를 유지할 수 있게 합니다. **스레드 범위**인 단기 메모리와 달리, 장기 메모리는 커스텀 "네임스페이스" 내에 저장됩니다.
 
@@ -42,7 +42,7 @@ LangGraph의 [장기 메모리](../how-tos/memory/add-memory.md#add-long-term-me
 
 - [메모리를 언제 업데이트하고 싶은가?](#writing-memories) 메모리는 에이전트의 애플리케이션 로직의 일부로("핫 패스에서") 업데이트될 수 있습니다. 이 경우 에이전트는 일반적으로 사용자에게 응답하기 전에 사실을 기억하기로 결정합니다. 또는 메모리는 백그라운드 작업(백그라운드에서/비동기적으로 실행되고 메모리를 생성하는 로직)으로 업데이트될 수 있습니다. [아래 섹션](#writing-memories)에서 이러한 접근 방식 간의 트레이드오프를 설명합니다.
 
-### 메모리 유형
+### 메모리 유형 {#memory-types}
 
 서로 다른 애플리케이션은 다양한 유형의 메모리를 필요로 합니다. 비유가 완벽하지는 않지만, [인간 메모리 유형](https://www.psychologytoday.com/us/basics/memory/types-of-memory?ref=blog.langchain.dev)을 살펴보는 것은 통찰력이 있을 수 있습니다. 일부 연구(예: [CoALA 논문](https://arxiv.org/pdf/2309.02427))에서는 이러한 인간 메모리 유형을 AI 에이전트에서 사용되는 유형으로 매핑하기도 했습니다.
 
@@ -52,7 +52,7 @@ LangGraph의 [장기 메모리](../how-tos/memory/add-memory.md#add-long-term-me
 | [일화](#episodic-memory) | 경험 | 내가 한 일들 | 과거 에이전트 작업 |
 | [절차](#procedural-memory) | 지침 | 본능 또는 운동 기술 | 에이전트 시스템 프롬프트 |
 
-#### 의미 메모리
+#### 의미 메모리 {#semantic-memory}
 
 인간과 AI 에이전트 모두에서 [의미 메모리](https://en.wikipedia.org/wiki/Semantic_memory)는 특정 사실과 개념의 보유를 포함합니다. 인간의 경우 학교에서 배운 정보와 개념 및 그 관계에 대한 이해를 포함할 수 있습니다. AI 에이전트의 경우, 의미 메모리는 종종 과거 상호작용에서 사실이나 개념을 기억하여 애플리케이션을 개인화하는 데 사용됩니다. 
 
@@ -83,7 +83,7 @@ LangGraph의 [장기 메모리](../how-tos/memory/add-memory.md#add-long-term-me
 
 메모리 관리 접근 방식에 관계없이, 핵심은 에이전트가 의미 메모리를 사용하여 [응답을 근거화](https://python.langchain.com/docs/concepts/rag/)한다는 것이며, 이는 종종 더 개인화되고 관련성 있는 상호작용으로 이어집니다.
 
-#### 일화 메모리
+#### 일화 메모리 {#episodic-memory}
 
 인간과 AI 에이전트 모두에서 [일화 메모리](https://en.wikipedia.org/wiki/Episodic_memory)는 과거 이벤트나 작업을 회상하는 것을 포함합니다. [CoALA 논문](https://arxiv.org/pdf/2309.02427)은 이를 잘 설명합니다: 사실은 의미 메모리에 작성될 수 있지만, *경험*은 일화 메모리에 작성될 수 있습니다. AI 에이전트의 경우, 일화 메모리는 종종 에이전트가 작업을 수행하는 방법을 기억하는 데 도움을 주기 위해 사용됩니다. 
 
@@ -107,7 +107,7 @@ Note that the memory [store](persistence.md#memory-store) is just one way to sto
 See this how-to [video](https://www.youtube.com/watch?v=37VaU7e7t5o) for example usage of dynamic few-shot example selection in LangSmith. Also, see this [blog post](https://blog.langchain.dev/few-shot-prompting-to-improve-tool-calling-performance/) showcasing few-shot prompting to improve tool calling performance and this [blog post](https://blog.langchain.dev/aligning-llm-as-a-judge-with-human-preferences/) using few-shot example to align an LLMs to human preferences.
 :::
 
-#### 절차 메모리
+#### 절차 메모리 {#procedural-memory}
 
 인간과 AI 에이전트 모두에서 [절차 메모리](https://en.wikipedia.org/wiki/Procedural_memory)는 작업을 수행하는 데 사용되는 규칙을 기억하는 것을 포함합니다. 인간의 경우, 절차 메모리는 기본 운동 기술과 균형을 통해 자전거를 타는 것과 같은 작업을 수행하는 방법에 대한 내재화된 지식과 같습니다. 반면에 일화 메모리는 보조 바퀴 없이 자전거를 성공적으로 탄 첫 경험이나 경치 좋은 길을 통한 기억에 남는 자전거 타기와 같은 특정 경험을 회상하는 것을 포함합니다. AI 에이전트의 경우, 절차 메모리는 모델 가중치, 에이전트 코드 및 에이전트 프롬프트의 조합으로, 이들이 집합적으로 에이전트의 기능을 결정합니다.
 
@@ -176,13 +176,13 @@ const updateInstructions = async (state: State, store: BaseStore) => {
 
 ![](img/memory/update-instructions.png)
 
-### 메모리 작성
+### 메모리 작성 {#writing-memories}
 
 에이전트가 메모리를 작성하는 두 가지 주요 방법이 있습니다: ["핫 패스에서"](#in-the-hot-path)와 ["백그라운드에서"](#in-the-background)입니다.
 
 ![](img/memory/hot_path_vs_background.png)
 
-#### 핫 패스에서
+#### 핫 패스에서 {#in-the-hot-path}
 
 런타임 중에 메모리를 생성하는 것은 장점과 과제를 모두 제공합니다. 긍정적인 측면에서, 이 접근 방식은 실시간 업데이트를 허용하여 새로운 메모리를 후속 상호작용에서 즉시 사용할 수 있게 합니다. 또한 메모리가 생성되고 저장될 때 사용자에게 알릴 수 있어 투명성을 가능하게 합니다.
 
@@ -190,7 +190,7 @@ const updateInstructions = async (state: State, store: BaseStore) => {
 
 예를 들어, ChatGPT는 [save_memories](https://openai.com/index/memory-and-new-controls-for-chatgpt/) 도구를 사용하여 메모리를 콘텐츠 문자열로 업서트하고, 각 사용자 메시지에서 이 도구를 사용할지 여부와 방법을 결정합니다. 참조 구현으로 [memory-agent](https://github.com/langchain-ai/memory-agent) 템플릿을 참조하세요.
 
-#### 백그라운드에서
+#### 백그라운드에서 {#in-the-background}
 
 별도의 백그라운드 작업으로 메모리를 생성하는 것은 여러 장점을 제공합니다. 주요 애플리케이션의 지연 시간을 제거하고, 애플리케이션 로직을 메모리 관리에서 분리하며, 에이전트가 더 집중된 작업 완료를 할 수 있게 합니다. 이 접근 방식은 또한 중복 작업을 피하기 위해 메모리 생성 시기를 유연하게 조정할 수 있습니다.
 

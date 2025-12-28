@@ -21,7 +21,7 @@ hide:
 
     Human-in-the-loop 사용 방법에 대한 정보는 [사람 개입 활성화](../how-tos/human_in_the_loop/add-human-in-the-loop.md)와 [Server API를 사용한 Human-in-the-loop](../cloud/how-tos/add-human-in-the-loop.md)를 참조하세요.
 
-## 주요 기능
+## 주요 기능 {#key-capabilities}
 
 * **지속적인 실행 상태**: 중단(Interrupt)은 그래프 상태를 저장하는 LangGraph의 [지속성](./persistence.md) 레이어를 사용하여 재개할 때까지 그래프 실행을 무기한 일시 중지합니다. 이는 LangGraph가 각 단계 후 그래프 상태를 체크포인트하기 때문에 가능하며, 시스템이 실행 컨텍스트를 유지하고 나중에 중단된 지점부터 워크플로를 재개할 수 있게 합니다. 이는 시간 제약 없이 비동기 사람 검토 또는 입력을 지원합니다.
 

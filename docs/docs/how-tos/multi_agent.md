@@ -11,7 +11,7 @@
 
 다중 에이전트 시스템 구축을 시작하려면 가장 인기 있는 두 가지 다중 에이전트 아키텍처인 [supervisor](../agents/multi-agent.md#supervisor)와 [swarm](../agents/multi-agent.md#swarm)의 LangGraph [사전 빌드 구현](#prebuilt-implementations)을 확인하세요.
 
-## 핸드오프
+## 핸드오프 {#handoffs}
 
 다중 에이전트 시스템에서 에이전트 간 통신을 설정하려면 [**핸드오프**](../concepts/multi_agent.md#handoffs)를 사용할 수 있습니다 — 한 에이전트가 다른 에이전트에게 제어권을 *넘기는* 패턴입니다. 핸드오프를 사용하면 다음을 지정할 수 있습니다:
 
@@ -174,7 +174,7 @@ function createHandoffTool({
       ```
       :::
 
-### 에이전트 입력 제어
+### 에이전트 입력 제어 {#control-agent-inputs}
 
 :::python
 @[`Send()`][Send] 프리미티브를 사용하여 핸드오프 중에 작업자 에이전트에 직접 데이터를 보낼 수 있습니다. 예를 들어, 호출하는 에이전트가 다음 에이전트를 위한 작업 설명을 채우도록 요청할 수 있습니다:
@@ -274,7 +274,7 @@ function createTaskDescriptionHandoffTool({
 
 See the multi-agent [supervisor](../tutorials/multi_agent/agent_supervisor.md#4-create-delegation-tasks) example for a full example of using @[`Send()`][Send] in handoffs.
 
-## 다중 에이전트 시스템 구축
+## 다중 에이전트 시스템 구축 {#build-a-multi-agent-system}
 
 LangGraph로 구축된 모든 에이전트에서 핸드오프를 사용할 수 있습니다. `Command`를 반환하는 핸드오프 도구를 기본적으로 지원하는 사전 빌드된 [에이전트](../agents/overview.md) 또는 [`ToolNode`](./tool-calling.md#toolnode) 사용을 권장합니다. 다음은 핸드오프를 사용하여 여행 예약을 위한 다중 에이전트 시스템을 구현하는 방법의 예입니다:
 
@@ -1238,7 +1238,7 @@ function agent(state: MessagesState): Command {
     ```
     :::
 
-## 사전 빌드 구현
+## 사전 빌드 구현 {#prebuilt-implementations}
 
 LangGraph에는 가장 인기 있는 두 가지 다중 에이전트 아키텍처의 사전 빌드 구현이 함께 제공됩니다:
 

@@ -531,7 +531,7 @@ const myWorkflow = entrypoint(
     ```
     :::
 
-## 스트리밍
+## 스트리밍 {#streaming}
 
 The **Functional API** uses the same streaming mechanism as the **Graph API**. Please
 read the [**streaming guide**](../concepts/streaming.md) section for more details.
@@ -831,7 +831,7 @@ for await (const chunk of await main.stream(
 1. `ttl` is specified in seconds. The cache will be invalidated after this time.
    :::
 
-## 오류 후 재개
+## 오류 후 재개 {#resuming-after-an-error}
 
 :::python
 
@@ -1741,7 +1741,7 @@ for await (const chunk of await workflow.stream([inputMessage2], {
 
      [How to add thread-level persistence (functional API)](./persistence-functional.ipynb): Shows how to add thread-level persistence to a functional API workflow and implements a simple chatbot.
 
-## 장기 메모리
+## 장기 메모리 {#long-term-memory}
 
 [long-term memory](../concepts/memory.md#long-term-memory) allows storing information across different **thread ids**. This could be useful for learning information about a given user in one conversation and using it in another.
 

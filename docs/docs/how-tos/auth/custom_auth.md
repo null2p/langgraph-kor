@@ -19,7 +19,7 @@
 
     커스텀 인증은 모든 **관리형 LangGraph Platform** 배포와 **Enterprise** 셀프 호스팅 플랜에서 지원됩니다.
 
-## 배포에 커스텀 인증 추가
+## 배포에 커스텀 인증 추가 {#add-custom-authentication-to-your-deployment}
 
 배포에서 커스텀 인증을 활용하고 사용자 레벨 메타데이터에 접근하려면 커스텀 인증 핸들러를 통해 `config["configurable"]["langgraph_auth_user"]` 객체를 자동으로 채우도록 커스텀 인증을 설정하세요. 그런 다음 `langgraph_auth_user` 키로 그래프에서 이 객체에 접근하여 [에이전트가 사용자를 대신하여 인증된 작업을 수행](#enable-agent-authentication)할 수 있도록 할 수 있습니다.
 
@@ -122,7 +122,7 @@
         curl -H "Authorization: Bearer ${your-token}" http://localhost:2024/threads
         ```
 
-## 에이전트 인증 활성화
+## 에이전트 인증 활성화 {#enable-agent-authentication}
 
 [인증](#add-custom-authentication-to-your-deployment) 후, 플랫폼은 LangGraph Platform 배포에 전달되는 특별한 구성 객체(`config`)를 생성합니다. 이 객체에는 `@auth.authenticate` 핸들러에서 반환하는 커스텀 필드를 포함하여 현재 사용자에 대한 정보가 포함됩니다.
 
